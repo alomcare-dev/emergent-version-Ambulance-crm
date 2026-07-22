@@ -1,0 +1,1237 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finance | Ambulance &amp; PTS Management System</title>
+<style>
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface-2:#F6F8FA; --surface-3:#EEF1F5;
+  --line:#D6DCE3; --line-2:#BAC4CF;
+  --ink:#111820; --ink-2:#4B5763; --ink-3:#78848F;
+  --nav:#1A222C; --nav-ink:#B7C3CF; --nav-ink-2:#7C8B99;
+  --accent:#0B6A66; --accent-2:#0E837E; --accent-soft:#DFEEED;
+  --ok:#166534; --ok-soft:#E3F2E8;
+  --warn:#96560A; --warn-soft:#FBEEDC;
+  --soon:#8A6D0B; --soon-soft:#FBF6DC;
+  --stop:#A81C24; --stop-soft:#FAE7E8;
+  --info:#1E4E8C; --info-soft:#E6EEF8;
+  --draft:#5B21A8; --draft-soft:#EFE6FA;
+  --r:6px; --r2:10px;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --shadow:0 1px 2px rgba(17,24,32,.05),0 6px 18px rgba(17,24,32,.06);
+}
+html[data-theme="dark"]{
+  --bg:#0D1218; --surface:#151D26; --surface-2:#1B2530; --surface-3:#212C38;
+  --line:#2A3744; --line-2:#3B4C5C;
+  --ink:#E7EDF3; --ink-2:#AFBDC9; --ink-3:#8394A2;
+  --nav:#0A0F14; --nav-ink:#AEBDCA; --nav-ink-2:#6D7E8D;
+  --accent:#2FA39D; --accent-2:#3CB8B1; --accent-soft:#10312F;
+  --ok:#63C088; --ok-soft:#11301E; --warn:#DFA45C; --warn-soft:#33260F;
+  --soon:#D8C26A; --soon-soft:#2E2A10;
+  --stop:#EE868D; --stop-soft:#361619; --info:#7BAEEA; --info-soft:#12253C;
+  --draft:#B79BE8; --draft-soft:#241636;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:13.5px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:640;letter-spacing:-.005em}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent-2)}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.micro{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.muted{color:var(--ink-3)} .nowrap{white-space:nowrap} .spacer{flex:1}
+
+.shell{display:flex;min-height:100vh}
+.side{width:212px;flex:0 0 212px;background:var(--nav);color:var(--nav-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.logo{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:9px;align-items:center}
+.logo .sq{width:28px;height:28px;flex:0 0 28px;border-radius:5px;background:var(--accent-2);display:grid;place-items:center;color:#04211F;font-weight:800;font-size:11px}
+.logo b{display:block;color:#fff;font-size:12.5px;line-height:1.25}
+.logo small{display:block;color:var(--nav-ink-2);font-size:10px}
+.menu{flex:1;overflow:auto;padding:6px}
+.menu .grp{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--nav-ink-2);padding:12px 8px 5px}
+.mi{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;color:var(--nav-ink);padding:6px 8px;border-radius:5px;cursor:pointer;font-size:12.5px}
+.mi:hover{background:rgba(255,255,255,.06);color:#fff}
+.mi[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+.mi.stub{color:var(--nav-ink-2)}
+.mi .pill{margin-left:auto;font:600 10px/1 var(--mono);background:rgba(255,255,255,.13);padding:3px 5px;border-radius:9px}
+.mi .pill.hot{background:var(--stop);color:#fff}
+.mi .planned{margin-left:auto;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--nav-ink-2)}
+.mi .indent{padding-left:22px}
+.sfoot{padding:9px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:9.5px;color:var(--nav-ink-2);line-height:1.5}
+
+.body{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);padding:7px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar .search{position:relative;flex:1 1 240px;max-width:360px}
+.bar .search input{width:100%;padding:6px 10px 6px 28px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2)}
+.bar .search::before{content:"⌕";position:absolute;left:9px;top:4px;color:var(--ink-3);font-size:15px}
+.bar select,.bar input[type=date]{padding:5px 8px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2)}
+.page{padding:14px}
+.ph{display:flex;align-items:flex-end;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.ph h1{font-size:18px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);padding:6px 11px;border-radius:var(--r);cursor:pointer;font-weight:550;font-size:12.5px}
+.btn:hover{border-color:var(--accent);color:var(--accent-2)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.p:hover{background:var(--accent-2);color:#fff}
+.btn.danger{border-color:var(--stop);color:var(--stop)}
+.btn.danger:hover{background:var(--stop-soft)}
+.btn.g{background:transparent}
+.btn.xs{padding:3px 8px;font-size:11.5px}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.card>.h{padding:9px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.card>.h h2{font-size:12.5px}
+.card>.b{padding:12px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+label.f{display:block;margin-bottom:9px}
+label.f>span{display:block;font-size:11px;font-weight:640;color:var(--ink-2);margin-bottom:3px}
+label.f .rq{color:var(--stop)}
+input[type=text],input[type=tel],input[type=email],input[type=date],input[type=number],input[type=search],select,textarea{
+  width:100%;padding:6px 9px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface)}
+textarea{min-height:60px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--accent-2);outline:2px solid var(--accent-soft)}
+.bad{border-color:var(--stop)!important;background:var(--stop-soft)}
+.msg{display:none;color:var(--stop);font-size:11.5px;margin-top:3px}
+.msg.on{display:block}
+.hint{font-size:11px;color:var(--ink-3);margin-top:3px}
+.chk{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:2px 0}
+.chk input{width:auto}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+
+.bdg{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:3px;border:1px solid;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.b-soon{background:var(--soon-soft);color:var(--soon);border-color:var(--soon)}
+.b-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.b-stop{background:var(--stop-soft);color:var(--stop);border-color:var(--stop)}
+.b-info{background:var(--info-soft);color:var(--info);border-color:var(--info)}
+.b-draft{background:var(--draft-soft);color:var(--draft);border-color:var(--draft)}
+.b-grey{background:var(--surface-3);color:var(--ink-2);border-color:var(--line-2)}
+
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;text-align:left;cursor:pointer;box-shadow:var(--shadow)}
+.stat:hover{border-color:var(--accent)}
+.stat .v{font:700 21px/1.1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat .k{font-size:11.5px;color:var(--ink-2);margin-top:3px}
+.stat .x{font-size:10.5px;color:var(--ink-3)}
+.stat.stop .v{color:var(--stop)} .stat.warn .v{color:var(--warn)} .stat.ok .v{color:var(--ok)} .stat.info .v{color:var(--info)}
+
+.tw{overflow:auto;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
+table.d{width:100%;border-collapse:collapse;font-size:12.5px}
+table.d th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);
+   font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;font-weight:700}
+table.d th.sortable{cursor:pointer;user-select:none}
+table.d th.sortable:hover{color:var(--accent-2)}
+table.d td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.d tbody tr[data-open]{cursor:pointer}
+table.d tbody tr[data-open]:hover{background:var(--surface-2)}
+table.d tbody tr:last-child td{border-bottom:0}
+table.d td.r,table.d th.r{text-align:right}
+tr.overdue td:first-child{box-shadow:inset 3px 0 0 var(--stop)}
+
+.ageing{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;background:var(--surface);margin-bottom:12px}
+.ageing>div{flex:1;padding:10px 12px;border-right:1px solid var(--line);cursor:pointer}
+.ageing>div:last-child{border-right:0}
+.ageing>div:hover{background:var(--surface-2)}
+.ageing .k{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.ageing .v{font:700 18px/1.1 var(--mono);margin-top:4px}
+.ageing .n{font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.ageing .d0 .v{color:var(--ink)} .ageing .d30 .v{color:var(--soon)}
+.ageing .d60 .v{color:var(--warn)} .ageing .d90 .v{color:var(--stop)}
+
+.facts{display:flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;background:var(--surface);margin-bottom:12px}
+.facts>div{flex:1 1 120px;padding:9px 12px;border-right:1px solid var(--line)}
+.facts>div:last-child{border-right:0}
+.facts .k{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.facts .v{margin-top:3px;font-size:13px;font-weight:600}
+
+.tabs{display:flex;gap:1px;border-bottom:1px solid var(--line);overflow:auto;background:var(--surface);border-radius:var(--r2) var(--r2) 0 0;padding:0 6px}
+.tab{background:none;border:0;padding:9px 12px;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;font-weight:550;white-space:nowrap;font-size:12.5px}
+.tab[aria-selected="true"]{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+
+dl.kv{display:grid;grid-template-columns:172px 1fr;gap:5px 12px;margin:0}
+dl.kv dt{font-size:11px;color:var(--ink-3);font-weight:650}
+dl.kv dd{margin:0}
+@media(max-width:640px){dl.kv{grid-template-columns:1fr;gap:1px}dl.kv dd{margin-bottom:6px}}
+
+/* ---- invoice document ---- */
+.doc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.doc .top{display:flex;justify-content:space-between;gap:16px;padding:16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.doc .from b{font-size:15px}
+.doc .from .m{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.doc .meta{text-align:right}
+.doc .meta .t{font-size:18px;font-weight:700;letter-spacing:.02em}
+.doc .meta .r{font:600 13px/1.4 var(--mono);color:var(--accent-2)}
+.doc .meta .m{font-size:11.5px;color:var(--ink-3)}
+.doc .parties{display:flex;gap:16px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.doc .parties>div{flex:1 1 200px}
+.doc .parties .k{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin-bottom:3px}
+.doc table{width:100%;border-collapse:collapse;font-size:12.5px}
+.doc thead th{text-align:left;padding:8px 16px;background:var(--surface-2);border-bottom:1px solid var(--line);
+  font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.doc tbody td{padding:7px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+.doc td.r,.doc th.r{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.doc .grp td{background:var(--surface-2);font-weight:650;font-size:11px}
+.doc tfoot td{padding:5px 16px;text-align:right;font-family:var(--mono)}
+.doc tfoot tr.total td{font-weight:750;font-size:14px;border-top:2px solid var(--line-2);padding-top:9px;padding-bottom:11px}
+.doc .foot{padding:12px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);line-height:1.6}
+
+ul.feed{list-style:none;margin:0;padding:0}
+ul.feed li{padding:7px 0 7px 12px;border-left:2px solid var(--line-2);position:relative}
+ul.feed li::before{content:"";position:absolute;left:-4px;top:11px;width:6px;height:6px;border-radius:50%;background:var(--accent-2)}
+ul.feed .m{font-size:10.5px;color:var(--ink-3);font-family:var(--mono)}
+ul.feed .s{font-weight:600;margin-top:1px}
+ul.feed .d{font-size:11.5px;color:var(--ink-2)}
+
+.pickrow{display:flex;gap:9px;align-items:center;padding:7px 10px;border:1px solid var(--line-2);border-radius:var(--r);margin-bottom:6px;background:var(--surface)}
+.pickrow input{width:auto}
+.pickrow .r{font:600 11.5px/1.2 var(--mono);color:var(--accent-2)}
+.pickrow .amt{margin-left:auto;font-family:var(--mono);font-weight:650}
+
+.inline{background:var(--surface-2);border:1px dashed var(--line-2);border-radius:var(--r2);padding:10px;margin-top:11px}
+.empty{padding:30px 16px;text-align:center;color:var(--ink-2)}
+.empty b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+.demo{background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn);border-radius:var(--r);padding:6px 11px;font-size:11.5px;font-weight:650;margin-bottom:11px}
+.deny{max-width:560px;margin:60px auto;text-align:center}
+.blockbox{border:1px solid var(--warn);background:var(--warn-soft);border-radius:var(--r2);padding:11px 13px;margin-bottom:11px}
+.blockbox b{display:block;color:var(--warn);font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px}
+.blockbox ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--warn)}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:6px;align-items:center}
+.toast{background:var(--nav);color:#fff;padding:8px 14px;border-radius:18px;font-size:12.5px;box-shadow:var(--shadow);max-width:92vw}
+.toast.ok{background:var(--ok)} .toast.bad{background:var(--stop)}
+
+.scrim{position:fixed;inset:0;background:rgba(10,16,22,.55);z-index:60}
+.modal{position:fixed;z-index:61;top:50%;left:50%;transform:translate(-50%,-50%);width:min(620px,94vw);max-height:88vh;overflow:auto;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.modal .mh{padding:12px 15px;border-bottom:1px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:10px}
+.modal .mb{padding:14px}
+.modal .mf{padding:10px 15px;border-top:1px solid var(--line);background:var(--surface);display:flex;gap:8px;justify-content:flex-end}
+
+.sidetoggle{display:none}
+@media(max-width:920px){
+  .side{position:fixed;z-index:70;transform:translateX(-100%);transition:transform .16s}
+  .side.open{transform:none}
+  .sidetoggle{display:inline-flex}
+  .page{padding:10px}
+}
+@media print{.side,.bar,.tabs,.mf,.inline,.ph .btn{display:none}.doc{border:0}}
+</style>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Main navigation">
+    <div class="logo"><div class="sq" aria-hidden="true">PT</div>
+      <div><b>Ambulance &amp; PTS</b><small>Management System</small></div></div>
+    <div class="menu" id="menu"></div>
+    <div class="sfoot">Demonstration build · Finance<br>Branding is placeholder</div>
+  </nav>
+  <div class="body">
+    <header class="bar">
+      <button class="btn g sidetoggle" id="sidetoggle" aria-label="Show navigation">☰</button>
+      <div class="search"><input id="gsearch" type="search" placeholder="Search invoices, customers, journey refs…" aria-label="Search"></div>
+      <div class="spacer"></div>
+      <span class="micro">Role</span>
+      <select id="rolepick" aria-label="Signed-in role" style="max-width:210px"></select>
+      <button class="btn g" id="theme" aria-label="Switch theme" title="Switch theme">◐</button>
+    </header>
+    <div class="page" id="page"></div>
+  </div>
+</div>
+<div id="modalhost"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   FINANCE
+   Ambulance & Patient Transport Management System
+
+   The commercial loop closes here. Bookings priced every journey
+   against the customer's agreed rate card; nothing turned those
+   prices into money owed. Finance takes completed, priced journeys
+   and raises invoices — using the same rate card, the same VAT
+   treatment and the same payment terms the CRM account already
+   holds — then tracks what has been paid and what is overdue.
+   ============================================================ */
+
+const KEY="pts:finance:v1", BOOK_KEY="pts:bookings:v1", CRM_KEY="pts:crm:v1";
+
+/* ---------- reference data ---------- */
+const ROLES=[
+  {id:"finance", name:"Finance Officer",             p:["view","raise","edit","issue","credit","payment","remind","hold","settings","audit","export"]},
+  {id:"super",   name:"Super Administrator",         p:["view","raise","edit","issue","credit","payment","remind","hold","settings","audit","export"]},
+  {id:"director",name:"Company Director",            p:["view","audit","export"]},
+  {id:"ops",     name:"Operations Manager",          p:["view","audit"]},
+  {id:"admin",   name:"Booking Administrator",       p:["view.own"]},
+  {id:"portal",  name:"Commissioner / Customer Portal User", p:["view.portal"],ownCustomer:"CUS-0001"},
+  {id:"dispatch",name:"Control Room Dispatcher",     p:[]},
+  {id:"para",    name:"Paramedic",                   p:[]},
+  {id:"aca",     name:"Ambulance Care Assistant",    p:[]},
+  {id:"hr",      name:"HR & Compliance Officer",     p:[]},
+  {id:"fleet",   name:"Fleet Manager",               p:[]},
+  {id:"clinical",name:"Clinical Lead",               p:[]},
+  {id:"qa",      name:"Quality Assurance Officer",   p:["view","audit"]}
+];
+
+const MENU=[
+  {g:"Operations"},
+  {id:"dashboard",label:"Dashboard",stub:1},{id:"crm",label:"CRM",stub:1},
+  {id:"patients",label:"Patients",stub:1},{id:"bookings",label:"Bookings",stub:1},
+  {id:"cad",label:"CAD and Dispatch",stub:1},{id:"staff",label:"Staff and fleet",stub:1},
+  {g:"Business"},
+  {id:"overview",label:"Finance overview",live:1},
+  {id:"unbilled",label:"Ready to bill",live:1,indent:1},
+  {id:"invoices",label:"Invoices",live:1,indent:1},
+  {id:"credits",label:"Credit notes",live:1,indent:1},
+  {id:"payments",label:"Payments",live:1,indent:1},
+  {id:"customers",label:"Customer accounts",live:1,indent:1},
+  {id:"reports",label:"Reports",stub:1},
+  {g:"Governance"},
+  {id:"audit",label:"Finance log",live:1},
+  {id:"settings",label:"Settings",live:1}
+];
+
+/* ---------- state ---------- */
+let S={invoices:[],credits:[],payments:[],log:[],seq:{inv:1000,cn:200,pay:5000},
+  org:{name:"Demonstration Ambulance Services",addr:"Unit 4, Testford Business Park, Testford, TF1 9ZZ",
+    vatNo:"GB 123 4567 89",companyNo:"09" + "231144",bank:"Demo Bank · 12-34-56 · 01234567",
+    email:"accounts@demo-provider.test",phone:"01632 960000"},
+  view:"overview",roleId:"finance",selected:null,selKind:"invoice",tab:"document",
+  f:{q:"",status:"",customer:""},sort:{k:"date",dir:-1},
+  bookings:[],customers:[],linked:false};
+let storageOK=true;
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const role=()=>ROLES.find(r=>r.id===S.roleId)||ROLES[0];
+const can=p=>role().p.includes(p);
+const anyAccess=()=>role().p.length>0;
+const portalOnly=()=>can("view.portal")&&!can("view");
+
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const shiftD=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
+function ukd(iso){if(!iso)return "—";const d=new Date(iso.length<=10?iso+"T00:00:00":iso);if(isNaN(d))return "—";
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();}
+function uks(iso){if(!iso)return "—";const d=new Date(iso);if(isNaN(d))return "—";
+  return ukd(iso)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+function days(iso){if(!iso)return null;return Math.round((new Date(iso+"T00:00:00")-new Date(todayISO()+"T00:00:00"))/864e5);}
+const gbp=n=>(n<0?"−£":"£")+Math.abs(Math.round((n||0)*100)/100).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2});
+const round2=n=>Math.round((n||0)*100)/100;
+function toast(m,k){const t=document.createElement("div");t.className="toast"+(k?" "+k:"");t.textContent=m;
+  $("#toasts").appendChild(t);setTimeout(()=>{t.style.transition="opacity .3s";t.style.opacity=0;setTimeout(()=>t.remove(),320);},3000);}
+
+/* ---------- persistence ---------- */
+async function save(){
+  try{if(window.storage&&storageOK)await window.storage.set(KEY,
+    JSON.stringify({invoices:S.invoices,credits:S.credits,payments:S.payments,log:S.log.slice(-400),seq:S.seq,org:S.org}));}
+  catch(e){if(storageOK){storageOK=false;toast("Changes are held for this session only.","bad");}}
+}
+async function load(){
+  try{if(!window.storage){storageOK=false;return false;}
+    const r=await window.storage.get(KEY);
+    if(r&&r.value){const d=JSON.parse(r.value);
+      if(d&&Array.isArray(d.invoices)){S.invoices=d.invoices;S.credits=d.credits||[];S.payments=d.payments||[];
+        S.log=d.log||[];S.seq=d.seq||S.seq;S.org=d.org||S.org;return true;}}
+  }catch(e){}
+  return false;
+}
+/* Bookings and CRM are the upstream truth. Read them; never write them. */
+async function loadUpstream(){
+  let ok=false;
+  try{if(window.storage){
+    const rb=await window.storage.get(BOOK_KEY);
+    if(rb&&rb.value){const d=JSON.parse(rb.value);
+      if(d&&Array.isArray(d.bookings)){S.bookings=d.bookings;S._patients=d.patients||[];ok=true;}}
+    const rc=await window.storage.get(CRM_KEY);
+    if(rc&&rc.value){const d=JSON.parse(rc.value);
+      if(d&&Array.isArray(d.customers)) S.customers=d.customers;}
+  }}catch(e){}
+  return ok;
+}
+
+function log(action,detail,ref){
+  S.log.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||"",ref:ref||""});
+  if(S.log.length>500)S.log=S.log.slice(-500);
+}
+const cust=ref=>S.customers.find(c=>c.ref===ref);
+const patName=id=>{const p=(S._patients||[]).find(x=>x.id===id);return p?p.forename+" "+p.surname:"";};
+const inv=id=>S.invoices.find(i=>i.id===id);
+const cn=id=>S.credits.find(c=>c.id===id);
+
+/* ============================================================
+   PRICING — the same rules Bookings applied, re-derived here so
+   Finance is not trusting a number typed into another module.
+   ============================================================ */
+function rate(c,item){const r=(c&&c.rates||[]).find(x=>x.item===item);return r?r.amount:null;}
+function baseFareItem(b){
+  const m=b.mobility||"";
+  if(m.indexOf("Stretcher")===0||m==="Bariatric stretcher") return "Base fare — stretcher";
+  if(m.indexOf("wheelchair")>-1||m==="Carry chair") return "Base fare — wheelchair";
+  return "Base fare — ambulance care";
+}
+function isOutOfHours(b){
+  if(!b.collectTime) return false;
+  const h=parseInt(b.collectTime.split(":")[0],10);
+  const dow=new Date(b.collectDate+"T00:00:00").getDay();
+  return h<7||h>=19||dow===0||dow===6;
+}
+function priceLines(b){
+  const c=cust(b.customerRef);
+  const lines=[],notes=[];
+  if(!c) return {lines,total:0,notes:["No customer account linked."],priceable:false};
+  if(!c.rates||!c.rates.length) return {lines,total:0,notes:["No agreed rate card on the customer account."],priceable:false};
+
+  if(b.status==="Cancelled"&&b.lateCancel){
+    const lc=rate(c,"Late cancellation");
+    if(lc!=null) return {lines:[{label:"Late cancellation charge",detail:"Cancelled inside 24 hours of collection",qty:1,amount:lc}],
+      total:lc,notes:[],priceable:true};
+  }
+  const item=baseFareItem(b), base=rate(c,item);
+  if(base!=null) lines.push({label:item,detail:"1 journey",qty:1,amount:base});
+  else notes.push("No agreed base fare for "+item.toLowerCase()+".");
+
+  const perMile=rate(c,"Per mile");
+  if(perMile!=null&&b.mileage>0) lines.push({label:"Mileage",detail:b.mileage+" miles @ "+gbp(perMile),qty:b.mileage,amount:round2(perMile*b.mileage)});
+  else if(b.mileage>0) notes.push("No agreed mileage rate.");
+
+  const waitH=(b.waitingMins||0)/60, perHour=rate(c,"Waiting time per hour");
+  if(perHour!=null&&waitH>0) lines.push({label:"Waiting time",detail:b.waitingMins+" minutes @ "+gbp(perHour)+"/hr",qty:1,amount:round2(perHour*waitH)});
+
+  if(b.mobility==="Bariatric stretcher"||b.type==="Bariatric transport"){
+    const bar=rate(c,"Bariatric surcharge");
+    if(bar!=null) lines.push({label:"Bariatric surcharge",detail:"Additional crew and equipment",qty:1,amount:bar});
+  }
+  if(b.shape==="Return"){
+    const rl=lines.filter(l=>l.label!=="Waiting time").reduce((s,l)=>s+l.amount,0);
+    lines.push({label:"Return leg",detail:"Second journey at the same rates",qty:1,amount:round2(rl)});
+  }
+  let sub=lines.reduce((s,l)=>s+l.amount,0);
+  const ooh=rate(c,"Out-of-hours uplift");
+  if(isOutOfHours(b)&&ooh!=null) lines.push({label:"Out-of-hours uplift",detail:ooh+"% — collection outside 07:00–19:00 or at a weekend",qty:1,amount:round2(sub*ooh/100)});
+  const bh=rate(c,"Bank holiday uplift");
+  if(b.bankHoliday&&bh!=null) lines.push({label:"Bank holiday uplift",detail:bh+"%",qty:1,amount:round2(sub*bh/100)});
+
+  const total=round2(lines.reduce((s,l)=>s+l.amount,0));
+  return {lines,total,notes,priceable:lines.length>0};
+}
+/* net for a journey — override wins, same as Bookings */
+function journeyNet(b){
+  if(b.priceOverride!=null) return round2(b.priceOverride);
+  return priceLines(b).total;
+}
+function vatRateFor(c){
+  /* PTS is generally VAT-exempt; commercial/event work is standard-rated. The CRM account carries the treatment. */
+  const t=(c&&c.contract&&c.contract.vat)||"";
+  if(/exempt/i.test(t)) return {rate:0,label:"Exempt"};
+  if(/zero/i.test(t)) return {rate:0,label:"Zero-rated"};
+  const m=t.match(/(\d+(?:\.\d+)?)\s*%/);
+  return {rate:m?parseFloat(m[1]):20,label:m?("Standard rate "+m[1]+"%"):"Standard rate 20%"};
+}
+
+/* ============================================================
+   BILLABLE JOURNEYS
+   A completed journey that has a price and is not yet on an
+   invoice or credit note.
+   ============================================================ */
+const OUTCOMES=["Completed","Aborted","Patient not available","Cancelled"];
+const isBillableStatus=b=>b.status==="Completed"||(b.status==="Cancelled"&&b.lateCancel);
+function billedRefs(){
+  const set=new Set();
+  S.invoices.forEach(i=>i.lines.forEach(l=>{if(l.ref)set.add(l.ref);}));
+  return set;
+}
+function billable(){
+  const done=billedRefs();
+  return S.bookings.filter(b=>isBillableStatus(b)&&!done.has(b.ref)&&journeyNet(b)>0&&cust(b.customerRef))
+    .map(b=>({b,net:journeyNet(b)}))
+    .sort((a,b)=>a.b.collectDate.localeCompare(b.b.collectDate));
+}
+function billableByCustomer(){
+  const g={};
+  billable().forEach(x=>{(g[x.b.customerRef]=g[x.b.customerRef]||[]).push(x);});
+  return g;
+}
+
+/* ============================================================
+   INVOICE MODEL
+   ============================================================ */
+function termsDays(c){
+  const t=(c&&c.contract&&c.contract.terms)||"30 days";
+  if(/booking/i.test(t)) return 0;
+  const m=t.match(/(\d+)/); return m?parseInt(m[1],10):30;
+}
+function invNet(i){return round2(i.lines.reduce((s,l)=>s+l.amount,0));}
+function invVat(i){return round2(invNet(i)*(i.vatRate||0)/100);}
+function invGross(i){return round2(invNet(i)+invVat(i));}
+function invPaid(i){return round2(S.payments.filter(p=>p.invoiceId===i.id).reduce((s,p)=>s+p.amount,0));}
+function invCredited(i){return round2(S.credits.filter(c=>c.invoiceId===i.id).reduce((s,c)=>s+c.gross,0));}
+function invBalance(i){return round2(invGross(i)-invPaid(i)-invCredited(i));}
+function invStatus(i){
+  if(i.status==="Draft") return "Draft";
+  if(i.status==="Cancelled") return "Cancelled";
+  const bal=invBalance(i);
+  if(bal<=0.005) return invCredited(i)>0&&invPaid(i)<=0.005?"Credited":"Paid";
+  if(invPaid(i)>0.005) return "Part paid";
+  if(i.dueDate&&days(i.dueDate)<0) return "Overdue";
+  return "Issued";
+}
+function statusBadge(st){
+  const m={Draft:"b-draft",Issued:"b-info",Overdue:"b-stop","Part paid":"b-warn",Paid:"b-ok",
+    Credited:"b-grey",Cancelled:"b-grey"};
+  return '<span class="bdg '+(m[st]||"b-grey")+'">'+esc(st)+'</span>';
+}
+function nextInvNo(){S.seq.inv+=1;return "INV-"+S.seq.inv;}
+function nextCnNo(){S.seq.cn+=1;return "CN-"+S.seq.cn;}
+function nextPayNo(){S.seq.pay+=1;return "RCT-"+S.seq.pay;}
+
+function buildInvoice(customerRef,picks){
+  const c=cust(customerRef);
+  const vat=vatRateFor(c);
+  const issue=todayISO(), term=termsDays(c);
+  const due=shiftD(term);
+  const lines=picks.map(x=>{
+    const b=x.b, pl=priceLines(b);
+    const label=(b.type||"Journey")+" · "+ukd(b.collectDate)+(patName(b.patientId)?" · "+patName(b.patientId):"");
+    return {ref:b.ref,label,detail:(b.fromAddr||"").split(",")[0]+" → "+(b.toAddr||"").split(",")[0],
+      breakdown:pl.lines,amount:journeyNet(b),poNumber:b.poNumber||""};
+  });
+  return {id:uid(),number:"",customerRef,status:"Draft",issueDate:issue,dueDate:due,termsDays:term,
+    vatRate:vat.rate,vatLabel:vat.label,poNumber:(c&&c.contract&&c.contract.standingPO)||"",
+    reference:"",notes:"",lines,createdAt:new Date().toISOString(),audit:[]};
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+function iaudit(i,action,detail){i.audit=i.audit||[];
+  i.audit.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||""});}
+
+function issueInvoice(i){
+  i.number=i.number||nextInvNo();
+  i.status="Issued";i.issueDate=todayISO();i.dueDate=shiftD(i.termsDays);
+  iaudit(i,"Invoice issued","Gross "+gbp(invGross(i))+", due "+ukd(i.dueDate));
+  log("Invoice issued",i.number+" · "+(cust(i.customerRef)||{}).name+" · "+gbp(invGross(i)),i.number);
+}
+function recordPayment(i,amount,method,dateISO,refTxt){
+  const p={id:uid(),number:nextPayNo(),invoiceId:i.id,customerRef:i.customerRef,
+    amount:round2(amount),method,date:dateISO||todayISO(),reference:refTxt||"",at:new Date().toISOString(),by:role().name};
+  S.payments.push(p);
+  iaudit(i,"Payment recorded",gbp(p.amount)+" by "+method+(refTxt?" · "+refTxt:""));
+  log("Payment received",i.number+" · "+gbp(p.amount)+" · "+method,i.number);
+  return p;
+}
+function raiseCredit(i,amount,reason){
+  const c=cust(i.customerRef);
+  const net=round2(amount), vat=round2(net*(i.vatRate||0)/100);
+  const rec={id:uid(),number:nextCnNo(),invoiceId:i.id,customerRef:i.customerRef,
+    net,vat,gross:round2(net+vat),vatRate:i.vatRate,reason,date:todayISO(),at:new Date().toISOString(),by:role().name};
+  S.credits.push(rec);
+  iaudit(i,"Credit note raised",rec.number+" · "+gbp(rec.gross)+" · "+reason);
+  log("Credit note raised",rec.number+" against "+i.number+" · "+gbp(rec.gross),rec.number);
+  return rec;
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderMenu(){
+  const overdue=S.invoices.filter(i=>invStatus(i)==="Overdue").length;
+  $("#menu").innerHTML=MENU.map(m=>{
+    if(m.g)return '<div class="grp">'+esc(m.g)+'</div>';
+    const cur=S.view===m.id||(m.id==="invoices"&&S.view==="invoice")||(m.id==="credits"&&S.view==="credit");
+    const badge=m.id==="invoices"?'<span class="pill'+(overdue?" hot":"")+'">'+overdue+'</span>'
+      :m.id==="unbilled"?'<span class="pill">'+billable().length+'</span>'
+      :m.live?"":'<span class="planned">planned</span>';
+    return '<button class="mi'+(m.live?"":" stub")+(m.indent?'" style="padding-left:22px':'')+'" data-go="'+m.id+'"'+
+      (cur?' aria-current="page"':'')+'>'+esc(m.label)+badge+'</button>';
+  }).join("");
+}
+function render(){
+  renderMenu();
+  const p=$("#page");
+  if(!anyAccess()){p.innerHTML=viewDenied();return;}
+  if(portalOnly()&&!["overview","invoices","invoice","payments"].includes(S.view)) S.view="invoices";
+  if(S.view==="invoice"&&S.selected) p.innerHTML=viewInvoice();
+  else if(S.view==="credit"&&S.selected) p.innerHTML=viewCredit();
+  else if(S.view==="overview") p.innerHTML=viewOverview();
+  else if(S.view==="unbilled") p.innerHTML=viewUnbilled();
+  else if(S.view==="invoices") p.innerHTML=viewInvoices();
+  else if(S.view==="credits") p.innerHTML=viewCredits();
+  else if(S.view==="payments") p.innerHTML=viewPayments();
+  else if(S.view==="customers") p.innerHTML=viewCustomers();
+  else if(S.view==="audit") p.innerHTML=viewAudit();
+  else if(S.view==="settings") p.innerHTML=viewSettings();
+  else p.innerHTML=viewStub();
+}
+function viewDenied(){
+  return '<div class="deny"><div style="font-size:30px">🔒</div><h1 style="margin:8px 0">No access to Finance</h1>'+
+    '<p class="muted">The <strong>'+esc(role().name)+'</strong> role does not carry access to invoicing and payments.</p>'+
+    '<p class="hint">Change the role in the top bar to see how access differs.</p></div>';
+}
+function viewStub(){
+  const m=MENU.find(x=>x.id===S.view)||{label:"Module"};
+  return '<div class="card"><div class="b empty"><b>'+esc(m.label)+' is not in this build</b>'+
+    'This delivery covers invoicing, credit notes and payments for completed journeys.</div></div>';
+}
+const demoNote=()=>'<div class="demo">Demonstration build — fictional invoices. '+
+  (S.linked?'Completed journeys and customer terms are read live from Bookings and CRM.'
+    :'Bookings and CRM have not been used here, so a small set of completed journeys is simulated.')+'</div>';
+
+/* ---------- overview ---------- */
+function viewOverview(){
+  if(portalOnly()) return viewInvoices();
+  const issued=S.invoices.filter(i=>["Issued","Overdue","Part paid"].includes(invStatus(i)));
+  const outstanding=round2(issued.reduce((s,i)=>s+invBalance(i),0));
+  const overdueList=S.invoices.filter(i=>invStatus(i)==="Overdue");
+  const overdueAmt=round2(overdueList.reduce((s,i)=>s+invBalance(i),0));
+  const draftCount=S.invoices.filter(i=>i.status==="Draft").length;
+  const bl=billable();
+  const blAmt=round2(bl.reduce((s,x)=>s+x.net,0));
+
+  /* ageing */
+  const buckets=[["Not yet due",0],["1–30 days",0],["31–60 days",0],["60+ days",0]];
+  issued.forEach(i=>{const bal=invBalance(i);if(bal<=0)return;const d=i.dueDate?-days(i.dueDate):0;
+    if(d<=0)buckets[0][1]+=bal;else if(d<=30)buckets[1][1]+=bal;else if(d<=60)buckets[2][1]+=bal;else buckets[3][1]+=bal;});
+
+  /* revenue this month, issued invoices */
+  const mth=todayISO().slice(0,7);
+  const monthNet=round2(S.invoices.filter(i=>i.status!=="Draft"&&i.status!=="Cancelled"&&(i.issueDate||"").slice(0,7)===mth)
+    .reduce((s,i)=>s+invNet(i),0));
+
+  return demoNote()+
+  '<div class="ph"><h1>Finance overview</h1><span class="muted">as at '+ukd(todayISO())+'</span></div>'+
+  '<div class="grid g4" style="margin-bottom:12px">'+
+    stat(gbp(outstanding),"Outstanding","Issued and unpaid","info","invoices")+
+    stat(gbp(overdueAmt),"Overdue",overdueList.length+" invoice"+(overdueList.length===1?"":"s")+" past due",overdueAmt>0?"stop":"ok","invoices")+
+    stat(gbp(blAmt),"Ready to bill",bl.length+" completed journey"+(bl.length===1?"":"s"),bl.length?"warn":"ok","unbilled")+
+    stat(gbp(monthNet),"Billed this month","Net of VAT","ok","invoices")+
+  '</div>'+
+  '<div class="micro" style="margin-bottom:5px">Aged debt</div>'+
+  '<div class="ageing">'+buckets.map(([k,v],idx)=>
+    '<div class="d'+[0,30,60,90][idx]+'"><div class="k">'+esc(k)+'</div><div class="v">'+gbp(v)+'</div></div>').join("")+'</div>'+
+  '<div class="grid g2" style="align-items:start">'+
+    '<div class="card"><div class="h"><h2>Needs attention</h2><div class="spacer"></div>'+
+      (draftCount?'<span class="bdg b-draft">'+draftCount+' draft</span>':'')+'</div><div class="b">'+
+      (overdueList.length?'<div class="blockbox"><b>'+overdueList.length+' overdue</b><ul>'+
+        overdueList.slice(0,5).map(i=>'<li>'+esc(i.number)+' — '+esc((cust(i.customerRef)||{}).name||"")+' · '+gbp(invBalance(i))+
+          ' · '+Math.abs(days(i.dueDate))+' days late</li>').join("")+'</ul></div>':'')+
+      (bl.length?'<p style="margin:4px 0">'+bl.length+' completed journeys are priced and waiting to be invoiced'+
+        ' ('+gbp(blAmt)+').</p><button class="btn p xs" data-go="unbilled">Go to Ready to bill</button>'
+        :'<p class="muted" style="margin:4px 0">No completed journeys are waiting to be billed.</p>')+
+    '</div></div>'+
+    '<div class="card"><div class="h"><h2>Top balances by customer</h2></div><div class="tw" style="border:0"><table class="d"><tbody>'+
+      customerBalances().slice(0,6).map(c=>'<tr data-open="'+c.ref+'" data-kind="customer">'+
+        '<td><strong>'+esc(c.name)+'</strong></td>'+
+        '<td class="r num">'+gbp(c.outstanding)+'</td>'+
+        '<td class="r">'+(c.overdue>0?'<span class="bdg b-stop">'+gbp(c.overdue)+' overdue</span>':'<span class="muted">—</span>')+'</td></tr>').join("")+
+      '</tbody></table></div></div>'+
+  '</div>';
+}
+function stat(v,k,x,cls,go){
+  return '<button class="stat '+(cls||"")+'" data-go="'+(go||"overview")+'"><div class="v">'+v+'</div>'+
+    '<div class="k">'+esc(k)+'</div><div class="x">'+esc(x)+'</div></button>';
+}
+function customerBalances(){
+  const g={};
+  S.invoices.filter(i=>i.status!=="Draft").forEach(i=>{
+    const c=cust(i.customerRef);if(!c)return;
+    const k=i.customerRef;
+    g[k]=g[k]||{ref:k,name:c.name,outstanding:0,overdue:0};
+    const bal=invBalance(i);g[k].outstanding+=bal;
+    if(invStatus(i)==="Overdue")g[k].overdue+=bal;
+  });
+  return Object.values(g).map(x=>({...x,outstanding:round2(x.outstanding),overdue:round2(x.overdue)}))
+    .filter(x=>x.outstanding>0.005).sort((a,b)=>b.outstanding-a.outstanding);
+}
+
+/* ---------- ready to bill ---------- */
+function viewUnbilled(){
+  if(!can("raise")) return viewDenied();
+  const groups=billableByCustomer();
+  const refs=Object.keys(groups);
+  return demoNote()+
+  '<div class="ph"><h1>Ready to bill</h1><span class="muted">Completed, priced, not yet invoiced</span></div>'+
+  (refs.length?refs.map(ref=>{
+    const c=cust(ref),list=groups[ref];
+    const sum=round2(list.reduce((s,x)=>s+x.net,0));
+    const held=c&&c.creditHold;
+    return '<div class="card" style="margin-bottom:11px"><div class="h">'+
+      '<h2>'+esc(c?c.name:ref)+'</h2>'+
+      '<span class="muted">'+list.length+' journey'+(list.length>1?"s":"")+' · '+gbp(sum)+' net</span>'+
+      (held?'<span class="bdg b-stop">On credit hold</span>':'')+
+      '<div class="spacer"></div>'+
+      '<button class="btn p xs" data-billcust="'+esc(ref)+'"'+(held?' disabled title="Customer is on credit hold"':'')+'>Raise draft invoice</button></div>'+
+      '<div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)"><table class="d"><thead><tr>'+
+        '<th>Journey</th><th>Date</th><th>Patient</th><th>Route</th><th>Type</th><th class="r">Net</th></tr></thead><tbody>'+
+        list.map(x=>{const b=x.b;
+          return '<tr><td class="mono" style="color:var(--accent-2)">'+esc(b.ref)+'</td>'+
+          '<td class="num nowrap">'+ukd(b.collectDate)+'</td>'+
+          '<td>'+esc(patName(b.patientId)||"—")+'</td>'+
+          '<td class="muted">'+esc((b.fromAddr||"").split(",")[0])+' → '+esc((b.toAddr||"").split(",")[0])+'</td>'+
+          '<td class="nowrap">'+esc(b.type)+(b.status==="Cancelled"?' <span class="bdg b-warn">Late cancel</span>':'')+'</td>'+
+          '<td class="r num">'+gbp(x.net)+'</td></tr>';}).join("")+
+      '</tbody></table></div>'+
+      (held?'<div class="b" style="padding:8px 12px;font-size:11.5px;color:var(--stop)">This account is on credit hold in the CRM. '+
+        'Journeys can still be billed once Finance releases the hold on the customer record.</div>':'')+
+    '</div>';
+  }).join("")
+  :'<div class="card"><div class="b empty"><b>Nothing to bill</b>Every completed journey has been invoiced. '+
+    'New journeys appear here as soon as they are marked Completed in Bookings.</div></div>')+
+  '<p class="hint">A journey reaches this list only once it is Completed and has a price from the customer\'s rate card. '+
+    'A late cancellation appears here too, carrying the cancellation charge from the rate card.</p>';
+}
+
+/* ---------- invoice list ---------- */
+function viewInvoices(){
+  const rows=visibleInvoices();
+  const f=S.f;
+  const custs=Array.from(new Set(S.invoices.map(i=>i.customerRef))).map(cust).filter(Boolean);
+  return demoNote()+
+  '<div class="ph"><h1>'+(portalOnly()?"Your invoices":"Invoices")+'</h1><span class="muted">'+rows.length+' shown</span>'+
+    '<div class="spacer"></div>'+
+    (can("export")?'<button class="btn" id="export-invoices">Export CSV</button>':'')+
+    (can("raise")?'<button class="btn p" data-go="unbilled">Raise from journeys</button>':'')+'</div>'+
+  (portalOnly()?'':'<div class="card" style="margin-bottom:11px"><div class="b"><div class="row" style="align-items:flex-end">'+
+    '<label class="f" style="flex:2 1 200px;margin:0"><span>Search</span><input type="search" id="f-q" value="'+esc(f.q)+'" placeholder="Number, customer, journey ref"></label>'+
+    '<label class="f" style="margin:0"><span>Status</span><select id="f-status"><option value="">All</option>'+
+      ["Draft","Issued","Overdue","Part paid","Paid","Credited","Cancelled"].map(x=>'<option'+(f.status===x?' selected':'')+'>'+esc(x)+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Customer</span><select id="f-customer"><option value="">All</option>'+
+      custs.map(c=>'<option value="'+esc(c.ref)+'"'+(f.customer===c.ref?' selected':'')+'>'+esc(c.name)+'</option>').join("")+'</select></label>'+
+    '<button class="btn g" id="f-clear">Clear</button></div></div></div>')+
+  (rows.length?'<div class="tw"><table class="d"><thead><tr>'+
+    th("number","Invoice")+th("customer","Customer")+th("issueDate","Issued")+th("dueDate","Due")+
+    '<th class="r">Net</th><th class="r">VAT</th><th class="r">Gross</th><th class="r">Balance</th><th>Status</th></tr></thead><tbody>'+
+    rows.map(i=>{const st=invStatus(i);
+      return '<tr tabindex="0" data-open="'+i.id+'" data-kind="invoice"'+(st==="Overdue"?' class="overdue"':'')+'>'+
+      '<td class="mono nowrap" style="color:var(--accent-2);font-weight:600">'+esc(i.number||"— draft —")+
+        '<div class="muted">'+i.lines.length+' journey'+(i.lines.length>1?"s":"")+'</div></td>'+
+      '<td>'+esc((cust(i.customerRef)||{}).name||i.customerRef)+'</td>'+
+      '<td class="num nowrap">'+(i.status==="Draft"?"—":ukd(i.issueDate))+'</td>'+
+      '<td class="num nowrap">'+(i.status==="Draft"?"—":ukd(i.dueDate))+
+        (st==="Overdue"?'<div class="bdg b-stop">'+Math.abs(days(i.dueDate))+'d late</div>':'')+'</td>'+
+      '<td class="r num">'+gbp(invNet(i))+'</td><td class="r num">'+gbp(invVat(i))+'</td>'+
+      '<td class="r num">'+gbp(invGross(i))+'</td>'+
+      '<td class="r num">'+(invBalance(i)>0.005?gbp(invBalance(i)):'<span class="muted">—</span>')+'</td>'+
+      '<td>'+statusBadge(st)+'</td></tr>';
+    }).join("")+'</tbody></table></div>'
+    :'<div class="card"><div class="b empty"><b>No invoices</b>'+(can("raise")?'Raise one from a completed journey.':'')+'</div></div>');
+}
+function th(k,l){const a=S.sort.k===k;
+  return '<th class="sortable" data-sort="'+k+'">'+esc(l)+(a?(S.sort.dir<0?" ↓":" ↑"):"")+'</th>';}
+function visibleInvoices(){
+  let list=S.invoices.slice();
+  if(portalOnly()) list=list.filter(i=>i.customerRef===role().ownCustomer&&i.status!=="Draft");
+  const f=S.f,q=f.q.trim().toLowerCase();
+  list=list.filter(i=>{
+    if(f.status&&invStatus(i)!==f.status)return false;
+    if(f.customer&&i.customerRef!==f.customer)return false;
+    if(q){const hay=[i.number,(cust(i.customerRef)||{}).name,i.reference,i.lines.map(l=>l.ref).join(" ")].join(" ").toLowerCase();
+      if(!hay.includes(q))return false;}
+    return true;
+  });
+  const k=S.sort.k,dir=S.sort.dir;
+  return list.sort((a,b)=>{
+    let x,y;
+    if(k==="customer"){x=(cust(a.customerRef)||{}).name||"";y=(cust(b.customerRef)||{}).name||"";}
+    else if(k==="number"){x=a.number||"zzz";y=b.number||"zzz";}
+    else {x=a[k]||"";y=b[k]||"";}
+    return (x<y?-1:x>y?1:0)*dir;
+  });
+}
+
+/* ---------- single invoice ---------- */
+function viewInvoice(){
+  const i=inv(S.selected);
+  if(!i) return viewInvoices();
+  const c=cust(i.customerRef);
+  const st=invStatus(i);
+  const editable=i.status==="Draft"&&can("edit");
+  const tabs=[["document","Invoice"],["payments","Payments &amp; credits"],["audit","History"]];
+  return '<div class="ph"><button class="btn g" data-go="invoices">← Invoices</button>'+
+    '<div><div class="micro">'+(i.number?esc(i.number):"Draft invoice")+'</div>'+
+      '<h1>'+esc(c?c.name:i.customerRef)+'</h1></div>'+statusBadge(st)+
+    '<div class="spacer"></div>'+
+    (i.status==="Draft"&&can("issue")?'<button class="btn p" id="issue-invoice">Issue invoice</button>':'')+
+    (i.status==="Draft"&&can("edit")?'<button class="btn danger" id="delete-draft">Delete draft</button>':'')+
+    (st==="Issued"||st==="Overdue"||st==="Part paid"?
+      (can("payment")?'<button class="btn p" id="take-payment">Record payment</button>':'')+
+      (can("credit")?'<button class="btn" id="raise-credit">Raise credit note</button>':'')+
+      (can("remind")?'<button class="btn" id="send-reminder">Send reminder</button>':''):'')+
+    '<button class="btn" id="print-invoice">Print</button></div>'+
+
+  (S.tab==="document"?invoiceDoc(i,editable):
+   S.tab==="payments"?invoicePayments(i):
+   invoiceAudit(i));
+}
+function invoiceDoc(i,editable){
+  const c=cust(i.customerRef);
+  const net=invNet(i),vat=invVat(i),gross=invGross(i);
+  const contact=(c&&(c.contacts||[]).find(x=>/finance|account/i.test(x.role||"")))||null;
+  return '<div class="doc"><div class="top">'+
+    '<div class="from"><b>'+esc(S.org.name)+'</b><div class="m">'+esc(S.org.addr)+'<br>'+
+      'VAT '+esc(S.org.vatNo)+' · '+esc(S.org.email)+'</div></div>'+
+    '<div class="meta"><div class="t">'+(i.vatRate>0?"VAT INVOICE":"INVOICE")+'</div>'+
+      '<div class="r">'+esc(i.number||"DRAFT")+'</div>'+
+      '<div class="m">Issued '+(i.status==="Draft"?"— not yet issued":ukd(i.issueDate))+'<br>'+
+        'Due '+(i.status==="Draft"?"—":ukd(i.dueDate)+" ("+i.termsDays+" days)")+'</div></div></div>'+
+  '<div class="parties">'+
+    '<div><div class="k">Invoice to</div><strong>'+esc(c?c.name:i.customerRef)+'</strong>'+
+      '<div class="m" style="font-size:11.5px;color:var(--ink-3)">'+esc((c&&c.billing)||"")+'</div>'+
+      (contact?'<div class="m" style="font-size:11.5px;color:var(--ink-3)">Attn: '+esc(contact.name)+'</div>':'')+'</div>'+
+    '<div><div class="k">Purchase order</div>'+esc(i.poNumber||"—")+
+      '<div class="k" style="margin-top:8px">Payment terms</div>'+esc((c&&c.contract&&c.contract.terms)||"30 days")+'</div>'+
+    '<div><div class="k">Our reference</div>'+esc(i.reference||i.number||"—")+
+      '<div class="k" style="margin-top:8px">VAT treatment</div>'+esc(i.vatLabel||"")+'</div>'+
+  '</div>'+
+  '<table><thead><tr><th>Journey</th><th>Details</th><th class="r">Net</th></tr></thead><tbody>'+
+    i.lines.map(l=>'<tr><td><strong class="mono">'+esc(l.ref)+'</strong><div class="muted" style="font-size:11px">'+esc(l.label)+'</div>'+
+      (l.poNumber&&l.poNumber!==i.poNumber?'<div class="muted" style="font-size:10.5px">PO '+esc(l.poNumber)+'</div>':'')+'</td>'+
+      '<td style="font-size:11.5px">'+esc(l.detail)+
+        '<div class="muted" style="font-size:10.5px;margin-top:2px">'+(l.breakdown||[]).map(x=>esc(x.label)+" "+gbp(x.amount)).join(" · ")+'</div></td>'+
+      '<td class="r">'+gbp(l.amount)+
+        (editable?'<div><button class="btn xs g" data-rmline="'+esc(l.ref)+'" style="margin-top:3px">Remove</button></div>':'')+'</td></tr>').join("")+
+  '</tbody><tfoot>'+
+    '<tr><td colspan="2">Net total</td><td class="r">'+gbp(net)+'</td></tr>'+
+    '<tr><td colspan="2">VAT'+(i.vatRate>0?" @ "+i.vatRate+"%":" ("+esc(i.vatLabel)+")")+'</td><td class="r">'+gbp(vat)+'</td></tr>'+
+    (invCredited(i)>0?'<tr><td colspan="2">Less credit notes</td><td class="r">'+gbp(-invCredited(i))+'</td></tr>':'')+
+    (invPaid(i)>0?'<tr><td colspan="2">Less payments received</td><td class="r">'+gbp(-invPaid(i))+'</td></tr>':'')+
+    '<tr class="total"><td colspan="2">'+(invBalance(i)<gross?"Balance due":"Total due")+'</td><td class="r">'+gbp(invBalance(i))+'</td></tr>'+
+  '</tfoot></table>'+
+  '<div class="foot">Please pay by bank transfer to '+esc(S.org.bank)+', quoting '+esc(i.number||"the invoice number")+'. '+
+    (i.vatRate===0?'This service is '+esc((i.vatLabel||"exempt").toLowerCase())+' for VAT. ':'')+
+    esc(S.org.name)+' · Company no. '+esc(S.org.companyNo)+'.</div></div>'+
+  (editable?'<div class="inline"><div class="row" style="align-items:flex-end">'+
+    '<label class="f" style="margin:0;flex:2 1 200px"><span>Our reference (optional)</span><input type="text" id="ed-ref" value="'+esc(i.reference)+'"></label>'+
+    '<label class="f" style="margin:0"><span>Purchase order</span><input type="text" id="ed-po" value="'+esc(i.poNumber)+'"></label>'+
+    '<label class="f" style="margin:0"><span>Payment terms (days)</span><input type="number" id="ed-terms" min="0" value="'+i.termsDays+'"></label>'+
+    '<button class="btn p xs" id="save-draft">Save draft</button></div>'+
+    '<p class="hint">This is a draft. Nothing is owed and no number is assigned until you issue it.</p></div>':'');
+}
+function invoicePayments(i){
+  const pays=S.payments.filter(p=>p.invoiceId===i.id).sort((a,b)=>b.date.localeCompare(a.date));
+  const creds=S.credits.filter(c=>c.invoiceId===i.id).sort((a,b)=>b.date.localeCompare(a.date));
+  return '<div class="facts">'+
+    '<div><div class="k">Gross</div><div class="v num">'+gbp(invGross(i))+'</div></div>'+
+    '<div><div class="k">Paid</div><div class="v num">'+gbp(invPaid(i))+'</div></div>'+
+    '<div><div class="k">Credited</div><div class="v num">'+gbp(invCredited(i))+'</div></div>'+
+    '<div><div class="k">Balance</div><div class="v num" style="color:'+(invBalance(i)>0.005?"var(--stop)":"var(--ok)")+'">'+gbp(invBalance(i))+'</div></div>'+
+  '</div>'+
+  '<div class="card" style="margin-bottom:11px"><div class="h"><h2>Payments</h2></div>'+
+    (pays.length?'<div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)"><table class="d"><tbody>'+
+      pays.map(p=>'<tr><td class="mono">'+esc(p.number)+'</td><td class="num nowrap">'+ukd(p.date)+'</td>'+
+        '<td>'+esc(p.method)+(p.reference?' <span class="muted">· '+esc(p.reference)+'</span>':'')+'</td>'+
+        '<td class="r num">'+gbp(p.amount)+'</td></tr>').join("")+'</tbody></table></div>'
+      :'<div class="b empty" style="padding:16px"><b>No payments recorded</b></div>')+'</div>'+
+  '<div class="card"><div class="h"><h2>Credit notes</h2></div>'+
+    (creds.length?'<div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)"><table class="d"><tbody>'+
+      creds.map(c=>'<tr data-open="'+c.id+'" data-kind="credit"><td class="mono" style="color:var(--accent-2)">'+esc(c.number)+'</td>'+
+        '<td class="num nowrap">'+ukd(c.date)+'</td><td>'+esc(c.reason)+'</td>'+
+        '<td class="r num">'+gbp(c.gross)+'</td></tr>').join("")+'</tbody></table></div>'
+      :'<div class="b empty" style="padding:16px"><b>No credit notes</b></div>')+'</div>';
+}
+function invoiceAudit(i){
+  return '<div class="card"><div class="b"><ul class="feed">'+
+    (i.audit||[]).slice().sort((a,b)=>b.at.localeCompare(a.at)).map(a=>
+      '<li><div class="m">'+uks(a.at)+' · '+esc(a.by)+'</div><div class="s">'+esc(a.action)+'</div>'+
+      (a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</li>').join("")+'</ul></div></div>';
+}
+
+/* ---------- credits / payments lists ---------- */
+function viewCredits(){
+  if(!can("view")) return viewDenied();
+  const rows=S.credits.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  return demoNote()+'<div class="ph"><h1>Credit notes</h1><span class="muted">'+rows.length+'</span></div>'+
+  (rows.length?'<div class="tw"><table class="d"><thead><tr><th>Number</th><th>Against</th><th>Customer</th><th>Date</th><th>Reason</th><th class="r">Net</th><th class="r">VAT</th><th class="r">Gross</th></tr></thead><tbody>'+
+    rows.map(c=>{const i=inv(c.invoiceId);
+      return '<tr tabindex="0" data-open="'+c.id+'" data-kind="credit">'+
+      '<td class="mono" style="color:var(--accent-2)">'+esc(c.number)+'</td>'+
+      '<td class="mono">'+esc(i?i.number:"—")+'</td>'+
+      '<td>'+esc((cust(c.customerRef)||{}).name||"")+'</td>'+
+      '<td class="num nowrap">'+ukd(c.date)+'</td><td>'+esc(c.reason)+'</td>'+
+      '<td class="r num">'+gbp(c.net)+'</td><td class="r num">'+gbp(c.vat)+'</td><td class="r num">'+gbp(c.gross)+'</td></tr>';
+    }).join("")+'</tbody></table></div>'
+    :'<div class="card"><div class="b empty"><b>No credit notes</b>Raise one from an issued invoice.</div></div>');
+}
+function viewCredit(){
+  const c=cn(S.selected);if(!c) return viewCredits();
+  const i=inv(c.invoiceId),cu=cust(c.customerRef);
+  return '<div class="ph"><button class="btn g" data-go="credits">← Credit notes</button>'+
+    '<div><div class="micro">'+esc(c.number)+'</div><h1>'+esc(cu?cu.name:c.customerRef)+'</h1></div>'+
+    '<div class="spacer"></div><button class="btn" id="print-invoice">Print</button></div>'+
+  '<div class="doc"><div class="top">'+
+    '<div class="from"><b>'+esc(S.org.name)+'</b><div class="m">'+esc(S.org.addr)+'<br>VAT '+esc(S.org.vatNo)+'</div></div>'+
+    '<div class="meta"><div class="t">CREDIT NOTE</div><div class="r">'+esc(c.number)+'</div>'+
+      '<div class="m">Dated '+ukd(c.date)+'<br>Against '+esc(i?i.number:"—")+'</div></div></div>'+
+  '<div class="parties"><div><div class="k">Credit to</div><strong>'+esc(cu?cu.name:"")+'</strong>'+
+    '<div class="m" style="font-size:11.5px;color:var(--ink-3)">'+esc((cu&&cu.billing)||"")+'</div></div>'+
+    '<div><div class="k">Reason</div>'+esc(c.reason)+'</div></div>'+
+  '<table><tbody><tr><td>Credit against invoice '+esc(i?i.number:"")+'</td><td class="r">'+gbp(c.net)+'</td></tr></tbody>'+
+    '<tfoot><tr><td>Net</td><td class="r">'+gbp(c.net)+'</td></tr>'+
+    '<tr><td>VAT @ '+c.vatRate+'%</td><td class="r">'+gbp(c.vat)+'</td></tr>'+
+    '<tr class="total"><td>Total credited</td><td class="r">'+gbp(c.gross)+'</td></tr></tfoot></table>'+
+    '<div class="foot">This credit note reduces the balance of invoice '+esc(i?i.number:"")+'.</div></div>';
+}
+function viewPayments(){
+  if(!can("view")) return viewDenied();
+  let rows=S.payments.slice();
+  if(portalOnly()) rows=rows.filter(p=>p.customerRef===role().ownCustomer);
+  rows.sort((a,b)=>b.date.localeCompare(a.date));
+  const total=round2(rows.reduce((s,p)=>s+p.amount,0));
+  return demoNote()+'<div class="ph"><h1>Payments</h1><span class="muted">'+rows.length+' · '+gbp(total)+'</span>'+
+    '<div class="spacer"></div>'+(can("export")?'<button class="btn" id="export-payments">Export CSV</button>':'')+'</div>'+
+  (rows.length?'<div class="tw"><table class="d"><thead><tr><th>Receipt</th><th>Invoice</th><th>Customer</th><th>Date</th><th>Method</th><th>Reference</th><th class="r">Amount</th></tr></thead><tbody>'+
+    rows.map(p=>{const i=inv(p.invoiceId);
+      return '<tr'+(i?' tabindex="0" data-open="'+i.id+'" data-kind="invoice"':'')+'>'+
+      '<td class="mono">'+esc(p.number)+'</td><td class="mono" style="color:var(--accent-2)">'+esc(i?i.number:"—")+'</td>'+
+      '<td>'+esc((cust(p.customerRef)||{}).name||"")+'</td><td class="num nowrap">'+ukd(p.date)+'</td>'+
+      '<td>'+esc(p.method)+'</td><td class="muted">'+esc(p.reference||"—")+'</td>'+
+      '<td class="r num">'+gbp(p.amount)+'</td></tr>';
+    }).join("")+'</tbody></table></div>'
+    :'<div class="card"><div class="b empty"><b>No payments</b>Record a payment from an issued invoice.</div></div>');
+}
+
+/* ---------- customer accounts ---------- */
+function viewCustomers(){
+  if(!can("view")||portalOnly()) return viewDenied();
+  const rows=customerBalances();
+  const all=Array.from(new Set(S.invoices.map(i=>i.customerRef))).map(cust).filter(Boolean);
+  return demoNote()+'<div class="ph"><h1>Customer accounts</h1><span class="muted">Balances from issued invoices</span></div>'+
+  '<div class="tw"><table class="d"><thead><tr><th>Customer</th><th>Terms</th><th>VAT</th>'+
+    '<th class="r">Invoiced</th><th class="r">Paid</th><th class="r">Outstanding</th><th class="r">Overdue</th><th>Credit hold</th></tr></thead><tbody>'+
+    all.map(c=>{
+      const mine=S.invoices.filter(i=>i.customerRef===c.ref&&i.status!=="Draft");
+      const invd=round2(mine.reduce((s,i)=>s+invGross(i),0));
+      const paid=round2(mine.reduce((s,i)=>s+invPaid(i),0));
+      const out=round2(mine.reduce((s,i)=>s+invBalance(i),0));
+      const over=round2(mine.filter(i=>invStatus(i)==="Overdue").reduce((s,i)=>s+invBalance(i),0));
+      return '<tr data-open="'+esc(c.ref)+'" data-kind="customer"><td><strong>'+esc(c.name)+'</strong>'+
+        '<div class="muted">'+esc(c.type||"")+'</div></td>'+
+        '<td class="nowrap">'+esc((c.contract&&c.contract.terms)||"30 days")+'</td>'+
+        '<td class="nowrap">'+esc(vatRateFor(c).label)+'</td>'+
+        '<td class="r num">'+gbp(invd)+'</td><td class="r num">'+gbp(paid)+'</td>'+
+        '<td class="r num">'+(out>0.005?gbp(out):'<span class="muted">—</span>')+'</td>'+
+        '<td class="r num">'+(over>0.005?'<span class="bdg b-stop">'+gbp(over)+'</span>':'<span class="muted">—</span>')+'</td>'+
+        '<td>'+(c.creditHold?'<span class="bdg b-stop">On hold</span>':'<span class="muted">—</span>')+'</td></tr>';
+    }).join("")+'</tbody></table></div>'+
+  '<p class="hint">Credit hold is set on the CRM record and read here. A held customer\'s completed journeys can still be seen '+
+    'under Ready to bill, but cannot be invoiced until the hold is released.</p>';
+}
+
+/* ---------- log / settings ---------- */
+function viewAudit(){
+  if(!can("audit")) return viewDenied();
+  const rows=S.log.slice().sort((a,b)=>b.at.localeCompare(a.at));
+  return demoNote()+'<div class="ph"><h1>Finance log</h1><span class="muted">'+rows.length+' entries</span></div>'+
+  '<div class="tw"><table class="d"><thead><tr><th>When</th><th>Reference</th><th>Action</th><th>Detail</th><th>By</th></tr></thead><tbody>'+
+    rows.map(a=>'<tr><td class="mono muted nowrap">'+uks(a.at)+'</td>'+
+      '<td class="mono" style="color:var(--accent-2)">'+esc(a.ref||"—")+'</td>'+
+      '<td class="nowrap">'+esc(a.action)+'</td><td>'+esc(a.detail)+'</td>'+
+      '<td class="nowrap muted">'+esc(a.by)+'</td></tr>').join("")+'</tbody></table></div>';
+}
+function viewSettings(){
+  if(!can("settings")) return viewDenied();
+  const o=S.org;
+  return '<div class="ph"><h1>Settings</h1></div>'+
+  '<div class="card" style="max-width:640px"><div class="h"><h2>Invoice header</h2></div><div class="b">'+
+    '<label class="f"><span>Trading name</span><input type="text" id="og-name" value="'+esc(o.name)+'"></label>'+
+    '<label class="f"><span>Address</span><input type="text" id="og-addr" value="'+esc(o.addr)+'"></label>'+
+    '<div class="row"><label class="f" style="margin:0"><span>VAT number</span><input type="text" id="og-vat" value="'+esc(o.vatNo)+'"></label>'+
+    '<label class="f" style="margin:0"><span>Company number</span><input type="text" id="og-co" value="'+esc(o.companyNo)+'"></label></div>'+
+    '<label class="f"><span>Bank details</span><input type="text" id="og-bank" value="'+esc(o.bank)+'"></label>'+
+    '<div class="row"><label class="f" style="margin:0"><span>Accounts email</span><input type="email" id="og-email" value="'+esc(o.email)+'"></label>'+
+    '<label class="f" style="margin:0"><span>Telephone</span><input type="tel" id="og-phone" value="'+esc(o.phone)+'"></label></div>'+
+    '<button class="btn p xs" id="save-org">Save</button>'+
+    '<p class="hint">Numbering, VAT treatment and payment terms come from the customer\'s CRM record, not from here — '+
+    'this is only the header that appears on every document.</p>'+
+  '</div></div>';
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function modal(title,body,foot){
+  $("#modalhost").innerHTML='<div class="scrim" data-mclose="1"></div>'+
+    '<div class="modal" role="dialog" aria-modal="true" aria-label="'+esc(title)+'">'+
+    '<div class="mh"><h2 style="font-size:14px">'+esc(title)+'</h2><div class="spacer"></div>'+
+    '<button class="btn g xs" data-mclose="1" aria-label="Close">✕</button></div>'+
+    '<div class="mb">'+body+'</div><div class="mf">'+foot+'</div></div>';
+}
+const closeModal=()=>{$("#modalhost").innerHTML="";};
+
+function modalPayment(i){
+  const bal=invBalance(i);
+  modal("Record payment — "+i.number,
+    '<p style="margin-top:0" class="muted">Balance outstanding: <strong>'+gbp(bal)+'</strong></p>'+
+    '<div class="row"><label class="f"><span>Amount<span class="rq">*</span></span>'+
+      '<input type="number" id="pm-amt" min="0" step="0.01" value="'+bal.toFixed(2)+'"><div class="msg" id="m-pm">Enter an amount greater than zero.</div></label>'+
+    '<label class="f"><span>Date</span><input type="date" id="pm-date" value="'+todayISO()+'"></label></div>'+
+    '<div class="row"><label class="f"><span>Method</span><select id="pm-method">'+
+      ["Bank transfer","BACS","Card","Cheque","Cash","Direct debit"].map(m=>'<option>'+m+'</option>').join("")+'</select></label>'+
+    '<label class="f"><span>Reference</span><input type="text" id="pm-ref" placeholder="Remittance or transaction reference"></label></div>'+
+    (bal>0?'<p class="hint" style="margin:0">A payment for the full balance marks the invoice paid. A smaller amount marks it part paid.</p>':''),
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="pm-save" data-inv="'+i.id+'">Record payment</button>');
+}
+function modalCredit(i){
+  const net=invNet(i);
+  modal("Raise credit note — "+i.number,
+    '<p style="margin-top:0" class="muted">Invoice net: <strong>'+gbp(net)+'</strong> · VAT will be added at '+i.vatRate+'%.</p>'+
+    '<label class="f"><span>Net amount to credit<span class="rq">*</span></span>'+
+      '<input type="number" id="cr-amt" min="0" step="0.01" max="'+net+'" value="'+net.toFixed(2)+'">'+
+      '<div class="msg" id="m-cr">Enter an amount up to the invoice net.</div></label>'+
+    '<label class="f" style="margin:0"><span>Reason<span class="rq">*</span></span><select id="cr-reason">'+
+      ["Journey not carried out","Duplicate charge","Agreed goodwill reduction","Rate correction","Cancelled after invoicing","Other"]
+        .map(r=>'<option>'+r+'</option>').join("")+'</select></label>'+
+    '<p class="hint">A credit note reduces the outstanding balance. It does not delete the invoice or the journey behind it.</p>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="cr-save" data-inv="'+i.id+'">Raise credit note</button>');
+}
+function modalReminder(i){
+  const c=cust(i.customerRef);
+  const late=days(i.dueDate)<0;
+  const contact=(c&&(c.contacts||[]).find(x=>/finance|account/i.test(x.role||"")))||null;
+  modal("Payment reminder — "+i.number,
+    '<p style="margin-top:0">To: <strong>'+esc(contact?contact.name:(c?c.name:""))+'</strong></p>'+
+    '<div class="card"><div class="b" style="font-size:12.5px;line-height:1.6">'+
+      'Dear '+esc(contact?contact.name.split(" ")[0]:"Sir or Madam")+',<br><br>'+
+      'Our invoice <strong>'+esc(i.number)+'</strong> for '+gbp(invBalance(i))+', '+
+      (late?'due on '+ukd(i.dueDate)+', is now <strong>'+Math.abs(days(i.dueDate))+' days overdue</strong>. '
+        :'is due for payment on '+ukd(i.dueDate)+'. ')+
+      'Please arrange payment to '+esc(S.org.bank)+', quoting the invoice number.<br><br>'+
+      'If payment has already been sent, please accept our thanks and disregard this notice.<br><br>'+
+      'Kind regards,<br>Accounts, '+esc(S.org.name)+
+    '</div></div>'+
+    '<p class="hint">In production this is emailed to the finance contact and logged. Here it records that a reminder was sent.</p>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="rm-send" data-inv="'+i.id+'">Log reminder sent</button>');
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function go(v){S.view=v;S.selected=null;render();window.scrollTo(0,0);$("#side").classList.remove("open");}
+function open(id,kind){
+  if(kind==="customer"){S.f={q:"",status:"",customer:id};go("invoices");return;}
+  S.selected=id;S.selKind=kind;S.view=kind;S.tab="document";render();window.scrollTo(0,0);
+}
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():"";};
+const numv=id=>{const e=document.getElementById(id);return e?parseFloat(e.value)||0:0;};
+function mark(id,mid,ok){const e=document.getElementById(id),m=document.getElementById(mid);
+  if(e)e.classList.toggle("bad",!ok);if(m)m.classList.toggle("on",!ok);return ok;}
+
+document.addEventListener("click", async e=>{
+  const t=e.target.closest("[data-go],[data-open],[data-tab],[data-mclose],[data-sort],[data-billcust],[data-rmline],button");
+  if(!t) return;
+  const i=(S.selKind==="invoice")?inv(S.selected):null;
+
+  if(t.dataset.mclose){closeModal();return;}
+  if(t.dataset.go){const m=MENU.find(x=>x.id===t.dataset.go);
+    if(m&&!m.live){S.view=t.dataset.go;S.selected=null;render();$("#side").classList.remove("open");return;}
+    go(t.dataset.go);return;}
+  if(t.dataset.open){open(t.dataset.open,t.dataset.kind);return;}
+  if(t.dataset.tab){S.tab=t.dataset.tab;render();return;}
+  if(t.dataset.sort){const k=t.dataset.sort;
+    if(S.sort.k===k)S.sort.dir*=-1;else{S.sort.k=k;S.sort.dir=1;}render();return;}
+
+  /* raise draft from a customer's billable journeys */
+  if(t.dataset.billcust){
+    const ref=t.dataset.billcust, c=cust(ref);
+    if(c&&c.creditHold){toast("Customer is on credit hold — release it on the CRM record first.","bad");return;}
+    const picks=(billableByCustomer()[ref]||[]);
+    if(!picks.length){toast("Nothing to bill for this customer.","bad");return;}
+    const draft=buildInvoice(ref,picks);
+    S.invoices.push(draft);
+    iaudit(draft,"Draft raised",picks.length+" journey(s) · net "+gbp(invNet(draft)));
+    log("Draft invoice raised",(c?c.name:ref)+" · "+picks.length+" journey(s) · "+gbp(invNet(draft)),"draft");
+    await save();toast("Draft raised — review and issue it","ok");open(draft.id,"invoice");return;
+  }
+  if(t.dataset.rmline&&i&&i.status==="Draft"){
+    i.lines=i.lines.filter(l=>l.ref!==t.dataset.rmline);
+    if(!i.lines.length){S.invoices=S.invoices.filter(x=>x.id!==i.id);toast("Draft emptied and removed");go("unbilled");return;}
+    iaudit(i,"Journey removed from draft",t.dataset.rmline);
+    await save();render();return;
+  }
+
+  const id=t.id;
+  if(id==="theme"){const n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",n);
+    try{if(window.storage)window.storage.set("pts:theme",n);}catch(_){}return;}
+  if(id==="sidetoggle"){$("#side").classList.toggle("open");return;}
+  if(id==="f-clear"){S.f={q:"",status:"",customer:""};render();return;}
+  if(id==="print-invoice"){window.print();return;}
+  if(id==="export-invoices"){exportInvoices();return;}
+  if(id==="export-payments"){exportPayments();return;}
+
+  if(id==="save-org"){
+    Object.assign(S.org,{name:val("og-name"),addr:val("og-addr"),vatNo:val("og-vat"),companyNo:val("og-co"),
+      bank:val("og-bank"),email:val("og-email"),phone:val("og-phone")});
+    log("Settings updated","Invoice header changed","");
+    await save();toast("Saved","ok");render();return;
+  }
+
+  if(!i) return;
+
+  if(id==="save-draft"){
+    i.reference=val("ed-ref");i.poNumber=val("ed-po");i.termsDays=parseInt(val("ed-terms"),10)||i.termsDays;
+    iaudit(i,"Draft updated","");await save();toast("Draft saved","ok");render();return;
+  }
+  if(id==="delete-draft"){
+    S.invoices=S.invoices.filter(x=>x.id!==i.id);
+    log("Draft deleted","Draft for "+((cust(i.customerRef)||{}).name||"")+" removed","");
+    await save();toast("Draft deleted");go("unbilled");return;
+  }
+  if(id==="issue-invoice"){
+    issueInvoice(i);await save();toast("Issued "+i.number+" — due "+ukd(i.dueDate),"ok");render();return;
+  }
+  if(id==="take-payment"){modalPayment(i);return;}
+  if(id==="raise-credit"){modalCredit(i);return;}
+  if(id==="send-reminder"){modalReminder(i);return;}
+
+  if(id==="pm-save"){
+    const amt=numv("pm-amt");
+    if(!mark("pm-amt","m-pm",amt>0)) return;
+    recordPayment(i,amt,val("pm-method"),val("pm-date"),val("pm-ref"));
+    await save();closeModal();
+    toast(invBalance(i)<=0.005?i.number+" paid in full":"Payment recorded","ok");render();return;
+  }
+  if(id==="cr-save"){
+    const amt=numv("cr-amt");
+    if(!mark("cr-amt","m-cr",amt>0&&amt<=invNet(i)+0.005)) return;
+    raiseCredit(i,amt,val("cr-reason"));
+    await save();closeModal();toast("Credit note raised","ok");render();return;
+  }
+  if(id==="rm-send"){
+    iaudit(i,"Reminder sent","To "+((cust(i.customerRef)||{}).name||""));
+    i.lastReminder=todayISO();
+    log("Reminder sent",i.number+" · "+((cust(i.customerRef)||{}).name||""),i.number);
+    await save();closeModal();toast("Reminder logged","ok");render();return;
+  }
+});
+
+document.addEventListener("change", e=>{
+  const el=e.target;
+  if(el.id==="rolepick"){S.roleId=el.value;S.selected=null;
+    S.view=portalOnly()?"invoices":can("view")?"overview":"invoices";render();toast("Signed in as "+role().name);return;}
+  const map={"f-status":"status","f-customer":"customer"};
+  if(map[el.id]){S.f[map[el.id]]=el.value;render();return;}
+});
+
+let tm;
+document.addEventListener("input", e=>{
+  if(e.target.id!=="f-q"&&e.target.id!=="gsearch") return;
+  const g=e.target.id==="gsearch";
+  S.f.q=e.target.value;
+  clearTimeout(tm);
+  tm=setTimeout(()=>{
+    const pos=e.target.selectionStart;
+    if(g&&S.view!=="invoices") go("invoices"); else render();
+    const x=document.getElementById(g?"gsearch":"f-q");
+    if(x){x.focus();try{x.setSelectionRange(pos,pos);}catch(_){}}
+  },220);
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){if($("#modalhost").innerHTML){closeModal();return;}if(S.selected){S.selected=null;S.view=S.selKind==="credit"?"credits":"invoices";render();}}
+  if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.open){e.preventDefault();open(e.target.dataset.open,e.target.dataset.kind);}
+});
+
+/* ---------- export ---------- */
+function exportInvoices(){
+  const q=x=>'"'+String(x==null?"":x).replace(/"/g,'""')+'"';
+  const head=["Invoice","Customer","Status","Issued","Due","Net","VAT","Gross","Paid","Credited","Balance","Journeys"];
+  const body=visibleInvoices().map(i=>[i.number||"draft",(cust(i.customerRef)||{}).name||"",invStatus(i),
+    i.status==="Draft"?"":ukd(i.issueDate),i.status==="Draft"?"":ukd(i.dueDate),
+    invNet(i),invVat(i),invGross(i),invPaid(i),invCredited(i),invBalance(i),i.lines.map(l=>l.ref).join(" ")].map(q).join(","));
+  dl("invoices-"+todayISO()+".csv","\ufeff"+head.map(q).join(",")+"\r\n"+body.join("\r\n"),body.length);
+}
+function exportPayments(){
+  const q=x=>'"'+String(x==null?"":x).replace(/"/g,'""')+'"';
+  const head=["Receipt","Invoice","Customer","Date","Method","Reference","Amount"];
+  const body=S.payments.map(p=>{const i=inv(p.invoiceId);
+    return [p.number,i?i.number:"",(cust(p.customerRef)||{}).name||"",ukd(p.date),p.method,p.reference,p.amount].map(q).join(",");});
+  dl("payments-"+todayISO()+".csv","\ufeff"+head.map(q).join(",")+"\r\n"+body.join("\r\n"),body.length);
+}
+function dl(name,text,count){
+  const url=URL.createObjectURL(new Blob([text],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),800);toast("Exported "+count+" rows","ok");
+}
+
+/* ============================================================
+   FALLBACK DATA — only if Bookings/CRM have not been used here,
+   so the module still demonstrates on its own.
+   ============================================================ */
+function seedStandalone(){
+  S.customers=[
+    {ref:"CUS-0001",name:"Meadowvale Integrated Care Board",type:"NHS organisation",creditHold:false,
+      billing:"Finance Dept, Meadowvale House, Testford TF2 3AB",
+      contract:{terms:"45 days",standingPO:"PO-24/25-4471",vat:"Exempt"},
+      contacts:[{name:"L. Marchetti",role:"Accounts payable"}],
+      rates:[{item:"Base fare — ambulance care",amount:58},{item:"Base fare — wheelchair",amount:46},
+        {item:"Base fare — stretcher",amount:92},{item:"Per mile",amount:2.4},{item:"Waiting time per hour",amount:18},
+        {item:"Out-of-hours uplift",amount:15},{item:"Late cancellation",amount:35}]},
+    {ref:"CUS-0002",name:"Sentinel Health Insurance plc",type:"Insurance company",creditHold:false,
+      billing:"Claims, Sentinel House, Testford TF5 1CD",
+      contract:{terms:"60 days",standingPO:"PO-SEN-2261",vat:"Standard rate 20%"},
+      contacts:[{name:"P. Nandi",role:"Accounts"}],
+      rates:[{item:"Base fare — ambulance care",amount:78},{item:"Base fare — wheelchair",amount:64},
+        {item:"Base fare — stretcher",amount:120},{item:"Per mile",amount:3.1},{item:"Waiting time per hour",amount:24},
+        {item:"Bariatric surcharge",amount:150},{item:"Out-of-hours uplift",amount:20},{item:"Late cancellation",amount:60}]},
+    {ref:"CUS-0003",name:"Mrs E. Fairweather",type:"Private customer",creditHold:false,
+      billing:"14 Larkspur Close, Testford TF1 2AB",
+      contract:{terms:"Payment on booking",standingPO:"",vat:"Standard rate 20%"},contacts:[],
+      rates:[{item:"Base fare — wheelchair",amount:70},{item:"Per mile",amount:3.5},{item:"Waiting time per hour",amount:28}]}
+  ];
+  const B=(ref,cr,pid,type,shape,date,time,from,to,mob,miles,wait,status,po,lateCancel)=>({
+    ref,customerRef:cr,patientId:pid,type,shape,collectDate:date,collectTime:time,fromAddr:from,toAddr:to,
+    mobility:mob,mileage:miles,waitingMins:wait,status,poNumber:po||"",priceOverride:null,bankHoliday:false,lateCancel:!!lateCancel});
+  S._patients=[{id:"p1",forename:"Elsie",surname:"Fairweather"},{id:"p2",forename:"Harold",surname:"Callow"},
+    {id:"p3",forename:"William",surname:"Traynor"},{id:"p4",forename:"Joseph",surname:"Nkemelu"}];
+  S.bookings=[
+    B("JOB-00011","CUS-0001","p1","Hospital appointment","Return",shiftD(-8),"07:45","14 Larkspur Close","Renal Unit, St Aldrich",  "Own wheelchair",9,45,"Completed","PO-24/25-4471"),
+    B("JOB-00012","CUS-0001","p2","Hospital appointment","Return",shiftD(-8),"08:15","3 Beckett Row","Renal Unit, St Aldrich",     "Walking, needs assistance",6,30,"Completed","PO-24/25-4471"),
+    B("JOB-00013","CUS-0002","p3","Planned ambulance transport","One-way",shiftD(-6),"07:10","2 Foundry Mews","Lindhurst Private Hospital","Stretcher",22,0,"Completed","PO-SEN-2261"),
+    B("JOB-00014","CUS-0002","p4","Bariatric transport","One-way",shiftD(-5),"10:30","22 Rowan Avenue","Lindhurst Private Hospital","Bariatric stretcher",11,0,"Completed","PO-SEN-2261"),
+    B("JOB-00015","CUS-0003","p1","Hospital appointment","Return",shiftD(-3),"09:00","14 Larkspur Close","Memory Clinic, St Aldrich","Own wheelchair",7,30,"Completed",""),
+    B("JOB-00016","CUS-0001","p2","Non-emergency patient transport","One-way",shiftD(-2),"18:40","3 Beckett Row","St Aldrich","Walking, needs assistance",6,0,"Cancelled","PO-24/25-4471",true),
+    B("JOB-00017","CUS-0002","p3","Planned ambulance transport","One-way",shiftD(-1),"11:00","Lindhurst Private Hospital","2 Foundry Mews","Stretcher",22,0,"Completed","PO-SEN-2261")
+  ];
+  /* a couple already invoiced so lists aren't empty */
+  const draftPicks=billableByCustomer()["CUS-0001"]||[];
+  if(draftPicks.length){
+    const past=buildInvoice("CUS-0001",[draftPicks[0]]);
+    past.number=nextInvNo();past.status="Issued";past.issueDate=shiftD(-40);past.dueDate=shiftD(-40+past.termsDays);
+    iaudit(past,"Invoice issued","Seed");
+    S.invoices.push(past);
+    if(past.dueDate<todayISO()){/* leave overdue */}
+  }
+}
+
+/* ---------- boot ---------- */
+(async function(){
+  $("#rolepick").innerHTML=ROLES.map(r=>'<option value="'+r.id+'"'+(r.id===S.roleId?' selected':'')+'>'+esc(r.name)+'</option>').join("");
+  try{if(window.storage){const th=await window.storage.get("pts:theme");
+    if(th&&th.value)document.documentElement.setAttribute("data-theme",th.value);}}catch(_){}
+  S.linked=await loadUpstream();
+  const had=await load();
+  if(!had){
+    if(!S.linked||!S.bookings.length){ seedStandalone(); S.linked=false; }
+    await save();
+  } else if(!S.linked){
+    /* have our own invoices but no upstream this session — synthesise just enough customer context to display */
+    if(!S.customers.length){ seedStandalone(); }
+  }
+  render();
+  if(S.linked) toast("Completed journeys loaded from Bookings and CRM","ok");
+  if(!storageOK) toast("Changes are held for this session only.","bad");
+})();
+
+})();
+</script>

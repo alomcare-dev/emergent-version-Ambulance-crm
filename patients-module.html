@@ -1,0 +1,1499 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patients | Ambulance &amp; PTS Management System</title>
+<style>
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface-2:#F6F8FA; --surface-3:#EEF1F5;
+  --line:#D6DCE3; --line-2:#BAC4CF;
+  --ink:#111820; --ink-2:#4B5763; --ink-3:#78848F;
+  --nav:#1A222C; --nav-ink:#B7C3CF; --nav-ink-2:#7C8B99;
+  --accent:#0B6A66; --accent-2:#0E837E; --accent-soft:#DFEEED;
+  --ok:#166534; --ok-soft:#E3F2E8;
+  --warn:#96560A; --warn-soft:#FBEEDC;
+  --stop:#A81C24; --stop-soft:#FAE7E8;
+  --info:#1E4E8C; --info-soft:#E6EEF8;
+  --seal:#5B21A8; --seal-soft:#F0E8FB;
+  --r:6px; --r2:10px;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --shadow:0 1px 2px rgba(17,24,32,.05),0 6px 18px rgba(17,24,32,.06);
+}
+html[data-theme="dark"]{
+  --bg:#0D1218; --surface:#151D26; --surface-2:#1B2530; --surface-3:#212C38;
+  --line:#2A3744; --line-2:#3B4C5C;
+  --ink:#E7EDF3; --ink-2:#AFBDC9; --ink-3:#8394A2;
+  --nav:#0A0F14; --nav-ink:#AEBDCA; --nav-ink-2:#6D7E8D;
+  --accent:#2FA39D; --accent-2:#3CB8B1; --accent-soft:#10312F;
+  --ok:#63C088; --ok-soft:#11301E; --warn:#DFA45C; --warn-soft:#33260F;
+  --stop:#EE868D; --stop-soft:#361619; --info:#7BAEEA; --info-soft:#12253C;
+  --seal:#B79BE8; --seal-soft:#241636;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:13.5px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:640;letter-spacing:-.005em}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent-2)}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.micro{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.muted{color:var(--ink-3)} .nowrap{white-space:nowrap} .spacer{flex:1}
+
+.shell{display:flex;min-height:100vh}
+.side{width:214px;flex:0 0 214px;background:var(--nav);color:var(--nav-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.logo{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:9px;align-items:center}
+.logo .sq{width:28px;height:28px;flex:0 0 28px;border-radius:5px;background:var(--accent-2);display:grid;place-items:center;color:#04211F;font-weight:800;font-size:11px}
+.logo b{display:block;color:#fff;font-size:12.5px;line-height:1.25}
+.logo small{display:block;color:var(--nav-ink-2);font-size:10px}
+.menu{flex:1;overflow:auto;padding:6px}
+.menu .grp{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--nav-ink-2);padding:12px 8px 5px}
+.mi{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;color:var(--nav-ink);padding:6px 8px;border-radius:5px;cursor:pointer;font-size:12.5px}
+.mi:hover{background:rgba(255,255,255,.06);color:#fff}
+.mi[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+.mi.stub{color:var(--nav-ink-2)}
+.mi .pill{margin-left:auto;font:600 10px/1 var(--mono);background:rgba(255,255,255,.13);padding:3px 5px;border-radius:9px}
+.mi .planned{margin-left:auto;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--nav-ink-2)}
+.sfoot{padding:9px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:9.5px;color:var(--nav-ink-2);line-height:1.5}
+
+.body{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);padding:8px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar .search{position:relative;flex:1 1 300px;max-width:440px}
+.bar .search input{width:100%;padding:6px 10px 6px 28px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2)}
+.bar .search::before{content:"⌕";position:absolute;left:9px;top:4px;color:var(--ink-3);font-size:15px}
+.role select{padding:5px 8px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2);max-width:230px}
+.page{padding:16px;max-width:1520px;width:100%}
+.ph{display:flex;align-items:flex-end;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.ph h1{font-size:18px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);padding:6px 11px;border-radius:var(--r);cursor:pointer;font-weight:550;font-size:12.5px}
+.btn:hover{border-color:var(--accent);color:var(--accent-2)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.p:hover{background:var(--accent-2);color:#fff}
+.btn.seal{border-color:var(--seal);color:var(--seal)}
+.btn.seal:hover{background:var(--seal-soft)}
+.btn.danger{border-color:var(--stop);color:var(--stop)}
+.btn.g{background:transparent}
+.btn.xs{padding:3px 8px;font-size:11.5px}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.card>.h{padding:10px 13px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.card>.h h2{font-size:13px}
+.card>.b{padding:13px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:1000px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.g2,.g3{grid-template-columns:1fr}}
+
+label.f{display:block;margin-bottom:10px}
+label.f>span{display:block;font-size:11px;font-weight:640;color:var(--ink-2);margin-bottom:3px}
+label.f .rq{color:var(--stop)}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],input[type=search],select,textarea{
+  width:100%;padding:6px 9px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface)}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--accent-2);outline:2px solid var(--accent-soft)}
+.bad{border-color:var(--stop)!important;background:var(--stop-soft)}
+.msg{display:none;color:var(--stop);font-size:11.5px;margin-top:3px}
+.msg.on{display:block}
+.hint{font-size:11px;color:var(--ink-3);margin-top:3px}
+.chk{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:3px 0}
+.chk input{width:auto}
+
+.tw{overflow:auto;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);
+   font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;font-weight:700}
+th button{background:none;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr[data-open]{cursor:pointer}
+tbody tr[data-open]:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+
+.bdg{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:3px;border:1px solid;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.b-stop{background:var(--stop-soft);color:var(--stop);border-color:var(--stop)}
+.b-info{background:var(--info-soft);color:var(--info);border-color:var(--info)}
+.b-seal{background:var(--seal-soft);color:var(--seal);border-color:var(--seal)}
+.b-grey{background:var(--surface-3);color:var(--ink-2);border-color:var(--line-2)}
+
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;text-align:left;cursor:pointer;box-shadow:var(--shadow)}
+.stat:hover{border-color:var(--accent)}
+.stat .v{font:700 22px/1.1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat .k{font-size:11.5px;color:var(--ink-2);margin-top:3px}
+.stat .x{font-size:10.5px;color:var(--ink-3)}
+.stat.warn .v{color:var(--warn)} .stat.stop .v{color:var(--stop)} .stat.seal .v{color:var(--seal)}
+
+/* ---- SIGNATURE 1: the identity band (three-point check) ---- */
+.idband{display:flex;flex-wrap:wrap;border:1.5px solid var(--ink);border-radius:var(--r2);overflow:hidden;background:var(--surface)}
+.idband .seg{flex:1 1 190px;padding:10px 14px;border-right:1px solid var(--line-2)}
+.idband .seg:last-child{border-right:0}
+.idband .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.idband .v{font:700 19px/1.15 var(--mono);letter-spacing:.01em;margin-top:4px;word-break:break-word}
+.idband .v.name{font-family:var(--sans);letter-spacing:-.015em}
+.idband .sub{font-size:11px;color:var(--ink-3);margin-top:2px}
+.idnote{font-size:11px;color:var(--ink-3);margin-top:5px}
+
+/* ---- SIGNATURE 2: alert tiles ---- */
+.tiles{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.tile{flex:1 1 178px;min-width:158px;border:1px solid;border-radius:var(--r);padding:8px 10px;background:var(--surface)}
+.tile .k{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:800}
+.tile .t{font-size:12px;margin-top:3px;color:var(--ink-2)}
+.tile .m{font-size:10px;color:var(--ink-3);margin-top:4px;font-family:var(--mono)}
+.tile.red{border-color:var(--stop);background:var(--stop-soft)} .tile.red .k{color:var(--stop)}
+.tile.amb{border-color:var(--warn);background:var(--warn-soft)} .tile.amb .k{color:var(--warn)}
+.tile.blu{border-color:var(--info);background:var(--info-soft)} .tile.blu .k{color:var(--info)}
+
+/* ---- sealed sections ---- */
+.sealed{border:1.5px dashed var(--seal);border-radius:var(--r2);padding:22px;text-align:center;
+  background:repeating-linear-gradient(135deg,transparent,transparent 9px,var(--seal-soft) 9px,var(--seal-soft) 18px)}
+.sealed .lk{font-size:24px}
+.sealed h3{color:var(--seal);font-size:14px;margin:6px 0 4px}
+.sealed p{margin:0 auto;max-width:520px;font-size:12.5px;color:var(--ink-2)}
+.openbanner{background:var(--seal-soft);border:1px solid var(--seal);color:var(--seal);border-radius:var(--r);
+  padding:7px 11px;font-size:11.5px;font-weight:650;margin-bottom:11px}
+
+.alertbox{border:1px solid var(--stop);background:var(--stop-soft);color:var(--stop);border-radius:var(--r2);padding:10px 13px;margin-bottom:12px}
+.alertbox b{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.alertbox ul{margin:0;padding-left:16px;font-size:12.5px}
+
+.tabs{display:flex;gap:1px;border-bottom:1px solid var(--line);overflow:auto;background:var(--surface);border-radius:var(--r2) var(--r2) 0 0;padding:0 6px}
+.tab{background:none;border:0;padding:9px 12px;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;font-weight:550;white-space:nowrap;font-size:12.5px}
+.tab[aria-selected="true"]{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+.tab .lock{font-size:10px;opacity:.7}
+
+dl.kv{display:grid;grid-template-columns:190px 1fr;gap:6px 14px;margin:0}
+dl.kv dt{font-size:11px;color:var(--ink-3);font-weight:650}
+dl.kv dd{margin:0}
+@media(max-width:640px){dl.kv{grid-template-columns:1fr;gap:1px}dl.kv dd{margin-bottom:7px}}
+
+ul.feed{list-style:none;margin:0;padding:0}
+ul.feed li{padding:8px 0 8px 13px;border-left:2px solid var(--line-2);position:relative}
+ul.feed li::before{content:"";position:absolute;left:-4px;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent-2)}
+ul.feed li.seal::before{background:var(--seal)}
+ul.feed .m{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+ul.feed .s{font-weight:600;margin-top:2px}
+ul.feed .d{margin-top:2px;white-space:pre-wrap;color:var(--ink-2)}
+
+.inline{background:var(--surface-2);border:1px dashed var(--line-2);border-radius:var(--r2);padding:11px;margin-top:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1 1 140px}
+.empty{padding:34px 16px;text-align:center;color:var(--ink-2)}
+.empty b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:6px;align-items:center}
+.toast{background:var(--nav);color:#fff;padding:8px 14px;border-radius:18px;font-size:12.5px;box-shadow:var(--shadow)}
+.toast.ok{background:var(--ok)} .toast.bad{background:var(--stop)} .toast.seal{background:var(--seal)}
+
+.scrim{position:fixed;inset:0;background:rgba(10,16,22,.55);z-index:60}
+.modal{position:fixed;z-index:61;top:50%;left:50%;transform:translate(-50%,-50%);width:min(580px,94vw);max-height:88vh;overflow:auto;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.modal .mh{padding:12px 15px;border-bottom:1px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:10px}
+.modal .mb{padding:15px}
+.modal .mf{padding:11px 15px;border-top:1px solid var(--line);background:var(--surface);display:flex;gap:8px;justify-content:flex-end}
+
+.demo{background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn);border-radius:var(--r);padding:6px 11px;font-size:11.5px;font-weight:650;margin-bottom:12px}
+.deny{max-width:560px;margin:60px auto;text-align:center}
+
+.sidetoggle{display:none}
+@media(max-width:920px){
+  .side{position:fixed;z-index:70;transform:translateX(-100%);transition:transform .16s}
+  .side.open{transform:none}
+  .sidetoggle{display:inline-flex}
+  .page{padding:12px}
+}
+@media print{.side,.bar,.mf,.inline,.tabs{display:none}.page{padding:0}.sealed{display:none}}
+</style>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Main navigation">
+    <div class="logo"><div class="sq" aria-hidden="true">PT</div>
+      <div><b>Ambulance &amp; PTS</b><small>Management System</small></div></div>
+    <div class="menu" id="menu"></div>
+    <div class="sfoot">Demonstration build · Patients module<br>Branding is placeholder</div>
+  </nav>
+  <div class="body">
+    <header class="bar">
+      <button class="btn g sidetoggle" id="sidetoggle" aria-label="Show navigation">☰</button>
+      <div class="search"><input id="gsearch" type="search" placeholder="Search by surname, NHS number, date of birth or address" aria-label="Search patients"></div>
+      <div class="spacer"></div>
+      <div class="role"><span class="micro">Role</span> <select id="rolepick" aria-label="Signed-in role"></select></div>
+      <button class="btn g" id="theme" aria-label="Switch theme" title="Switch theme">◐</button>
+    </header>
+    <div class="page" id="page"></div>
+  </div>
+</div>
+<div id="modalhost"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   PATIENTS — master patient index
+   Ambulance & Patient Transport Management System
+
+   Patient records hold special-category personal data. This module
+   is built around that: sections are sealed by role, privileged
+   roles can open a sealed section only with a recorded reason, and
+   every view of a record is written to an access log.
+   ============================================================ */
+
+const KEY="pts:patients:v1", BOOK_KEY="pts:bookings:v1";
+
+/* ---------- reference data ---------- */
+const MOBILITY=["Walking, unaided","Walking, needs assistance","Walking frame","Own wheelchair",
+  "Our wheelchair","Carry chair","Stretcher","Bariatric stretcher"];
+const HANDLING=["Independent","Stand-aid","One-person assist","Two-person assist","Hoist — full sling","Four-person bariatric transfer"];
+const COMMS_METHOD=["Telephone","Mobile","Text message","Email","Letter","Through next of kin","Through care home"];
+const COMMS_NEEDS=["None recorded","Interpreter required","British Sign Language","Large print","Easy read",
+  "Hearing loop","Speaks quietly — allow time","Non-verbal — uses communication board"];
+const FUNDING=["NHS commissioned","Local authority funded","Continuing healthcare","Insurance funded",
+  "Self-funding","Charity funded","Contract — care home"];
+const ALERT_KINDS=["Allergy","Safeguarding","Behavioural","Infection","Clinical","Mobility","Communication","Access"];
+const CONSENT_TYPES=["Consent to transport","Consent to share information","Best-interests decision",
+  "Mental capacity assessment","Advance decision recorded","Consent withdrawn"];
+const STATUSES=["Active","Inactive","Deceased","Archived","Merged"];
+
+const ROLES=[
+  {id:"super",   name:"Super Administrator",          p:["view","edit","clinical","safeguarding","consent","sar","merge","alerts","access.log"]},
+  {id:"director",name:"Company Director",             p:["view","clinical","safeguarding","sar","access.log"]},
+  {id:"ops",     name:"Operations Manager",           p:["view","edit","clinical","safeguarding","consent","sar","merge","alerts","access.log"]},
+  {id:"dispatch",name:"Control Room Dispatcher",      p:["view","edit","alerts","clinical.breakglass"]},
+  {id:"clinical",name:"Clinical Lead",                p:["view","clinical","safeguarding","consent","alerts","access.log"]},
+  {id:"para",    name:"Paramedic",                    p:["view","clinical","alerts","safeguarding.breakglass"]},
+  {id:"emt",     name:"Emergency Medical Technician", p:["view","clinical","alerts"]},
+  {id:"aca",     name:"Ambulance Care Assistant",     p:["view","alerts","clinical.breakglass"]},
+  {id:"driver",  name:"Driver",                       p:["view.transport"]},
+  {id:"event",   name:"Event Medical Staff",          p:[]},
+  {id:"hr",      name:"HR & Compliance Officer",      p:[]},
+  {id:"fleet",   name:"Fleet Manager",                p:[]},
+  {id:"finance", name:"Finance Officer",              p:["view","funding"]},
+  {id:"qa",      name:"Quality Assurance Officer",    p:["view","clinical","safeguarding","sar","access.log"]},
+  {id:"portal",  name:"Commissioner / Customer Portal User", p:["view.own"], commissioner:"Meadowvale Integrated Care Board"}
+];
+
+const MENU=[
+  {g:"Operations"},
+  {id:"dashboard",label:"Dashboard",stub:1},{id:"crm",label:"CRM",stub:1},
+  {id:"patients",label:"Patients",live:1},
+  {id:"newpatient",label:"Add patient",live:1,indent:1},
+  {id:"duplicates",label:"Possible duplicates",live:1,indent:1},
+  {id:"bookings",label:"Bookings",stub:1},{id:"cad",label:"CAD and Dispatch",stub:1},
+  {id:"map",label:"Live Map",stub:1},{id:"epcr",label:"ePCR",stub:1},{id:"events",label:"Events",stub:1},
+  {g:"Workforce"},
+  {id:"staff",label:"Staff",stub:1},{id:"rota",label:"Rota",stub:1},{id:"training",label:"Training",stub:1},
+  {g:"Assets"},
+  {id:"fleet",label:"Fleet",stub:1},{id:"equipment",label:"Equipment",stub:1},{id:"stock",label:"Stock and Medicines",stub:1},
+  {g:"Governance"},
+  {id:"incidents",label:"Incidents",stub:1},{id:"safeg",label:"Safeguarding",stub:1},
+  {id:"qa",label:"Quality Assurance",stub:1},{id:"policies",label:"Policies",stub:1},
+  {id:"accesslog",label:"Record access log",live:1},
+  {g:"Business"},
+  {id:"finance",label:"Finance",stub:1},{id:"reports",label:"Reports",stub:1},
+  {id:"actions",label:"Action Centre",stub:1},{id:"settings",label:"Settings",stub:1}
+];
+
+/* ---------- state ---------- */
+let S={patients:[],bookings:[],seq:0,view:"patients",roleId:"ops",selected:null,tab:"summary",
+  sort:{k:"surname",d:"asc"},
+  f:{q:"",alert:"",mobility:"",funding:"",status:"Active"},
+  opened:{}, bookingsLinked:false, patientLink:{}};
+let storageOK=true;
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const role=()=>ROLES.find(r=>r.id===S.roleId)||ROLES[0];
+const can=p=>role().p.includes(p);
+const anyAccess=()=>role().p.length>0;
+const driverOnly=()=>can("view.transport")&&!can("view");
+const portalOnly=()=>can("view.own");
+
+const todayISO=()=>new Date().toISOString().slice(0,10);
+function ukd(iso){if(!iso)return "—";const d=new Date(iso.length<=10?iso+"T00:00:00":iso);if(isNaN(d))return "—";
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();}
+function uks(iso){if(!iso)return "—";const d=new Date(iso);if(isNaN(d))return "—";
+  return ukd(iso)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+function age(dob){if(!dob)return "";const d=new Date(dob+"T00:00:00"),n=new Date();
+  let a=n.getFullYear()-d.getFullYear();const m=n.getMonth()-d.getMonth();
+  if(m<0||(m===0&&n.getDate()<d.getDate()))a--;return a;}
+const nhsFmt=n=>{const d=String(n||"").replace(/\D/g,"");return d.length===10?d.slice(0,3)+" "+d.slice(3,6)+" "+d.slice(6):n||"—";};
+function toast(m,k){const t=document.createElement("div");t.className="toast"+(k?" "+k:"");t.textContent=m;
+  $("#toasts").appendChild(t);setTimeout(()=>{t.style.transition="opacity .3s";t.style.opacity=0;setTimeout(()=>t.remove(),320);},3000);}
+
+/* ---------- persistence ---------- */
+async function save(){
+  try{if(window.storage&&storageOK)await window.storage.set(KEY,JSON.stringify({patients:S.patients,seq:S.seq}));}
+  catch(e){if(storageOK){storageOK=false;toast("Changes are held for this session only.","bad");}}
+}
+async function load(){
+  try{if(!window.storage){storageOK=false;return false;}
+    const r=await window.storage.get(KEY);
+    if(r&&r.value){const d=JSON.parse(r.value);
+      if(d&&Array.isArray(d.patients)&&d.patients.length){S.patients=d.patients;S.seq=d.seq||d.patients.length;return true;}}
+  }catch(e){}
+  return false;
+}
+async function loadBookings(){
+  try{if(!window.storage)return false;
+    const r=await window.storage.get(BOOK_KEY);
+    if(r&&r.value){const d=JSON.parse(r.value);
+      if(d&&Array.isArray(d.bookings)&&d.bookings.length){
+        S.bookings=d.bookings;
+        /* the Bookings module keys patients by its own ids — match them to ours on NHS number */
+        const byNHS={};
+        (d.patients||[]).forEach(bp=>{const k=String(bp.nhs||"").replace(/\D/g,"");if(k)byNHS[k]=bp.id;});
+        S.patientLink={};
+        S.patients.forEach(x=>{const k=String(x.nhs||"").replace(/\D/g,"");if(k&&byNHS[k])S.patientLink[x.id]=byNHS[k];});
+        return true;}}
+  }catch(e){}
+  return false;
+}
+
+/* ---------- audit and access logging ---------- */
+function log(p,action,detail){
+  p.audit.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||""});
+  p.updatedAt=new Date().toISOString();
+}
+function access(p,action,detail,sealBreak){
+  p.access.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||"",seal:!!sealBreak});
+  if(p.access.length>120) p.access=p.access.slice(-120);
+}
+
+/* ============================================================
+   ACCESS CONTROL — what this role may see on a patient record
+   ============================================================ */
+const openKey=(pid,sec)=>pid+":"+sec;
+function sectionState(p,sec){
+  /* returns: "open" | "sealed" | "breakglass" */
+  if(sec==="clinical"){
+    if(can("clinical")) return "open";
+    if(S.opened[openKey(p.id,sec)]) return "open";
+    if(can("clinical.breakglass")) return "breakglass";
+    return "sealed";
+  }
+  if(sec==="safeguarding"){
+    if(can("safeguarding")) return "open";
+    if(S.opened[openKey(p.id,sec)]) return "open";
+    if(can("safeguarding.breakglass")) return "breakglass";
+    return "sealed";
+  }
+  if(sec==="consent") return can("consent")||can("clinical")?"open":"sealed";
+  if(sec==="funding") return can("funding")||can("edit")||can("clinical")||can("sar")?"open":"sealed";
+  return "open";
+}
+function sealedPanel(sec,p){
+  const st=sectionState(p,sec);
+  const label=sec==="clinical"?"Clinical detail":sec==="safeguarding"?"Safeguarding record":"This section";
+  if(st==="breakglass")
+    return '<div class="sealed"><div class="lk" aria-hidden="true">🔐</div>'+
+      '<h3>'+esc(label)+' is restricted</h3>'+
+      '<p>Your role can open this section when there is a direct care reason. Opening it records your name, the time '+
+      'and the reason you give in the patient\'s access log, and the record owner can see it.</p>'+
+      '<button class="btn seal" id="breakglass" data-sec="'+sec+'" style="margin-top:12px">Open with a recorded reason</button></div>';
+  return '<div class="sealed"><div class="lk" aria-hidden="true">🔒</div>'+
+    '<h3>'+esc(label)+' is not available to your role</h3>'+
+    '<p>This is special-category data. The <strong>'+esc(role().name)+'</strong> role does not carry access to it, '+
+    'and it cannot be unlocked from here. Ask a clinical lead or the operations manager if you need it for direct care.</p></div>';
+}
+
+/* ---------- alerts ---------- */
+function alertTone(k){
+  if(["Allergy","Safeguarding","Behavioural","Infection"].includes(k)) return "red";
+  if(["Clinical","Mobility","Access"].includes(k)) return "amb";
+  return "blu";
+}
+/* alerts a role may see: safeguarding alerts are themselves restricted */
+function visibleAlerts(p){
+  return p.alerts.filter(a=>{
+    if(a.kind==="Safeguarding") return sectionState(p,"safeguarding")==="open";
+    /* allergy and infection are safety-critical and travel with the crew; clinical narrative does not */
+    if(a.kind==="Allergy"||a.kind==="Infection") return sectionState(p,"clinical")==="open"||can("alerts")||driverOnly();
+    if(a.kind==="Clinical"||a.kind==="Behavioural") return sectionState(p,"clinical")==="open"||can("alerts");
+    return true;
+  });
+}
+
+/* ---------- records ---------- */
+function nextRef(){S.seq+=1;return "PAT-"+String(S.seq).padStart(5,"0");}
+function blankPatient(){
+  return {id:uid(),ref:"",surname:"",forename:"",preferred:"",dob:"",nhs:"",status:"Active",
+    address:"",postcode:"",phone:"",mobile:"",email:"",
+    nok:{name:"",relationship:"",phone:""},emergency:{name:"",relationship:"",phone:""},
+    gp:{name:"",practice:"",phone:""},hospital:{name:"",number:"",ward:""},
+    conditions:"",allergies:"",medication:"",oxygen:"",clinicalSupport:"",
+    mobility:"",wheelchair:"",stretcher:"",bariatric:"",handling:"",ipc:"",
+    commsNeeds:"None recorded",commsMethod:"Telephone",capacity:"",behavioural:"",safeguarding:"",
+    funding:"",commissioner:"",accessNotes:"",
+    alerts:[],consents:[],documents:[],audit:[],access:[],
+    clinicalRecords:0,mergedInto:"",createdAt:"",updatedAt:""};
+}
+function commit(d){
+  const p=Object.assign(blankPatient(),d);
+  const now=new Date().toISOString();
+  p.id=uid();p.ref=nextRef();p.createdAt=now;p.updatedAt=now;
+  p.audit=[{id:uid(),at:now,by:role().name,action:"Patient record created",detail:p.surname+", "+p.forename}];
+  return p;
+}
+function possibleDuplicates(p){
+  return S.patients.filter(x=>{
+    if(x.id===p.id||x.status==="Merged") return false;
+    const sameNHS=p.nhs&&x.nhs&&x.nhs.replace(/\D/g,"")===p.nhs.replace(/\D/g,"");
+    const sameNameDOB=p.dob&&x.dob===p.dob&&x.surname.toLowerCase()===p.surname.toLowerCase();
+    return sameNHS||sameNameDOB;
+  });
+}
+function allDuplicatePairs(){
+  const out=[],seen={};
+  S.patients.forEach(p=>{
+    if(p.status==="Merged") return;
+    possibleDuplicates(p).forEach(q=>{
+      const k=[p.id,q.id].sort().join("|");
+      if(seen[k]) return; seen[k]=1;
+      out.push([p,q]);
+    });
+  });
+  return out;
+}
+
+/* ============================================================
+   DEMO DATA
+   ============================================================ */
+function seed(){
+  S.patients=[];S.seq=0;
+  const rows=[
+    {surname:"Fairweather",forename:"Elsie",preferred:"Elsie",dob:"1938-04-12",nhs:"4315579012",
+     address:"14 Larkspur Close, Testford",postcode:"TF2 6RJ",phone:"01632 960118",mobile:"07700 900431",
+     nok:["A daughter","Daughter","07700 900432"],emerg:["A daughter","Daughter","07700 900432"],
+     gp:["Dr N. Ravel","Larkspur Road Surgery","01632 960900"],hosp:["St Aldrich General Hospital","RXA4471","Renal Unit"],
+     conditions:"End-stage renal failure, hypertension, osteoarthritis.",
+     allergies:"Penicillin — rash and facial swelling. Recorded 2019.",
+     medication:"Amlodipine, alfacalcidol, ferrous sulfate. Dialysis three times weekly.",
+     oxygen:"None",clinicalSupport:"None routinely. Collect promptly after dialysis — often light-headed.",
+     mobility:"Own wheelchair",wheelchair:"Self-propelling, folds. Owned by the patient — must travel with her.",
+     stretcher:"Not required",bariatric:"Not applicable",handling:"One-person assist",ipc:"None",
+     commsNeeds:"None recorded",commsMethod:"Telephone",
+     capacity:"Has capacity for transport decisions. No concerns recorded.",behavioural:"",safeguarding:"",
+     funding:"NHS commissioned",commissioner:"Meadowvale Integrated Care Board",
+     accessNotes:"Ground-floor flat, ramp at the side entrance. Key safe by the meter box — code held by the control room.",
+     alerts:[["Allergy","Penicillin — rash and facial swelling"],["Mobility","Own wheelchair, cannot self-transfer"]],
+     consents:[["Consent to transport","2026-01-14","Verbal consent, recorded by coordinator"],
+               ["Consent to share information","2026-01-14","Shares with the renal unit and her daughter"]],
+     records:6},
+
+    {surname:"Callow",forename:"Harold",preferred:"Harry",dob:"1946-11-02",nhs:"5221184471",
+     address:"3 Beckett Row, Testford",postcode:"TF1 4NN",phone:"01632 960212",mobile:"07700 900812",
+     nok:["A wife","Wife","07700 900813"],emerg:["A wife","Wife","07700 900813"],
+     gp:["Dr P. Aylward","Beckett Row Medical Centre","01632 960910"],hosp:["St Aldrich General Hospital","RXA5510","Renal Unit"],
+     conditions:"Chronic kidney disease stage 5, type 2 diabetes, peripheral neuropathy.",
+     allergies:"None known.",medication:"Metformin, insulin, atorvastatin.",
+     oxygen:"None",clinicalSupport:"Prone to hypoglycaemia after dialysis — carries glucose tablets.",
+     mobility:"Walking, needs assistance",wheelchair:"Not required",stretcher:"Not required",bariatric:"Not applicable",
+     handling:"One-person assist",ipc:"None",commsNeeds:"None recorded",commsMethod:"Mobile",
+     capacity:"Has capacity.",behavioural:"",safeguarding:"",
+     funding:"NHS commissioned",commissioner:"Meadowvale Integrated Care Board",
+     accessNotes:"Terraced house, three steps to the front door with a handrail.",
+     alerts:[["Clinical","Hypoglycaemia risk after dialysis"]],
+     consents:[["Consent to transport","2025-11-03","Written consent on file"]],records:9},
+
+    {surname:"Duku",forename:"Amara",preferred:"Amara",dob:"1955-02-27",nhs:"6104452280",
+     address:"Flat 9, Hollow Lane Care Home, Testford",postcode:"TF3 8QP",phone:"01632 960771",mobile:"",
+     nok:["A son","Son","07700 900555"],emerg:["Hollow Lane Care Home","Care home","01632 960771"],
+     gp:["Dr S. Mbeki","Hollow Lane Practice","01632 960920"],hosp:["Greenfell Hospice","GH2210","Inpatient unit"],
+     conditions:"Metastatic breast cancer. Palliative care under the hospice team.",
+     allergies:"Morphine — nausea and confusion. Alternative analgesia in use.",
+     medication:"Oxycodone, dexamethasone, metoclopramide, lorazepam as required.",
+     oxygen:"2 L/min via nasal cannula, continuous. Cylinder travels with the patient.",
+     clinicalSupport:"Syringe driver in situ. Crew must not adjust. Hospice nurse contactable en route.",
+     mobility:"Stretcher",wheelchair:"Not required",stretcher:"Full stretcher, head slightly elevated.",
+     bariatric:"Not applicable",handling:"Hoist — full sling",ipc:"None",
+     commsNeeds:"Speaks quietly — allow time",commsMethod:"Through care home",
+     capacity:"Fluctuating capacity. Best-interests decision recorded for transport 03/2026.",
+     behavioural:"",safeguarding:"",
+     funding:"Continuing healthcare",commissioner:"Meadowvale Integrated Care Board",
+     accessNotes:"First floor, lift available. Care home requires 15 minutes' notice for the lift key.",
+     alerts:[["Allergy","Morphine — nausea and confusion"],["Clinical","Palliative, oxygen and syringe driver in situ"],
+             ["Mobility","Full hoist transfer, stretcher only"]],
+     consents:[["Best-interests decision","2026-03-02","Agreed with the hospice team and her son"],
+               ["Consent to share information","2025-09-18","Shares with hospice, GP and her son"]],records:4},
+
+    {surname:"Nkemelu",forename:"Joseph",preferred:"Joe",dob:"1962-07-19",nhs:"7002318846",
+     address:"22 Rowan Avenue, Testford",postcode:"TF5 2AA",phone:"01632 960344",mobile:"07700 900204",
+     nok:["A partner","Partner","07700 900205"],emerg:["A partner","Partner","07700 900205"],
+     gp:["Dr H. Lindqvist","Rowan Avenue Surgery","01632 960930"],hosp:["Lindhurst Private Hospital","LP8842","Bariatric surgery"],
+     conditions:"Obesity, obstructive sleep apnoea, type 2 diabetes, lymphoedema of both legs.",
+     allergies:"None known.",medication:"Metformin, CPAP at night.",
+     oxygen:"None",clinicalSupport:"None. Repositioning every 30 minutes on longer journeys.",
+     mobility:"Bariatric stretcher",wheelchair:"Bariatric wheelchair available at the hospital, not at home.",
+     stretcher:"Bariatric stretcher, rated to 320 kg.",
+     bariatric:"Recorded weight 214 kg. Four-person transfer. Bariatric ambulance only.",
+     handling:"Four-person bariatric transfer",ipc:"None",
+     commsNeeds:"None recorded",commsMethod:"Mobile",capacity:"Has capacity.",behavioural:"",safeguarding:"",
+     funding:"Insurance funded",commissioner:"Sentinel Health Insurance plc",
+     accessNotes:"Ground floor. Doorway 760 mm — bariatric chair will not pass. Side patio doors used instead, agreed with the family.",
+     alerts:[["Mobility","Bariatric — 214 kg, four-person transfer"],["Access","Narrow front doorway, use the patio doors"]],
+     consents:[["Consent to transport","2026-02-20","Written"]],records:3},
+
+    {surname:"Whitcombe",forename:"Doris",preferred:"Dot",dob:"1933-09-08",nhs:"3889021147",
+     address:"Brackenfield Lodge, Testford",postcode:"TF4 7BB",phone:"01632 960512",mobile:"",
+     nok:["A nephew","Nephew","07700 900700"],emerg:["Brackenfield Lodge","Care home","01632 960512"],
+     gp:["Dr T. Fenwick","Brackenfield Surgery","01632 960940"],hosp:["St Aldrich General Hospital","RXA1188","Memory clinic"],
+     conditions:"Advanced dementia, atrial fibrillation, previous fractured neck of femur.",
+     allergies:"Aspirin — gastric bleeding.",medication:"Rivaroxaban, donepezil, paracetamol as required.",
+     oxygen:"None",clinicalSupport:"None.",
+     mobility:"Carry chair",wheelchair:"Care home wheelchair, does not travel.",stretcher:"Not required",
+     bariatric:"Not applicable",handling:"Two-person assist",ipc:"None",
+     commsNeeds:"Speaks quietly — allow time",commsMethod:"Through care home",
+     capacity:"Lacks capacity for transport decisions. Best-interests decision on file, reviewed 01/2026.",
+     behavioural:"Becomes distressed in confined spaces and when rushed. Allow extra time, keep the same crew where possible, speak from the front.",
+     safeguarding:"",
+     funding:"Contract — care home",commissioner:"Brackenfield Nursing Group",
+     accessNotes:"Ring the bell at the main entrance. Staff must accompany to the vehicle.",
+     alerts:[["Allergy","Aspirin — gastric bleeding"],["Behavioural","Distressed in confined spaces — allow extra time"],
+             ["Clinical","Living with dementia"]],
+     consents:[["Best-interests decision","2026-01-11","Care home manager and nephew consulted"],
+               ["Mental capacity assessment","2026-01-11","Completed by the memory clinic"]],records:7},
+
+    {surname:"Ferris",forename:"Malcolm",preferred:"Mal",dob:"1971-01-30",nhs:"2456673390",
+     address:"8 Quarry Bank, Testford",postcode:"TF6 1HD",phone:"",mobile:"07700 900118",
+     nok:["A brother","Brother","07700 900119"],emerg:["A brother","Brother","07700 900119"],
+     gp:["Dr K. Ozturk","Quarry Bank Health Centre","01632 960950"],hosp:["St Aldrich General Hospital","RXA9902","Orthopaedics"],
+     conditions:"Post-operative hip replacement. Previously colonised with MRSA.",
+     allergies:"None known.",medication:"Codeine, apixaban.",
+     oxygen:"None",clinicalSupport:"None.",
+     mobility:"Walking, unaided",wheelchair:"Not required",stretcher:"Not required",bariatric:"Not applicable",
+     handling:"Independent",ipc:"MRSA colonised — contact precautions. Vehicle deep clean after the journey.",
+     commsNeeds:"None recorded",commsMethod:"Text message",capacity:"Has capacity.",behavioural:"",safeguarding:"",
+     funding:"NHS commissioned",commissioner:"Meadowvale Integrated Care Board",
+     accessNotes:"Flat above a shop, external staircase. No lift.",
+     alerts:[["Infection","MRSA colonised — contact precautions and deep clean"]],
+     consents:[["Consent to transport","2026-04-02","Verbal"]],records:2},
+
+    {surname:"Sandhu",forename:"Priya",preferred:"Priya",dob:"1988-06-14",nhs:"9023345518",
+     address:"51 Millgate, Testford",postcode:"TF2 3LP",phone:"",mobile:"07700 900977",
+     nok:["A husband","Husband","07700 900978"],emerg:["A husband","Husband","07700 900978"],
+     gp:["Dr A. Weir","Millgate Surgery","01632 960960"],hosp:["St Aldrich General Hospital","RXA3320","Antenatal clinic"],
+     conditions:"Spinal cord injury at T6, neurogenic bladder. Currently pregnant.",
+     allergies:"Latex — contact dermatitis. Non-latex gloves only.",medication:"Baclofen, folic acid.",
+     oxygen:"None",clinicalSupport:"Catheter in situ — bag must be kept below bladder level.",
+     mobility:"Own wheelchair",wheelchair:"Rigid-frame active wheelchair. Does not fold — needs a tail-lift vehicle.",
+     stretcher:"Not required",bariatric:"Not applicable",handling:"Independent transfer with a slide board",ipc:"None",
+     commsNeeds:"Interpreter required",commsMethod:"Mobile",capacity:"Has capacity.",behavioural:"",safeguarding:"",
+     funding:"NHS commissioned",commissioner:"Meadowvale Integrated Care Board",
+     accessNotes:"Level access. Punjabi interpreter booked through the clinic — confirm before travel.",
+     alerts:[["Allergy","Latex — non-latex gloves only"],["Communication","Punjabi interpreter required"],
+             ["Clinical","Catheter in situ"]],
+     consents:[["Consent to transport","2026-05-06","Written, interpreter present"],
+               ["Consent to share information","2026-05-06","Shares with maternity and spinal teams"]],records:5},
+
+    {surname:"Okonjo",forename:"Grace",preferred:"Grace",dob:"1949-12-01",nhs:"1557802264",
+     address:"17 Chandler Street, Testford",postcode:"TF1 9WE",phone:"01632 960455",mobile:"07700 900303",
+     nok:["A neighbour","Neighbour and named contact","07700 900304"],emerg:["A neighbour","Neighbour","07700 900304"],
+     gp:["Dr M. Sallow","Chandler Street Surgery","01632 960970"],hosp:["St Aldrich General Hospital","RXA7741","Cardiology"],
+     conditions:"Heart failure, previous stroke with mild left-sided weakness.",
+     allergies:"None known.",medication:"Furosemide, bisoprolol, clopidogrel.",
+     oxygen:"None",clinicalSupport:"None.",
+     mobility:"Walking frame",wheelchair:"Not required",stretcher:"Not required",bariatric:"Not applicable",
+     handling:"One-person assist",ipc:"None",commsNeeds:"None recorded",commsMethod:"Telephone",
+     capacity:"Has capacity.",behavioural:"",
+     safeguarding:"Adult safeguarding referral raised 02/2026 by the discharge team — concerns about self-neglect and a "+
+       "relative managing her finances. Social worker allocated. Crews must not leave her unattended at home; hand over to "+
+       "a named person and record who. Any new concern to be reported the same day through the Safeguarding module.",
+     funding:"Local authority funded",commissioner:"Northshire County Council",
+     accessNotes:"Front door sticks — use the side door. Neighbour holds a spare key.",
+     alerts:[["Safeguarding","Do not leave unattended at home — hand over to a named person"],
+             ["Mobility","Walking frame, mild left-sided weakness"]],
+     consents:[["Consent to transport","2026-02-19","Verbal"],
+               ["Consent to share information","2026-02-19","Shares with the local authority safeguarding team"]],records:8},
+
+    {surname:"Traynor",forename:"William",preferred:"Bill",dob:"1940-03-22",nhs:"4470196631",
+     address:"2 Foundry Mews, Testford",postcode:"TF7 5GG",phone:"01632 960601",mobile:"07700 900556",
+     nok:["A daughter","Daughter","07700 900557"],emerg:["A daughter","Daughter","07700 900557"],
+     gp:["Dr J. Prentice","Foundry Road Surgery","01632 960980"],hosp:["Lindhurst Private Hospital","LP4419","Respiratory"],
+     conditions:"COPD, cor pulmonale, previous pulmonary embolism.",
+     allergies:"Latex — rash.",medication:"Salbutamol, tiotropium, apixaban, prednisolone.",
+     oxygen:"2 L/min via nasal cannula, continuous. Own concentrator at home; cylinder for transport.",
+     clinicalSupport:"Breathless on minimal exertion. Sit upright, do not lay flat.",
+     mobility:"Stretcher",wheelchair:"Not required",stretcher:"Stretcher, backrest raised to 45 degrees.",
+     bariatric:"Not applicable",handling:"Two-person assist",ipc:"None",
+     commsNeeds:"Speaks quietly — allow time",commsMethod:"Through next of kin",capacity:"Has capacity.",behavioural:"",safeguarding:"",
+     funding:"Insurance funded",commissioner:"Sentinel Health Insurance plc",
+     accessNotes:"Bungalow, level access at the rear. Narrow hallway — carry chair to the door.",
+     alerts:[["Allergy","Latex — rash"],["Clinical","Oxygen dependent, must sit upright"],["Mobility","Stretcher, backrest at 45°"]],
+     consents:[["Consent to transport","2026-06-01","Written"]],records:11},
+
+    {surname:"Ashworth",forename:"Nina",preferred:"Nina",dob:"1994-08-05",nhs:"8332264109",
+     address:"Room 4, Ridgeway House, Testford",postcode:"TF3 2XX",phone:"01632 960820",mobile:"07700 900640",
+     nok:["A mother","Mother","07700 900641"],emerg:["Ridgeway House","Supported housing","01632 960820"],
+     gp:["Dr R. Ellery","Ridgeway Practice","01632 960990"],hosp:["Testford Community Mental Health Team","CMH2214","Community"],
+     conditions:"Recorded under the community mental health team. Asthma.",
+     allergies:"None known.",medication:"As prescribed by the community team. Salbutamol inhaler.",
+     oxygen:"None",clinicalSupport:"None.",
+     mobility:"Walking, needs assistance",wheelchair:"Not required",stretcher:"Not required",bariatric:"Not applicable",
+     handling:"One-person assist",ipc:"None",commsNeeds:"None recorded",commsMethod:"Text message",
+     capacity:"Capacity assessment 04/2026 — has capacity to accept or decline transport. May decline on the day; "+
+       "this must be respected and reported back to the referrer, not overridden.",
+     behavioural:"May decline transport at the door. Do not persuade. Step back, telephone the control room, "+
+       "and let the support worker speak with her.",
+     safeguarding:"",
+     funding:"Local authority funded",commissioner:"Northshire County Council",
+     accessNotes:"Supported housing — sign in at reception. Support worker escorts to the vehicle.",
+     alerts:[["Behavioural","May decline transport — do not persuade, contact control"],["Clinical","Asthma — inhaler travels with her"]],
+     consents:[["Mental capacity assessment","2026-04-15","Community mental health team"],
+               ["Consent to transport","2026-04-15","Verbal, may be withdrawn on the day"]],records:3},
+
+    {surname:"Halloran",forename:"Patrick",preferred:"Paddy",dob:"1951-05-17",nhs:"6612290043",
+     address:"9 Cooper's Yard, Testford",postcode:"TF5 8DD",phone:"01632 960707",mobile:"",
+     nok:["A son","Son","07700 900880"],emerg:["A son","Son","07700 900880"],
+     gp:["Dr L. Bannon","Cooper's Yard Surgery","01632 961000"],hosp:["St Aldrich General Hospital","RXA6650","Oncology"],
+     conditions:"Prostate cancer, receiving radiotherapy. Hearing loss.",
+     allergies:"None known.",medication:"Bicalutamide, tamsulosin.",
+     oxygen:"None",clinicalSupport:"Fatigued after treatment — allow time at the vehicle.",
+     mobility:"Walking, needs assistance",wheelchair:"Not required",stretcher:"Not required",bariatric:"Not applicable",
+     handling:"One-person assist",ipc:"None",commsNeeds:"Hearing loop",commsMethod:"Through next of kin",
+     capacity:"Has capacity.",behavioural:"",safeguarding:"",
+     funding:"NHS commissioned",commissioner:"Meadowvale Integrated Care Board",
+     accessNotes:"Doorbell not heard — telephone the son on arrival and he will meet the crew.",
+     alerts:[["Communication","Significant hearing loss — face him and speak clearly"],["Clinical","Fatigue after radiotherapy"]],
+     consents:[["Consent to transport","2026-03-30","Verbal"]],records:6},
+
+    {surname:"Beauchamp",forename:"Margaret",preferred:"Peggy",dob:"1944-10-25",nhs:"7748103352",
+     address:"31 Selby Gardens, Testford",postcode:"TF2 9LL",phone:"01632 960880",mobile:"",
+     nok:["A daughter","Daughter","07700 900910"],emerg:["A daughter","Daughter","07700 900910"],
+     gp:["Dr F. Odell","Selby Gardens Surgery","01632 961010"],hosp:["St Aldrich General Hospital","RXA2287","Ophthalmology"],
+     conditions:"Macular degeneration, osteoporosis.",allergies:"None known.",medication:"Alendronic acid, calcium and vitamin D.",
+     oxygen:"None",clinicalSupport:"None.",
+     mobility:"Walking, needs assistance",wheelchair:"Not required",stretcher:"Not required",bariatric:"Not applicable",
+     handling:"One-person assist",ipc:"None",commsNeeds:"Large print",commsMethod:"Letter",
+     capacity:"Has capacity.",behavioural:"",safeguarding:"",
+     funding:"Self-funding",commissioner:"",
+     accessNotes:"Poor sight — guide to the vehicle, describe the step.",
+     alerts:[["Communication","Severe sight loss — guide and describe"],["Mobility","Unsteady, high falls risk"]],
+     consents:[["Consent to transport","2026-06-12","Written, large print copy given"]],records:1},
+
+    /* deliberate near-duplicate of the record above, to demonstrate detection and merge */
+    {surname:"Beauchamp",forename:"Margaret",preferred:"",dob:"1944-10-25",nhs:"",
+     address:"31 Selby Gdns, Testford",postcode:"TF2 9LL",phone:"01632 960880",mobile:"",
+     nok:["",""," "],emerg:["","",""],
+     gp:["","",""],hosp:["St Aldrich General Hospital","","Ophthalmology"],
+     conditions:"",allergies:"",medication:"",oxygen:"",clinicalSupport:"",
+     mobility:"Walking, needs assistance",wheelchair:"",stretcher:"",bariatric:"",handling:"",ipc:"",
+     commsNeeds:"None recorded",commsMethod:"Telephone",capacity:"",behavioural:"",safeguarding:"",
+     funding:"Self-funding",commissioner:"",
+     accessNotes:"Created from a telephone booking. Details not verified.",
+     alerts:[],consents:[],records:0}
+  ];
+
+  const back=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString();};
+
+  rows.forEach((r,i)=>{
+    const p=commit({
+      surname:r.surname,forename:r.forename,preferred:r.preferred,dob:r.dob,nhs:r.nhs,
+      address:r.address,postcode:r.postcode,phone:r.phone,mobile:r.mobile,
+      nok:{name:r.nok[0],relationship:r.nok[1],phone:r.nok[2]},
+      emergency:{name:r.emerg[0],relationship:r.emerg[1],phone:r.emerg[2]},
+      gp:{name:r.gp[0],practice:r.gp[1],phone:r.gp[2]},
+      hospital:{name:r.hosp[0],number:r.hosp[1],ward:r.hosp[2]},
+      conditions:r.conditions,allergies:r.allergies,medication:r.medication,oxygen:r.oxygen,
+      clinicalSupport:r.clinicalSupport,mobility:r.mobility,wheelchair:r.wheelchair,stretcher:r.stretcher,
+      bariatric:r.bariatric,handling:r.handling,ipc:r.ipc,commsNeeds:r.commsNeeds,commsMethod:r.commsMethod,
+      capacity:r.capacity,behavioural:r.behavioural,safeguarding:r.safeguarding,
+      funding:r.funding,commissioner:r.commissioner,accessNotes:r.accessNotes,clinicalRecords:r.records
+    });
+    p.createdAt=back(500-i*22);p.audit[0].at=p.createdAt;p.audit[0].by="A. Petrides";
+    p.alerts=r.alerts.map((a,j)=>({id:uid(),kind:a[0],text:a[1],by:j%2?"D. Iqbal":"Clinical Lead",
+      at:back(300-i*11-j*4),review:""}));
+    p.consents=r.consents.map(c=>({id:uid(),type:c[0],date:c[1],notes:c[2],by:"Operations Manager"}));
+    if(r.records) p.documents.push({id:uid(),name:"referral-letter.pdf",category:"Referral",size:"318 KB",
+      by:"J. Okafor",at:back(120-i*5)});
+    if(r.safeguarding) p.documents.push({id:uid(),name:"safeguarding-referral.pdf",category:"Safeguarding",
+      size:"96 KB",by:"Clinical Lead",at:back(150)});
+    p.access=[
+      {id:uid(),at:back(3),by:"Control Room Dispatcher",action:"Record viewed",detail:"Booking JOB-00003",seal:false},
+      {id:uid(),at:back(9),by:"Operations Manager",action:"Record viewed",detail:"Routine check",seal:false}
+    ];
+    if(r.safeguarding) p.access.push({id:uid(),at:back(6),by:"Paramedic",action:"Safeguarding section opened",
+      detail:"Direct care — attending a journey for this patient",seal:true});
+    p.audit.push({id:uid(),at:back(60-i),by:"Operations Manager",action:"Transport needs reviewed",detail:"Annual review"});
+    p.updatedAt=p.audit[p.audit.length-1].at;
+    S.patients.push(p);
+  });
+}
+
+/* ---------- filtering ---------- */
+function visible(){
+  let list=S.patients.filter(p=>p.status!=="Merged");
+  if(portalOnly()) list=list.filter(p=>p.commissioner===role().commissioner);
+  const f=S.f,q=f.q.trim().toLowerCase(),qd=q.replace(/\D/g,"");
+  list=list.filter(p=>{
+    if(f.status&&p.status!==f.status) return false;
+    if(f.mobility&&p.mobility!==f.mobility) return false;
+    if(f.funding&&p.funding!==f.funding) return false;
+    if(f.alert&&!p.alerts.some(a=>a.kind===f.alert)) return false;
+    if(q){
+      const hay=[p.ref,p.surname,p.forename,p.preferred,p.address,p.postcode,p.commissioner].join(" ").toLowerCase();
+      const nums=[p.nhs.replace(/\D/g,""),p.dob.replace(/\D/g,"")].join(" ");
+      if(!hay.includes(q)&&!(qd.length>=4&&nums.includes(qd))) return false;
+    }
+    return true;
+  });
+  const k=S.sort.k,d=S.sort.d==="asc"?1:-1;
+  list.sort((a,b)=>{
+    let x,y;
+    if(k==="dob"){x=a.dob;y=b.dob;}
+    else if(k==="alerts"){x=a.alerts.length;y=b.alerts.length;}
+    else if(k==="updated"){x=a.updatedAt;y=b.updatedAt;}
+    else{x=String(a[k]||"").toLowerCase();y=String(b[k]||"").toLowerCase();}
+    return x<y?-d:x>y?d:0;
+  });
+  return list;
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderMenu(){
+  $("#menu").innerHTML=MENU.map(m=>{
+    if(m.g) return '<div class="grp">'+esc(m.g)+'</div>';
+    const cur=S.view===m.id||(m.id==="patients"&&S.view==="patient");
+    const dup=allDuplicatePairs().length;
+    const badge=m.id==="patients"?'<span class="pill">'+S.patients.filter(p=>p.status==="Active").length+'</span>'
+      :m.id==="duplicates"&&dup?'<span class="pill">'+dup+'</span>'
+      :m.live?"":'<span class="planned">planned</span>';
+    return '<button class="mi'+(m.live?"":" stub")+'" data-go="'+m.id+'"'+(cur?' aria-current="page"':'')+
+      (m.indent?' style="padding-left:22px"':'')+'>'+esc(m.label)+badge+'</button>';
+  }).join("");
+}
+function render(){
+  renderMenu();
+  const pg=$("#page");
+  if(!anyAccess()){pg.innerHTML=viewDenied();return;}
+  if(S.view==="patient"&&S.selected) pg.innerHTML=viewPatient();
+  else if(S.view==="patients") pg.innerHTML=viewList();
+  else if(S.view==="newpatient") pg.innerHTML=viewNew();
+  else if(S.view==="duplicates") pg.innerHTML=viewDuplicates();
+  else if(S.view==="accesslog") pg.innerHTML=viewAccessLog();
+  else pg.innerHTML=viewStub();
+}
+function viewDenied(){
+  return '<div class="deny"><div style="font-size:30px">🔒</div><h1 style="margin:8px 0">No access to patient records</h1>'+
+    '<p class="muted">The <strong>'+esc(role().name)+'</strong> role does not carry access to the patient index. '+
+    'Patient records hold special-category data and are limited to roles with a direct care or administrative reason to see them.</p>'+
+    '<p class="hint">Change the role in the top bar to see how access differs.</p></div>';
+}
+function viewStub(){
+  const m=MENU.find(x=>x.id===S.view)||{label:"Module"};
+  return '<div class="card"><div class="b empty"><b>'+esc(m.label)+' is not in this build</b>'+
+    'This delivery covers the Patients module. Bookings and clinical records are held in their own modules.</div></div>';
+}
+const demoNote='<div class="demo">Demonstration build — fictional patients. Never enter real patient data in a demonstration environment.</div>';
+
+/* ---------- list ---------- */
+function viewList(){
+  const rows=visible(),f=S.f;
+  const th=(k,l,cls)=>'<th'+(cls?' class="'+cls+'"':'')+'><button data-sort="'+k+'">'+l+(S.sort.k===k?(S.sort.d==="asc"?" ▲":" ▼"):"")+'</button></th>';
+  const act=S.patients.filter(p=>p.status==="Active");
+  const stats=[
+    {v:act.length,k:"Active patients",x:"On the index",f:{status:"Active"}},
+    {v:act.filter(p=>p.alerts.some(a=>a.kind==="Safeguarding")).length,k:"Safeguarding alerts",x:"Restricted",cls:"seal",f:{alert:"Safeguarding"}},
+    {v:act.filter(p=>p.alerts.some(a=>a.kind==="Allergy")).length,k:"Allergy alerts",x:"Check before conveying",cls:"stop",f:{alert:"Allergy"}},
+    {v:act.filter(p=>["Stretcher","Bariatric stretcher"].includes(p.mobility)).length,k:"Stretcher or bariatric",x:"Vehicle-critical",cls:"warn",f:{status:"Active"}},
+    {v:act.filter(p=>p.ipc&&p.ipc!=="None").length,k:"Infection precautions",x:"Deep clean after",cls:"warn",f:{alert:"Infection"}},
+    {v:allDuplicatePairs().length,k:"Possible duplicates",x:"Needs review",cls:"stop",go:"duplicates"}
+  ];
+
+  return demoNote+
+  '<div class="ph"><h1>'+(driverOnly()?"Patient transport details":"Patients")+'</h1>'+
+    '<span class="muted">'+rows.length+' shown</span><div class="spacer"></div>'+
+    (can("view")?'<button class="btn" id="export">Export CSV</button>':'')+
+    (can("edit")?'<button class="btn p" data-go="newpatient">Add patient</button>':'')+
+  '</div>'+
+  (driverOnly()?'<div class="card" style="margin-bottom:12px"><div class="b"><p class="hint" style="margin:0">'+
+    'Your role sees the transport details needed to carry a patient safely — mobility, handling, access and communication. '+
+    'Clinical history, medication, capacity and safeguarding are not shown.</p></div></div>'
+   :'<div class="grid g3" style="margin-bottom:12px">'+stats.map((s,i)=>
+      '<button class="stat '+(s.cls||"")+'" data-stat="'+i+'"><div class="v">'+s.v+'</div><div class="k">'+esc(s.k)+'</div>'+
+      '<div class="x">'+esc(s.x)+'</div></button>').join("")+'</div>')+
+
+  '<div class="card" style="margin-bottom:12px"><div class="b"><div class="row" style="align-items:flex-end">'+
+    '<label class="f" style="flex:2 1 240px;margin:0"><span>Search</span><input type="search" id="f-q" value="'+esc(f.q)+'" placeholder="Surname, NHS number, date of birth or address"></label>'+
+    '<label class="f" style="margin:0"><span>Alert type</span><select id="f-alert"><option value="">Any alert</option>'+
+      ALERT_KINDS.map(a=>'<option'+(f.alert===a?' selected':'')+'>'+esc(a)+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Mobility</span><select id="f-mobility"><option value="">Any mobility</option>'+
+      MOBILITY.map(m=>'<option'+(f.mobility===m?' selected':'')+'>'+esc(m)+'</option>').join("")+'</select></label>'+
+    (driverOnly()||portalOnly()?'':'<label class="f" style="margin:0"><span>Funding</span><select id="f-funding"><option value="">Any funding</option>'+
+      FUNDING.map(x=>'<option'+(f.funding===x?' selected':'')+'>'+esc(x)+'</option>').join("")+'</select></label>')+
+    '<label class="f" style="margin:0"><span>Status</span><select id="f-status"><option value="">All</option>'+
+      STATUSES.filter(s=>s!=="Merged").map(s=>'<option'+(f.status===s?' selected':'')+'>'+esc(s)+'</option>').join("")+'</select></label>'+
+    '<button class="btn g" id="f-clear">Clear</button>'+
+  '</div></div></div>'+
+
+  (rows.length?'<div class="tw"><table><thead><tr>'+
+    th("ref","Ref")+th("surname","Patient")+th("dob","Date of birth")+'<th>NHS number</th>'+
+    '<th>Address</th>'+th("mobility","Mobility")+th("alerts","Alerts")+
+    (driverOnly()||portalOnly()?'':'<th>Funding</th>')+
+  '</tr></thead><tbody>'+
+  rows.map(p=>{
+    const al=visibleAlerts(p);
+    const hidden=p.alerts.length-al.length;
+    return '<tr tabindex="0" data-open="'+p.id+'">'+
+      '<td class="mono nowrap" style="color:var(--accent-2);font-weight:600">'+esc(p.ref)+'</td>'+
+      '<td><strong style="font-weight:640">'+esc(p.surname.toUpperCase()+", "+p.forename)+'</strong>'+
+        (p.preferred&&p.preferred!==p.forename?'<div class="muted">Known as '+esc(p.preferred)+'</div>':'')+
+        (p.status!=="Active"?' <span class="bdg b-grey">'+esc(p.status)+'</span>':'')+'</td>'+
+      '<td class="num nowrap">'+ukd(p.dob)+'<div class="muted">'+(p.dob?age(p.dob)+" years":"")+'</div></td>'+
+      '<td class="mono nowrap">'+(p.nhs?esc(nhsFmt(p.nhs)):'<span class="bdg b-warn">Not recorded</span>')+'</td>'+
+      '<td class="muted">'+esc(p.address)+'<div class="mono">'+esc(p.postcode)+'</div></td>'+
+      '<td class="nowrap">'+esc(p.mobility||"—")+'</td>'+
+      '<td>'+(al.length?'<div style="display:flex;gap:4px;flex-wrap:wrap">'+
+          al.slice(0,3).map(a=>'<span class="bdg b-'+(alertTone(a.kind)==="red"?"stop":alertTone(a.kind)==="amb"?"warn":"info")+'" title="'+esc(a.text)+'">'+esc(a.kind)+'</span>').join("")+
+          (hidden?'<span class="bdg b-seal">'+hidden+' restricted</span>':'')+'</div>'
+        :(hidden?'<span class="bdg b-seal">'+hidden+' restricted</span>':'<span class="muted">None</span>'))+'</td>'+
+      (driverOnly()||portalOnly()?'':'<td class="nowrap muted">'+esc(p.funding||"—")+'</td>')+
+    '</tr>';
+  }).join("")+'</tbody></table></div>'
+  :'<div class="card"><div class="b empty"><b>No patients match this search</b>Try a surname, an NHS number, or a date of birth as ddmmyyyy.</div></div>');
+}
+
+/* ---------- patient record ---------- */
+function viewPatient(){
+  const p=S.patients.find(x=>x.id===S.selected);
+  if(!p) return viewList();
+  const al=visibleAlerts(p);
+  const hiddenCount=p.alerts.length-al.length;
+
+  const tabs=[["summary","Summary"],
+    ["transport","Transport needs"],
+    ["clinical","Clinical"+(sectionState(p,"clinical")!=="open"?' <span class="lock">🔒</span>':"")],
+    ["capacity","Capacity & consent"+(sectionState(p,"consent")!=="open"?' <span class="lock">🔒</span>':"")],
+    ["safeguarding","Safeguarding"+(sectionState(p,"safeguarding")!=="open"?' <span class="lock">🔒</span>':"")],
+    ["contacts","Contacts"],
+    ["journeys","Journeys"],
+    ["documents","Documents ("+p.documents.length+")"],
+    ...(can("access.log")?[["access","Access log ("+p.access.length+")"]]:[]),
+    ...(can("access.log")?[["audit","Change history"]]:[])];
+  const tabList=driverOnly()?tabs.filter(t=>["transport","contacts"].includes(t[0])):tabs;
+
+  return '<div class="ph">'+
+    '<button class="btn g" data-go="patients">← All patients</button>'+
+    '<div class="spacer"></div>'+
+    (can("sar")?'<button class="btn" id="sar">Export record (SAR)</button>':'')+
+    '<button class="btn" id="printrec">Print</button>'+
+  '</div>'+
+
+  '<div class="idband">'+
+    '<div class="seg" style="flex:2 1 240px"><div class="k">Patient</div>'+
+      '<div class="v name">'+esc(p.surname.toUpperCase()+", "+p.forename)+'</div>'+
+      '<div class="sub">'+(p.preferred?'Known as '+esc(p.preferred)+' · ':'')+esc(p.ref)+
+        (p.status!=="Active"?' · '+esc(p.status):'')+'</div></div>'+
+    '<div class="seg"><div class="k">Date of birth</div><div class="v">'+ukd(p.dob)+'</div>'+
+      '<div class="sub">'+(p.dob?age(p.dob)+" years":"")+'</div></div>'+
+    '<div class="seg"><div class="k">NHS number</div><div class="v">'+(p.nhs?esc(nhsFmt(p.nhs)):"—")+'</div>'+
+      '<div class="sub">'+(p.nhs?"Verified on the index":"Not recorded")+'</div></div>'+
+  '</div>'+
+  '<div class="idnote">Check all three against the patient or their notes before conveying. '+
+    'If any one does not match, stop and telephone the control room.</div>'+
+
+  (al.length||hiddenCount?'<div class="tiles">'+
+    al.map(a=>'<div class="tile '+alertTone(a.kind)+'"><div class="k">'+esc(a.kind)+'</div>'+
+      '<div class="t">'+esc(a.text)+'</div><div class="m">'+esc(a.by)+' · '+ukd(a.at.slice(0,10))+'</div></div>').join("")+
+    (hiddenCount?'<div class="tile" style="border-color:var(--seal);background:var(--seal-soft)">'+
+      '<div class="k" style="color:var(--seal)">Restricted</div>'+
+      '<div class="t">'+hiddenCount+' further alert'+(hiddenCount>1?"s":"")+' on this record are not available to your role.</div></div>':'')+
+  '</div>':'<div class="card" style="margin:12px 0"><div class="b" style="padding:9px 12px"><span class="muted">No alerts recorded on this patient.</span></div></div>')+
+
+  '<div class="tabs" role="tablist">'+tabList.map(([id,l])=>
+    '<button class="tab" role="tab" data-tab="'+id+'" aria-selected="'+(S.tab===id)+'">'+l+'</button>').join("")+'</div>'+
+  '<div class="card" style="border-radius:0 0 var(--r2) var(--r2);border-top:0"><div class="b">'+patientTab(p)+'</div></div>';
+}
+
+function patientTab(p){
+  const t=S.tab;
+  if(driverOnly()&&!["transport","contacts"].includes(t)) { S.tab="transport"; return patientTab(p); }
+
+  if(t==="summary"){
+    return '<div class="grid g2"><div><dl class="kv">'+
+      '<dt>Full name</dt><dd>'+esc(p.forename+" "+p.surname)+'</dd>'+
+      '<dt>Preferred name</dt><dd>'+esc(p.preferred||"—")+'</dd>'+
+      '<dt>Date of birth</dt><dd class="num">'+ukd(p.dob)+' ('+age(p.dob)+')</dd>'+
+      '<dt>NHS number</dt><dd class="mono">'+esc(nhsFmt(p.nhs))+'</dd>'+
+      '<dt>Address</dt><dd>'+esc(p.address)+'<div class="mono">'+esc(p.postcode)+'</div></dd>'+
+      '<dt>Telephone</dt><dd class="num">'+esc(p.phone||"—")+'</dd>'+
+      '<dt>Mobile</dt><dd class="num">'+esc(p.mobile||"—")+'</dd>'+
+      '<dt>Preferred contact</dt><dd>'+esc(p.commsMethod)+'</dd>'+
+      '<dt>Communication needs</dt><dd>'+esc(p.commsNeeds)+'</dd>'+
+    '</dl></div><div>'+
+      (sectionState(p,"funding")==="open"?'<dl class="kv">'+
+        '<dt>Funding source</dt><dd>'+esc(p.funding||"—")+'</dd>'+
+        '<dt>Commissioner</dt><dd>'+esc(p.commissioner||"—")+'</dd>'+
+        '<dt>Usual hospital</dt><dd>'+esc(p.hospital.name||"—")+(p.hospital.ward?'<div class="muted">'+esc(p.hospital.ward)+'</div>':'')+'</dd>'+
+        '<dt>Record status</dt><dd>'+esc(p.status)+'</dd>'+
+        '<dt>Record created</dt><dd class="num">'+ukd(p.createdAt.slice(0,10))+'</dd>'+
+        '<dt>Last updated</dt><dd class="num">'+uks(p.updatedAt)+'</dd>'+
+        '<dt>Clinical records held</dt><dd>'+(p.clinicalRecords?p.clinicalRecords+' — held in the ePCR module':'None')+'</dd>'+
+      '</dl>':'<p class="muted">Funding and commissioner detail is not shown to your role.</p>')+
+      '<div class="micro" style="margin-top:14px">Access and collection notes</div>'+
+      '<p style="margin:4px 0">'+esc(p.accessNotes||"None recorded.")+'</p>'+
+    '</div></div>'+
+    (can("edit")?'<div class="inline"><div class="row">'+
+      '<label class="f" style="margin:0"><span>Telephone</span><input type="tel" id="e-phone" value="'+esc(p.phone)+'"></label>'+
+      '<label class="f" style="margin:0"><span>Mobile</span><input type="tel" id="e-mobile" value="'+esc(p.mobile)+'"></label>'+
+      '<label class="f" style="margin:0"><span>Preferred contact</span><select id="e-commsmethod">'+
+        COMMS_METHOD.map(x=>'<option'+(p.commsMethod===x?' selected':'')+'>'+esc(x)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Record status</span><select id="e-status">'+
+        STATUSES.filter(s=>s!=="Merged").map(s=>'<option'+(p.status===s?' selected':'')+'>'+esc(s)+'</option>').join("")+'</select></label>'+
+      '</div>'+
+      '<label class="f" style="margin-top:8px"><span>Access and collection notes</span><textarea id="e-access">'+esc(p.accessNotes)+'</textarea></label>'+
+      '<button class="btn p xs" id="save-summary">Save changes</button></div>':'');
+  }
+
+  if(t==="transport"){
+    return '<div class="grid g2"><div><dl class="kv">'+
+      '<dt>Mobility</dt><dd><strong>'+esc(p.mobility||"—")+'</strong></dd>'+
+      '<dt>Manual handling</dt><dd>'+esc(p.handling||"—")+'</dd>'+
+      '<dt>Wheelchair</dt><dd>'+esc(p.wheelchair||"Not required")+'</dd>'+
+      '<dt>Stretcher</dt><dd>'+esc(p.stretcher||"Not required")+'</dd>'+
+      '<dt>Bariatric</dt><dd>'+esc(p.bariatric||"Not applicable")+'</dd>'+
+    '</dl></div><div><dl class="kv">'+
+      '<dt>Infection control</dt><dd>'+(p.ipc&&p.ipc!=="None"?'<span class="bdg b-warn">'+esc(p.ipc)+'</span>':"None")+'</dd>'+
+      '<dt>Communication needs</dt><dd>'+esc(p.commsNeeds)+'</dd>'+
+      '<dt>Oxygen</dt><dd>'+(sectionState(p,"clinical")==="open"?esc(p.oxygen||"None"):'<span class="bdg b-seal">Restricted</span>')+'</dd>'+
+      '<dt>Behavioural notes</dt><dd>'+(sectionState(p,"clinical")==="open"?esc(p.behavioural||"None recorded"):'<span class="bdg b-seal">Restricted</span>')+'</dd>'+
+    '</dl></div></div>'+
+    '<div class="micro" style="margin-top:14px">Access and collection notes</div>'+
+    '<p style="margin:4px 0">'+esc(p.accessNotes||"None recorded.")+'</p>'+
+    (can("edit")?'<div class="inline"><div class="row">'+
+      '<label class="f" style="margin:0"><span>Mobility</span><select id="e-mob">'+
+        MOBILITY.map(m=>'<option'+(p.mobility===m?' selected':'')+'>'+esc(m)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Manual handling</span><select id="e-handling">'+
+        HANDLING.map(m=>'<option'+(p.handling===m?' selected':'')+'>'+esc(m)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Communication needs</span><select id="e-comms">'+
+        COMMS_NEEDS.map(m=>'<option'+(p.commsNeeds===m?' selected':'')+'>'+esc(m)+'</option>').join("")+'</select></label>'+
+      '</div><div class="row" style="margin-top:8px">'+
+      '<label class="f" style="margin:0"><span>Wheelchair detail</span><input type="text" id="e-wheel" value="'+esc(p.wheelchair)+'"></label>'+
+      '<label class="f" style="margin:0"><span>Stretcher detail</span><input type="text" id="e-stretch" value="'+esc(p.stretcher)+'"></label>'+
+      '<label class="f" style="margin:0"><span>Infection control</span><input type="text" id="e-ipc" value="'+esc(p.ipc)+'"></label>'+
+      '</div><button class="btn p xs" id="save-transport" style="margin-top:9px">Save transport needs</button>'+
+      '<p class="hint">Changes here feed the next booking made for this patient and are written to the change history.</p></div>':'');
+  }
+
+  if(t==="clinical"){
+    const st=sectionState(p,"clinical");
+    if(st!=="open") return sealedPanel("clinical",p);
+    return (S.opened[openKey(p.id,"clinical")]?'<div class="openbanner">You opened this restricted section with a recorded reason. '+
+      'It is visible for this session only and has been written to the access log.</div>':'')+
+    '<dl class="kv">'+
+      '<dt>Medical conditions</dt><dd>'+esc(p.conditions||"None recorded")+'</dd>'+
+      '<dt>Allergies</dt><dd>'+(p.allergies&&p.allergies!=="None known."?'<strong style="color:var(--stop)">'+esc(p.allergies)+'</strong>':esc(p.allergies||"None known"))+'</dd>'+
+      '<dt>Current medication</dt><dd>'+esc(p.medication||"None recorded")+'</dd>'+
+      '<dt>Oxygen requirements</dt><dd>'+esc(p.oxygen||"None")+'</dd>'+
+      '<dt>Clinical support on the journey</dt><dd>'+esc(p.clinicalSupport||"None")+'</dd>'+
+      '<dt>Behavioural risks</dt><dd>'+esc(p.behavioural||"None recorded")+'</dd>'+
+      '<dt>Clinical records</dt><dd>'+(p.clinicalRecords?p.clinicalRecords+' patient care records held in the ePCR module':'None held')+'</dd>'+
+    '</dl>'+
+    (can("clinical")&&can("edit")?'<div class="inline">'+
+      '<label class="f"><span>Medical conditions</span><textarea id="e-cond">'+esc(p.conditions)+'</textarea></label>'+
+      '<label class="f"><span>Allergies</span><textarea id="e-allergy">'+esc(p.allergies)+'</textarea></label>'+
+      '<label class="f"><span>Current medication</span><textarea id="e-med">'+esc(p.medication)+'</textarea></label>'+
+      '<div class="row"><label class="f" style="margin:0"><span>Oxygen</span><input type="text" id="e-oxy" value="'+esc(p.oxygen)+'"></label>'+
+      '<label class="f" style="margin:0"><span>Clinical support</span><input type="text" id="e-support" value="'+esc(p.clinicalSupport)+'"></label></div>'+
+      '<button class="btn p xs" id="save-clinical" style="margin-top:9px">Save clinical detail</button></div>':'');
+  }
+
+  if(t==="capacity"){
+    if(sectionState(p,"consent")!=="open")
+      return '<div class="sealed"><div class="lk">🔒</div><h3>Capacity and consent are not available to your role</h3>'+
+        '<p>Capacity assessments and consent records are limited to clinical and management roles.</p></div>';
+    return '<dl class="kv"><dt>Mental capacity</dt><dd>'+esc(p.capacity||"No assessment recorded")+'</dd></dl>'+
+      '<h3 style="font-size:12.5px;margin:16px 0 7px">Consent records</h3>'+
+      (p.consents.length?'<div class="tw" style="border:0"><table><thead><tr><th>Type</th><th>Date</th><th>Recorded by</th><th>Notes</th>'+
+        (can("consent")?'<th></th>':'')+'</tr></thead><tbody>'+
+        p.consents.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(c=>
+          '<tr><td><strong>'+esc(c.type)+'</strong></td><td class="num nowrap">'+ukd(c.date)+'</td>'+
+          '<td class="muted nowrap">'+esc(c.by)+'</td><td class="muted">'+esc(c.notes)+'</td>'+
+          (can("consent")?'<td class="r"><button class="btn xs g" data-rmconsent="'+c.id+'">Remove</button></td>':'')+'</tr>').join("")+
+        '</tbody></table></div>'
+        :'<div class="empty"><b>No consent records</b>Consent or a best-interests decision should be recorded before transport.</div>')+
+      (can("consent")?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0"><span>Type</span><select id="cs-type">'+
+          CONSENT_TYPES.map(x=>'<option>'+esc(x)+'</option>').join("")+'</select></label>'+
+        '<label class="f" style="margin:0"><span>Date</span><input type="date" id="cs-date" value="'+todayISO()+'"></label>'+
+        '<label class="f" style="margin:0;flex:2 1 200px"><span>Notes</span><input type="text" id="cs-notes" placeholder="Who gave it, how it was obtained, any limits">'+
+          '<div class="msg" id="m-cs-notes">Record how consent was obtained.</div></label>'+
+        '</div><button class="btn p xs" id="add-consent" style="margin-top:9px">Record consent</button></div>':'');
+  }
+
+  if(t==="safeguarding"){
+    const st=sectionState(p,"safeguarding");
+    if(st!=="open") return sealedPanel("safeguarding",p);
+    return (S.opened[openKey(p.id,"safeguarding")]?'<div class="openbanner">You opened this restricted section with a recorded reason. '+
+      'It is visible for this session only and has been written to the access log, which the record owner can review.</div>':'')+
+    (p.safeguarding?'<div class="alertbox"><b>Safeguarding record</b>'+
+      '<div style="font-size:12.5px;white-space:pre-wrap">'+esc(p.safeguarding)+'</div></div>'
+      :'<div class="empty"><b>No safeguarding record</b>Nothing has been recorded against this patient.</div>')+
+    '<p class="hint">New concerns are raised through the Safeguarding module, not here. This section shows what crews and '+
+      'coordinators need to know to keep the patient safe on a journey.</p>'+
+    (can("safeguarding")&&can("edit")?'<div class="inline">'+
+      '<label class="f"><span>Safeguarding notes for transport</span><textarea id="e-safeg">'+esc(p.safeguarding)+'</textarea>'+
+      '<div class="hint">Keep this to what is needed for the journey. Full case detail belongs in the Safeguarding module.</div></label>'+
+      '<button class="btn p xs" id="save-safeg">Save</button></div>':'');
+  }
+
+  if(t==="contacts"){
+    const blk=(title,o,extra)=>'<div class="card" style="margin-bottom:10px"><div class="h"><h2>'+title+'</h2></div>'+
+      '<div class="b"><dl class="kv">'+
+      '<dt>Name</dt><dd>'+esc(o.name||"—")+'</dd>'+
+      (o.relationship!==undefined?'<dt>Relationship</dt><dd>'+esc(o.relationship||"—")+'</dd>':'')+
+      (o.practice!==undefined?'<dt>Practice</dt><dd>'+esc(o.practice||"—")+'</dd>':'')+
+      (o.ward!==undefined?'<dt>Ward or department</dt><dd>'+esc(o.ward||"—")+'</dd>':'')+
+      (o.number!==undefined?'<dt>Hospital number</dt><dd class="mono">'+esc(o.number||"—")+'</dd>':'')+
+      '<dt>Telephone</dt><dd class="num">'+esc(o.phone||"—")+'</dd>'+
+      '</dl>'+(extra||"")+'</div></div>';
+    return '<div class="grid g2">'+
+      '<div>'+blk("Next of kin",p.nok)+blk("Emergency contact",p.emergency)+'</div>'+
+      '<div>'+blk("GP",p.gp)+blk("Usual hospital",p.hospital)+'</div></div>'+
+      '<p class="hint">Names of relatives are held as relationship and contact number. Full personal detail on '+
+      'third parties is minimised deliberately.</p>';
+  }
+
+  if(t==="journeys"){
+    const bid=(S.patientLink||{})[p.id];
+    const list=bid?S.bookings.filter(b=>b.patientId===bid):[];
+    if(S.bookingsLinked&&list.length)
+      return '<div class="tw" style="border:0"><table><thead><tr><th>Job</th><th>Date</th><th>From</th><th>To</th><th>Status</th></tr></thead><tbody>'+
+        list.sort((a,b)=>b.collectDate.localeCompare(a.collectDate)).map(b=>
+        '<tr><td class="mono" style="color:var(--accent-2)">'+esc(b.ref)+'</td><td class="num nowrap">'+ukd(b.collectDate)+' '+esc(b.collectTime)+'</td>'+
+        '<td class="muted">'+esc((b.fromAddr||"").split(",")[0])+'</td><td class="muted">'+esc((b.toAddr||"").split(",")[0])+'</td>'+
+        '<td>'+esc(b.status)+'</td></tr>').join("")+'</tbody></table></div>';
+    return '<div class="empty"><b>Journey history lives in the Bookings module</b>'+
+      'This build reads live journeys when the Bookings module has been used in the same environment. '+
+      (p.clinicalRecords?'This patient has '+p.clinicalRecords+' previous journeys on record.':'No journeys recorded.')+'</div>';
+  }
+
+  if(t==="documents"){
+    return (p.documents.length?'<div class="tw" style="border:0"><table><thead><tr><th>Document</th><th>Category</th><th>Size</th><th>Added</th>'+
+      (can("edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      p.documents.map(d=>'<tr><td>'+esc(d.name)+'</td><td class="muted">'+esc(d.category)+'</td>'+
+        '<td class="num muted">'+esc(d.size)+'</td><td class="num muted nowrap">'+ukd(d.at.slice(0,10))+
+        '<div class="muted">'+esc(d.by)+'</div></td>'+
+        (can("edit")?'<td class="r"><button class="btn xs g" data-rmdoc="'+d.id+'">Remove</button></td>':'')+'</tr>').join("")+
+      '</tbody></table></div>'
+      :'<div class="empty"><b>No documents</b>Referral letters, risk assessments and consent forms attach here.</div>')+
+      (can("edit")?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0;flex:2 1 200px"><span>File</span><input type="file" id="dc-file" style="padding:4px"></label>'+
+        '<label class="f" style="margin:0"><span>Category</span><select id="dc-cat">'+
+          ["Referral","Consent","Risk assessment","Correspondence","Safeguarding","Discharge summary","Other"].map(x=>'<option>'+x+'</option>').join("")+'</select></label>'+
+        '</div><button class="btn p xs" id="add-doc" style="margin-top:9px">Attach</button>'+
+        '<p class="hint">Only the file name, size and metadata are stored in this build. In production, documents go to encrypted storage with per-role access.</p></div>':'');
+  }
+
+  if(t==="access"){
+    if(!can("access.log")) return '<div class="sealed"><div class="lk">🔒</div><h3>The access log is restricted</h3><p>Only governance and management roles may see who has viewed a patient record.</p></div>';
+    return '<p class="hint" style="margin-top:0">Every view of this record is logged. Entries marked in purple are openings of a '+
+      'restricted section, where the person had to give a reason.</p>'+
+      '<ul class="feed">'+p.access.slice().sort((a,b)=>b.at.localeCompare(a.at)).map(a=>
+        '<li'+(a.seal?' class="seal"':'')+'><div class="m">'+uks(a.at)+' · '+esc(a.by)+'</div>'+
+        '<div class="s">'+esc(a.action)+(a.seal?' <span class="bdg b-seal">Restricted section</span>':'')+'</div>'+
+        (a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</li>').join("")+'</ul>';
+  }
+
+  if(t==="audit"){
+    return '<ul class="feed">'+p.audit.slice().sort((a,b)=>b.at.localeCompare(a.at)).map(a=>
+      '<li><div class="m">'+uks(a.at)+' · '+esc(a.by)+'</div><div class="s">'+esc(a.action)+'</div>'+
+      (a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</li>').join("")+'</ul>'+
+      '<p class="hint">Change history is immutable.</p>';
+  }
+  return "";
+}
+
+/* ---------- new patient ---------- */
+function viewNew(){
+  if(!can("edit")) return viewDenied();
+  return '<div class="ph"><h1>Add a patient</h1><span class="muted">The index is checked for duplicates before the record is created</span></div>'+
+  '<div class="card" style="max-width:960px"><div class="b">'+
+    '<div class="grid g3">'+
+      '<label class="f"><span>Surname<span class="rq">*</span></span><input type="text" id="n-surname"><div class="msg" id="m-n-surname">Enter a surname.</div></label>'+
+      '<label class="f"><span>Forename<span class="rq">*</span></span><input type="text" id="n-forename"><div class="msg" id="m-n-forename">Enter a forename.</div></label>'+
+      '<label class="f"><span>Preferred name</span><input type="text" id="n-preferred"></label>'+
+    '</div>'+
+    '<div class="grid g3">'+
+      '<label class="f"><span>Date of birth<span class="rq">*</span></span><input type="date" id="n-dob" max="'+todayISO()+'"><div class="msg" id="m-n-dob">A date of birth is required to identify the patient safely.</div></label>'+
+      '<label class="f"><span>NHS number</span><input type="text" id="n-nhs" placeholder="10 digits" inputmode="numeric"><div class="msg" id="m-n-nhs">An NHS number is 10 digits.</div>'+
+        '<div class="hint">Leave blank if not known — it can be added later.</div></label>'+
+      '<label class="f"><span>Funding source</span><select id="n-funding">'+FUNDING.map(f=>'<option>'+esc(f)+'</option>').join("")+'</select></label>'+
+    '</div>'+
+    '<div class="grid g3">'+
+      '<label class="f" style="grid-column:span 2"><span>Address<span class="rq">*</span></span><input type="text" id="n-address"><div class="msg" id="m-n-address">Enter the address.</div></label>'+
+      '<label class="f"><span>Postcode</span><input type="text" id="n-postcode"></label>'+
+    '</div>'+
+    '<div class="grid g3">'+
+      '<label class="f"><span>Telephone</span><input type="tel" id="n-phone"></label>'+
+      '<label class="f"><span>Mobile</span><input type="tel" id="n-mobile"></label>'+
+      '<label class="f"><span>Mobility<span class="rq">*</span></span><select id="n-mobility"><option value="">Select…</option>'+
+        MOBILITY.map(m=>'<option>'+esc(m)+'</option>').join("")+'</select><div class="msg" id="m-n-mobility">Mobility drives the vehicle type — it is required.</div></label>'+
+    '</div>'+
+    '<label class="f"><span>Access and collection notes</span><textarea id="n-access" placeholder="Parking, key safe, floor, who to ask for"></textarea></label>'+
+    '<p class="hint" style="margin-top:0">Clinical detail, capacity and safeguarding are added on the record after it is created, by roles with the relevant access.</p>'+
+    '<div id="dupwarn"></div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn p" id="n-save">Create record</button>'+
+      '<button class="btn g" data-go="patients">Cancel</button></div>'+
+  '</div></div>';
+}
+
+/* ---------- duplicates ---------- */
+function viewDuplicates(){
+  const pairs=allDuplicatePairs();
+  return demoNote+
+  '<div class="ph"><h1>Possible duplicates</h1><span class="muted">'+pairs.length+' pair'+(pairs.length===1?"":"s")+' found</span></div>'+
+  '<div class="card" style="margin-bottom:12px"><div class="b"><p class="hint" style="margin:0">'+
+    'Records are matched on NHS number, or on surname with the same date of birth. Merging keeps one record, moves the '+
+    'other\'s alerts, consents and documents onto it, and marks the second record as merged rather than deleting it.</p></div></div>'+
+  (pairs.length?pairs.map(([a,b])=>
+    '<div class="card" style="margin-bottom:12px"><div class="h"><h2>'+esc(a.surname+", "+a.forename)+' — '+ukd(a.dob)+'</h2>'+
+      '<span class="bdg b-warn" style="margin-left:auto">'+(a.nhs&&b.nhs&&a.nhs===b.nhs?"Same NHS number":"Same name and date of birth")+'</span></div>'+
+    '<div class="tw" style="border:0"><table><thead><tr><th></th><th>Record A</th><th>Record B</th></tr></thead><tbody>'+
+      [["Reference","ref"],["NHS number","nhs"],["Address","address"],["Postcode","postcode"],
+       ["Telephone","phone"],["Mobility","mobility"],["Funding","funding"]].map(([l,k])=>
+        '<tr><td class="muted">'+l+'</td><td'+(a[k]!==b[k]?' style="background:var(--warn-soft)"':'')+'>'+esc(a[k]||"—")+'</td>'+
+        '<td'+(a[k]!==b[k]?' style="background:var(--warn-soft)"':'')+'>'+esc(b[k]||"—")+'</td></tr>').join("")+
+      '<tr><td class="muted">Alerts, consents, documents</td><td class="num">'+(a.alerts.length+a.consents.length+a.documents.length)+'</td>'+
+      '<td class="num">'+(b.alerts.length+b.consents.length+b.documents.length)+'</td></tr>'+
+    '</tbody></table></div>'+
+    '<div class="b" style="display:flex;gap:8px;flex-wrap:wrap">'+
+      (can("merge")?'<button class="btn p xs" data-merge="'+a.id+'|'+b.id+'">Keep A, merge B into it</button>'+
+        '<button class="btn p xs" data-merge="'+b.id+'|'+a.id+'">Keep B, merge A into it</button>'
+        :'<span class="muted">Merging needs an operations manager or administrator.</span>')+
+      '<div class="spacer"></div>'+
+      '<button class="btn xs g" data-open="'+a.id+'">Open A</button><button class="btn xs g" data-open="'+b.id+'">Open B</button>'+
+    '</div></div>').join("")
+  :'<div class="card"><div class="b empty"><b>No duplicates found</b>Every record on the index has a distinct identity.</div></div>');
+}
+
+/* ---------- global access log ---------- */
+function viewAccessLog(){
+  if(!can("access.log")) return viewDenied();
+  const all=[];
+  S.patients.forEach(p=>p.access.forEach(a=>all.push({...a,ref:p.ref,name:p.surname+", "+p.forename,pid:p.id})));
+  all.sort((a,b)=>b.at.localeCompare(a.at));
+  const rows=all.slice(0,250);
+  const breaks=all.filter(a=>a.seal).length;
+  return demoNote+
+  '<div class="ph"><h1>Record access log</h1><span class="muted">'+all.length+' entries · '+breaks+' restricted-section openings</span></div>'+
+  '<div class="card" style="margin-bottom:12px"><div class="b"><p class="hint" style="margin:0">'+
+    'This is the user activity report for patient records. Openings of a restricted section are highlighted — each one carries '+
+    'the reason the person gave, and should be reviewed periodically as part of information governance.</p></div></div>'+
+  '<div class="tw"><table><thead><tr><th>When</th><th>Patient</th><th>Who</th><th>Action</th><th>Reason or context</th></tr></thead><tbody>'+
+  rows.map(a=>'<tr tabindex="0" data-open="'+a.pid+'"'+(a.seal?' style="background:var(--seal-soft)"':'')+'>'+
+    '<td class="mono muted nowrap">'+uks(a.at)+'</td>'+
+    '<td>'+esc(a.name)+'<div class="mono muted">'+esc(a.ref)+'</div></td>'+
+    '<td class="nowrap">'+esc(a.by)+'</td>'+
+    '<td class="nowrap">'+esc(a.action)+(a.seal?' <span class="bdg b-seal">Restricted</span>':'')+'</td>'+
+    '<td class="muted">'+esc(a.detail||"—")+'</td></tr>').join("")+
+  '</tbody></table></div>';
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function modal(title,body,foot){
+  $("#modalhost").innerHTML='<div class="scrim" data-mclose="1"></div>'+
+    '<div class="modal" role="dialog" aria-modal="true" aria-label="'+esc(title)+'">'+
+    '<div class="mh"><h2 style="font-size:14px">'+esc(title)+'</h2><div class="spacer"></div>'+
+    '<button class="btn g xs" data-mclose="1" aria-label="Close">✕</button></div>'+
+    '<div class="mb">'+body+'</div><div class="mf">'+foot+'</div></div>';
+}
+const closeModal=()=>{$("#modalhost").innerHTML="";};
+
+function modalBreakGlass(sec){
+  const label=sec==="clinical"?"clinical detail":"the safeguarding record";
+  modal("Open a restricted section",
+    '<p style="margin-top:0">You are about to open '+label+' for this patient. Your name, the time and your reason will be '+
+    'written to the patient\'s access log and to the organisation-wide access report.</p>'+
+    '<label class="f"><span>Reason<span class="rq">*</span></span><select id="bg-reason">'+
+      '<option value="">Select a reason…</option>'+
+      ["Attending a journey for this patient today","Preparing a booking that needs this detail",
+       "Clinical query raised by the crew","Handover to a receiving unit","Incident or complaint investigation"]
+      .map(r=>'<option>'+esc(r)+'</option>').join("")+
+      '</select><div class="msg" id="m-bg-reason">Select the reason you need this.</div></label>'+
+    '<label class="f" style="margin:0"><span>Detail<span class="rq">*</span></span><input type="text" id="bg-detail" placeholder="Job reference, or a short explanation">'+
+      '<div class="msg" id="m-bg-detail">Give the job reference or a short explanation.</div></label>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn seal" id="bg-do" data-sec="'+sec+'">Open and record</button>');
+}
+function modalSAR(p){
+  modal("Export record — subject access request",
+    '<p style="margin-top:0">This produces a copy of everything held on <strong>'+esc(p.forename+" "+p.surname)+'</strong> '+
+    'in this module, for release to the patient or their representative.</p>'+
+    '<label class="f"><span>Requested by<span class="rq">*</span></span><input type="text" id="sar-by" placeholder="Patient, or the representative\'s name and relationship">'+
+      '<div class="msg" id="m-sar-by">Record who asked for it.</div></label>'+
+    '<label class="f"><span>Identity verified</span><select id="sar-id"><option>Verified in person</option>'+
+      '<option>Verified by documents</option><option>Not yet verified</option></select></label>'+
+    '<label class="f" style="margin:0"><span>Format</span><select id="sar-fmt"><option>JSON data file</option><option>Printable summary</option></select></label>'+
+    '<p class="hint">Clinical records held in the ePCR module and journey history in Bookings must be added to the pack separately. '+
+    'Third-party information should be reviewed before release.</p>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="sar-do">Produce the pack</button>');
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function go(v){S.view=v;S.selected=null;render();window.scrollTo(0,0);$("#side").classList.remove("open");}
+function openP(id){
+  const p=S.patients.find(x=>x.id===id);
+  if(!p) return;
+  if(portalOnly()&&p.commissioner!==role().commissioner){toast("Your portal account can only see patients it commissions.","bad");return;}
+  S.selected=id;S.view="patient";S.tab=driverOnly()?"transport":"summary";
+  access(p,"Record viewed",""); save();
+  render();window.scrollTo(0,0);
+}
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():"";};
+function mark(id,mid,ok){const e=document.getElementById(id),m=document.getElementById(mid);
+  if(e)e.classList.toggle("bad",!ok);if(m)m.classList.toggle("on",!ok);return ok;}
+
+document.addEventListener("click", async e=>{
+  const t=e.target.closest("[data-go],[data-open],[data-tab],[data-sort],[data-stat],[data-mclose],[data-merge],[data-rmdoc],[data-rmconsent],button");
+  if(!t) return;
+  const p=S.patients.find(x=>x.id===S.selected);
+
+  if(t.dataset.mclose){closeModal();return;}
+  if(t.dataset.go){const m=MENU.find(x=>x.id===t.dataset.go);
+    if(m&&!m.live){S.view=t.dataset.go;S.selected=null;render();$("#side").classList.remove("open");return;}
+    go(t.dataset.go);return;}
+  if(t.dataset.open){openP(t.dataset.open);return;}
+  if(t.dataset.tab){S.tab=t.dataset.tab;render();return;}
+  if(t.dataset.sort){const k=t.dataset.sort;S.sort=S.sort.k===k?{k,d:S.sort.d==="asc"?"desc":"asc"}:{k,d:"asc"};render();return;}
+  if(t.dataset.stat!==undefined&&t.classList.contains("stat")){
+    if(+t.dataset.stat===5){go("duplicates");return;}
+    const presets=[{status:"Active"},{alert:"Safeguarding"},{alert:"Allergy"},{status:"Active"},{alert:"Infection"}];
+    S.f=Object.assign({q:"",alert:"",mobility:"",funding:"",status:""},presets[+t.dataset.stat]);
+    go("patients");return;
+  }
+  if(t.dataset.merge){
+    if(!can("merge")){toast("Merging needs an operations manager or administrator.","bad");return;}
+    const [keepId,goneId]=t.dataset.merge.split("|");
+    const keep=S.patients.find(x=>x.id===keepId),gone=S.patients.find(x=>x.id===goneId);
+    if(!keep||!gone) return;
+    gone.alerts.forEach(a=>{if(!keep.alerts.some(b=>b.kind===a.kind&&b.text===a.text))keep.alerts.push(a);});
+    gone.consents.forEach(c=>keep.consents.push(c));
+    gone.documents.forEach(d=>keep.documents.push(d));
+    if(!keep.nhs&&gone.nhs) keep.nhs=gone.nhs;
+    if(!keep.accessNotes&&gone.accessNotes) keep.accessNotes=gone.accessNotes;
+    gone.status="Merged"; gone.mergedInto=keep.ref;
+    log(keep,"Records merged","Absorbed "+gone.ref+" — alerts, consents and documents moved across");
+    log(gone,"Record merged","Merged into "+keep.ref+". Retained, not deleted.");
+    await save();toast(gone.ref+" merged into "+keep.ref,"ok");render();return;
+  }
+
+  const id=t.id;
+  if(id==="theme"){const n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",n);
+    try{if(window.storage)window.storage.set("pts:theme",n);}catch(_){}return;}
+  if(id==="sidetoggle"){$("#side").classList.toggle("open");return;}
+  if(id==="f-clear"){S.f={q:"",alert:"",mobility:"",funding:"",status:"Active"};render();return;}
+  if(id==="printrec"){window.print();return;}
+  if(id==="export"){exportCSV();return;}
+
+  /* new patient */
+  if(id==="n-save"){
+    let ok=true;
+    ok=mark("n-surname","m-n-surname",!!val("n-surname"))&&ok;
+    ok=mark("n-forename","m-n-forename",!!val("n-forename"))&&ok;
+    ok=mark("n-dob","m-n-dob",!!val("n-dob"))&&ok;
+    ok=mark("n-address","m-n-address",!!val("n-address"))&&ok;
+    ok=mark("n-mobility","m-n-mobility",!!val("n-mobility"))&&ok;
+    const nhs=val("n-nhs").replace(/\D/g,"");
+    ok=mark("n-nhs","m-n-nhs",!val("n-nhs")||nhs.length===10)&&ok;
+    if(!ok){toast("Check the highlighted fields.","bad");return;}
+    const probe={id:"",surname:val("n-surname"),dob:val("n-dob"),nhs};
+    const dups=possibleDuplicates(probe);
+    if(dups.length&&!$("#dupwarn").dataset.ack){
+      $("#dupwarn").innerHTML='<div class="alertbox"><b>Possible duplicate</b>'+
+        '<ul>'+dups.map(d=>'<li>'+esc(d.ref)+' — '+esc(d.surname+", "+d.forename)+', born '+ukd(d.dob)+
+          (d.nhs?', NHS '+esc(nhsFmt(d.nhs)):'')+'</li>').join("")+'</ul>'+
+        '<div style="font-size:12.5px;margin-top:6px">Check these before creating another record. '+
+        'Press <strong>Create record</strong> again if this really is a different person.</div></div>';
+      $("#dupwarn").dataset.ack="1";
+      toast("Possible duplicate found — check before creating.","bad");
+      return;
+    }
+    const rec=commit({surname:val("n-surname"),forename:val("n-forename"),preferred:val("n-preferred"),
+      dob:val("n-dob"),nhs,address:val("n-address"),postcode:val("n-postcode").toUpperCase(),
+      phone:val("n-phone"),mobile:val("n-mobile"),mobility:val("n-mobility"),
+      funding:val("n-funding"),accessNotes:val("n-access")});
+    if(dups.length) log(rec,"Created despite a duplicate warning",dups.map(d=>d.ref).join(", "));
+    S.patients.unshift(rec);await save();
+    toast("Created "+rec.ref,"ok");openP(rec.id);return;
+  }
+
+  if(!p) return;
+
+  /* break glass */
+  if(id==="breakglass"){modalBreakGlass(t.dataset.sec);return;}
+  if(id==="bg-do"){
+    let ok=true;
+    ok=mark("bg-reason","m-bg-reason",!!val("bg-reason"))&&ok;
+    ok=mark("bg-detail","m-bg-detail",!!val("bg-detail"))&&ok;
+    if(!ok) return;
+    const sec=t.dataset.sec;
+    S.opened[openKey(p.id,sec)]=true;
+    access(p,(sec==="clinical"?"Clinical section":"Safeguarding section")+" opened",
+      val("bg-reason")+" — "+val("bg-detail"),true);
+    log(p,"Restricted section opened",sec+" · "+val("bg-reason"));
+    await save();closeModal();
+    toast("Opened and recorded in the access log","seal");render();return;
+  }
+
+  /* SAR */
+  if(id==="sar"){modalSAR(p);return;}
+  if(id==="sar-do"){
+    if(!mark("sar-by","m-sar-by",!!val("sar-by"))) return;
+    const pack={reference:p.ref,producedAt:new Date().toISOString(),producedBy:role().name,
+      requestedBy:val("sar-by"),identityCheck:val("sar-id"),
+      patient:{name:p.forename+" "+p.surname,preferred:p.preferred,dateOfBirth:p.dob,nhsNumber:p.nhs,
+        address:p.address,postcode:p.postcode,telephone:p.phone,mobile:p.mobile},
+      transport:{mobility:p.mobility,handling:p.handling,wheelchair:p.wheelchair,stretcher:p.stretcher,
+        bariatric:p.bariatric,infectionControl:p.ipc,communicationNeeds:p.commsNeeds,accessNotes:p.accessNotes},
+      clinical:{conditions:p.conditions,allergies:p.allergies,medication:p.medication,oxygen:p.oxygen,
+        clinicalSupport:p.clinicalSupport,behavioural:p.behavioural},
+      capacityAndConsent:{capacity:p.capacity,consents:p.consents},
+      safeguarding:p.safeguarding,
+      alerts:p.alerts,documents:p.documents.map(d=>({name:d.name,category:d.category,added:d.at})),
+      changeHistory:p.audit,accessHistory:p.access,
+      note:"Clinical records held in the ePCR module and journey history in Bookings are supplied separately."};
+    if(val("sar-fmt").indexOf("Print")===0){ closeModal(); access(p,"Record exported for a subject access request",val("sar-by"));
+      log(p,"Subject access request pack produced",val("sar-by")+" · printable"); await save(); window.print(); render(); return; }
+    const url=URL.createObjectURL(new Blob([JSON.stringify(pack,null,2)],{type:"application/json"}));
+    const a=document.createElement("a");a.href=url;a.download="sar-"+p.ref+"-"+todayISO()+".json";
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),800);
+    access(p,"Record exported for a subject access request",val("sar-by"));
+    log(p,"Subject access request pack produced",val("sar-by")+" · JSON");
+    await save();closeModal();toast("Pack produced and logged","ok");render();return;
+  }
+
+  /* edits */
+  if(id==="save-summary"){
+    const ch=[];
+    const set=(k,el,l)=>{const v=val(el);if(v!==p[k]){ch.push(l+" updated");p[k]=v;}};
+    set("phone","e-phone","telephone");set("mobile","e-mobile","mobile");
+    set("commsMethod","e-commsmethod","preferred contact");set("accessNotes","e-access","access notes");
+    const st=val("e-status");if(st!==p.status){ch.push("status "+p.status+" → "+st);p.status=st;}
+    if(!ch.length){toast("Nothing to save.");return;}
+    log(p,"Record updated",ch.join("; "));await save();toast("Saved","ok");render();return;
+  }
+  if(id==="save-transport"){
+    const ch=[];
+    const set=(k,el,l)=>{const v=val(el);if(v!==p[k]){ch.push(l+": "+(p[k]||"—")+" → "+v);p[k]=v;}};
+    set("mobility","e-mob","mobility");set("handling","e-handling","handling");set("commsNeeds","e-comms","communication needs");
+    set("wheelchair","e-wheel","wheelchair");set("stretcher","e-stretch","stretcher");set("ipc","e-ipc","infection control");
+    if(!ch.length){toast("Nothing to save.");return;}
+    log(p,"Transport needs updated",ch.join("; "));await save();toast("Saved","ok");render();return;
+  }
+  if(id==="save-clinical"){
+    const ch=[];
+    const set=(k,el,l)=>{const v=val(el);if(v!==p[k]){ch.push(l+" updated");p[k]=v;}};
+    set("conditions","e-cond","conditions");set("allergies","e-allergy","allergies");
+    set("medication","e-med","medication");set("oxygen","e-oxy","oxygen");set("clinicalSupport","e-support","clinical support");
+    if(!ch.length){toast("Nothing to save.");return;}
+    log(p,"Clinical detail updated",ch.join("; "));await save();toast("Saved","ok");render();return;
+  }
+  if(id==="save-safeg"){
+    const v=$("#e-safeg").value;
+    if(v===p.safeguarding){toast("Nothing to save.");return;}
+    p.safeguarding=v;log(p,"Safeguarding notes updated","");await save();toast("Saved","ok");render();return;
+  }
+  if(id==="add-consent"){
+    if(!mark("cs-notes","m-cs-notes",!!val("cs-notes"))) return;
+    p.consents.push({id:uid(),type:val("cs-type"),date:val("cs-date"),notes:val("cs-notes"),by:role().name});
+    log(p,"Consent recorded",val("cs-type"));await save();toast("Consent recorded","ok");render();return;
+  }
+  if(t.dataset.rmconsent){
+    const c=p.consents.find(x=>x.id===t.dataset.rmconsent);
+    p.consents=p.consents.filter(x=>x.id!==t.dataset.rmconsent);
+    log(p,"Consent record removed",c?c.type+" of "+ukd(c.date):"");await save();render();return;
+  }
+  if(id==="add-doc"){
+    const f=$("#dc-file").files[0];
+    if(!f){toast("Choose a file first.","bad");return;}
+    p.documents.push({id:uid(),name:f.name,category:val("dc-cat"),size:(f.size/1024).toFixed(0)+" KB",
+      by:role().name,at:new Date().toISOString()});
+    log(p,"Document attached",f.name);await save();toast("Attached "+f.name,"ok");render();return;
+  }
+  if(t.dataset.rmdoc){
+    const d=p.documents.find(x=>x.id===t.dataset.rmdoc);
+    p.documents=p.documents.filter(x=>x.id!==t.dataset.rmdoc);
+    log(p,"Document removed",d?d.name:"");await save();render();return;
+  }
+});
+
+document.addEventListener("change", e=>{
+  const el=e.target;
+  if(el.id==="rolepick"){S.roleId=el.value;S.selected=null;S.opened={};S.view="patients";
+    render();toast("Signed in as "+role().name+" — restricted sections reset");return;}
+  const map={"f-alert":"alert","f-mobility":"mobility","f-funding":"funding","f-status":"status"};
+  if(map[el.id]){S.f[map[el.id]]=el.value;render();return;}
+});
+
+let tm;
+document.addEventListener("input", e=>{
+  if(e.target.id!=="f-q"&&e.target.id!=="gsearch") return;
+  const g=e.target.id==="gsearch";
+  S.f.q=e.target.value;
+  clearTimeout(tm);
+  tm=setTimeout(()=>{
+    const pos=e.target.selectionStart;
+    if(g){ if(S.view!=="patients"){S.f.status="";go("patients");} else render();
+      const x=$("#gsearch");if(x){x.focus();try{x.setSelectionRange(pos,pos);}catch(_){}} }
+    else { render(); const x=$("#f-q");if(x){x.focus();try{x.setSelectionRange(pos,pos);}catch(_){}} }
+  },220);
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"&&$("#modalhost").innerHTML){closeModal();return;}
+  if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.open){e.preventDefault();openP(e.target.dataset.open);}
+});
+
+/* ---------- export (redacted by role) ---------- */
+function exportCSV(){
+  const rows=visible();
+  if(!rows.length){toast("Nothing to export with these filters.","bad");return;}
+  const clin=can("clinical");
+  const head=["Reference","Surname","Forename","Date of birth","NHS number","Address","Postcode","Telephone",
+    "Mobility","Manual handling","Wheelchair","Stretcher","Bariatric","Infection control","Communication needs",
+    "Access notes","Status"];
+  if(!portalOnly()&&!driverOnly()) head.push("Funding","Commissioner");
+  if(clin) head.push("Conditions","Allergies","Medication","Oxygen");
+  head.push("Alerts");
+  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const body=rows.map(p=>{
+    const line=[p.ref,p.surname,p.forename,ukd(p.dob),nhsFmt(p.nhs),p.address,p.postcode,p.phone||p.mobile,
+      p.mobility,p.handling,p.wheelchair,p.stretcher,p.bariatric,p.ipc,p.commsNeeds,p.accessNotes,p.status];
+    if(!portalOnly()&&!driverOnly()) line.push(p.funding,p.commissioner);
+    if(clin) line.push(p.conditions,p.allergies,p.medication,p.oxygen);
+    line.push(visibleAlerts(p).map(a=>a.kind+": "+a.text).join(" | "));
+    return line.map(q).join(",");
+  }).join("\r\n");
+  const csv="\ufeff"+head.map(q).join(",")+"\r\n"+body;
+  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download="patients-"+todayISO()+".csv";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),800);
+  toast("Exported "+rows.length+" records"+(clin?"":" — clinical columns omitted for your role"),"ok");
+}
+
+/* ---------- boot ---------- */
+(async function(){
+  $("#rolepick").innerHTML=ROLES.map(r=>'<option value="'+r.id+'"'+(r.id===S.roleId?' selected':'')+'>'+esc(r.name)+'</option>').join("");
+  try{if(window.storage){const th=await window.storage.get("pts:theme");
+    if(th&&th.value)document.documentElement.setAttribute("data-theme",th.value);}}catch(_){}
+  const had=await load();
+  if(!had){seed();await save();}
+  S.bookingsLinked=await loadBookings();
+  render();
+  if(!storageOK) toast("Changes are held for this session only.","bad");
+})();
+
+})();
+</script>

@@ -1,0 +1,1792 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff and Fleet | Ambulance &amp; PTS Management System</title>
+<style>
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface-2:#F6F8FA; --surface-3:#EEF1F5;
+  --line:#D6DCE3; --line-2:#BAC4CF;
+  --ink:#111820; --ink-2:#4B5763; --ink-3:#78848F;
+  --nav:#1A222C; --nav-ink:#B7C3CF; --nav-ink-2:#7C8B99;
+  --accent:#0B6A66; --accent-2:#0E837E; --accent-soft:#DFEEED;
+  --ok:#166534; --ok-soft:#E3F2E8;
+  --warn:#96560A; --warn-soft:#FBEEDC;
+  --stop:#A81C24; --stop-soft:#FAE7E8;
+  --info:#1E4E8C; --info-soft:#E6EEF8;
+  --seal:#5B21A8; --seal-soft:#EFE6FA;
+  --r:6px; --r2:10px;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --shadow:0 1px 2px rgba(17,24,32,.05),0 6px 18px rgba(17,24,32,.06);
+}
+html[data-theme="dark"]{
+  --bg:#0D1218; --surface:#151D26; --surface-2:#1B2530; --surface-3:#212C38;
+  --line:#2A3744; --line-2:#3B4C5C;
+  --ink:#E7EDF3; --ink-2:#AFBDC9; --ink-3:#8394A2;
+  --nav:#0A0F14; --nav-ink:#AEBDCA; --nav-ink-2:#6D7E8D;
+  --accent:#2FA39D; --accent-2:#3CB8B1; --accent-soft:#10312F;
+  --ok:#63C088; --ok-soft:#11301E; --warn:#DFA45C; --warn-soft:#33260F;
+  --stop:#EE868D; --stop-soft:#361619; --info:#7BAEEA; --info-soft:#12253C;
+  --seal:#B79BE8; --seal-soft:#241636;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:13.5px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:640;letter-spacing:-.005em}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent-2)}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.micro{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.muted{color:var(--ink-3)} .nowrap{white-space:nowrap} .spacer{flex:1}
+
+.shell{display:flex;min-height:100vh}
+.side{width:212px;flex:0 0 212px;background:var(--nav);color:var(--nav-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.logo{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:9px;align-items:center}
+.logo .sq{width:28px;height:28px;flex:0 0 28px;border-radius:5px;background:var(--accent-2);display:grid;place-items:center;color:#04211F;font-weight:800;font-size:11px}
+.logo b{display:block;color:#fff;font-size:12.5px;line-height:1.25}
+.logo small{display:block;color:var(--nav-ink-2);font-size:10px}
+.menu{flex:1;overflow:auto;padding:6px}
+.menu .grp{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--nav-ink-2);padding:12px 8px 5px}
+.mi{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;color:var(--nav-ink);padding:6px 8px;border-radius:5px;cursor:pointer;font-size:12.5px}
+.mi:hover{background:rgba(255,255,255,.06);color:#fff}
+.mi[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+.mi.stub{color:var(--nav-ink-2)}
+.mi .pill{margin-left:auto;font:600 10px/1 var(--mono);background:rgba(255,255,255,.13);padding:3px 5px;border-radius:9px}
+.mi .pill.hot{background:var(--stop);color:#fff}
+.mi .planned{margin-left:auto;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--nav-ink-2)}
+.sfoot{padding:9px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:9.5px;color:var(--nav-ink-2);line-height:1.5}
+
+.body{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);padding:8px 14px;display:flex;gap:11px;align-items:center;flex-wrap:wrap}
+.bar .search{position:relative;flex:1 1 280px;max-width:420px}
+.bar .search input{width:100%;padding:6px 10px 6px 28px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2)}
+.bar .search::before{content:"⌕";position:absolute;left:9px;top:4px;color:var(--ink-3);font-size:15px}
+.bar select{padding:5px 8px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2)}
+.page{padding:14px;max-width:1560px;width:100%}
+.ph{display:flex;align-items:flex-end;gap:11px;margin-bottom:11px;flex-wrap:wrap}
+.ph h1{font-size:18px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);padding:6px 11px;border-radius:var(--r);cursor:pointer;font-weight:550;font-size:12.5px}
+.btn:hover{border-color:var(--accent);color:var(--accent-2)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.p:hover{background:var(--accent-2);color:#fff}
+.btn.danger{border-color:var(--stop);color:var(--stop)}
+.btn.danger:hover{background:var(--stop-soft)}
+.btn.g{background:transparent}
+.btn.xs{padding:3px 8px;font-size:11.5px}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.card>.h{padding:9px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.card>.h h2{font-size:12.5px}
+.card>.b{padding:12px}
+.grid{display:grid;gap:11px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+label.f{display:block;margin-bottom:9px}
+label.f>span{display:block;font-size:11px;font-weight:640;color:var(--ink-2);margin-bottom:3px}
+label.f .rq{color:var(--stop)}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],input[type=search],select,textarea{
+  width:100%;padding:6px 9px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface)}
+textarea{min-height:64px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--accent-2);outline:2px solid var(--accent-soft)}
+.bad{border-color:var(--stop)!important;background:var(--stop-soft)}
+.msg{display:none;color:var(--stop);font-size:11.5px;margin-top:3px}
+.msg.on{display:block}
+.hint{font-size:11px;color:var(--ink-3);margin-top:3px}
+.chk{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:2px 0}
+.chk input{width:auto}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+
+.bdg{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:3px;border:1px solid;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.b-stop{background:var(--stop-soft);color:var(--stop);border-color:var(--stop)}
+.b-info{background:var(--info-soft);color:var(--info);border-color:var(--info)}
+.b-seal{background:var(--seal-soft);color:var(--seal);border-color:var(--seal)}
+.b-grey{background:var(--surface-3);color:var(--ink-2);border-color:var(--line-2)}
+
+/* ---- SIGNATURE: the compliance matrix ---- */
+.mx{overflow:auto;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
+.mx table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+.mx th{position:sticky;top:0;z-index:2;background:var(--surface-2);border-bottom:1px solid var(--line-2);
+  padding:6px 5px;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+  text-align:center;white-space:nowrap;min-width:56px}
+.mx th.who{text-align:left;left:0;z-index:3;min-width:180px;border-right:1px solid var(--line-2)}
+.mx td{padding:0;border-bottom:1px solid var(--line);text-align:center}
+.mx td.who{position:sticky;left:0;z-index:1;background:var(--surface);text-align:left;padding:6px 9px;
+  border-right:1px solid var(--line-2);min-width:180px}
+.mx tr:hover td.who{background:var(--surface-2)}
+.mx td.who .n{font-weight:640;font-size:12.5px}
+.mx td.who .g{font-size:10.5px;color:var(--ink-3)}
+.cell{display:block;padding:7px 4px;font:600 11px/1.25 var(--mono);cursor:default}
+.cell.ok{color:var(--ink-3)}
+.cell.due{background:var(--warn-soft);color:var(--warn)}
+.cell.exp{background:var(--stop-soft);color:var(--stop)}
+.cell.miss{background:var(--stop-soft);color:var(--stop);
+  background-image:repeating-linear-gradient(135deg,transparent,transparent 4px,rgba(168,28,36,.16) 4px,rgba(168,28,36,.16) 8px)}
+.cell .d{display:block;font-size:9.5px;font-weight:400;opacity:.8}
+.mx tr.blocked td.who{box-shadow:inset 3px 0 0 var(--stop)}
+
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;text-align:left;cursor:pointer;box-shadow:var(--shadow)}
+.stat:hover{border-color:var(--accent)}
+.stat .v{font:700 21px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.stat .k{font-size:11.5px;color:var(--ink-2);margin-top:3px}
+.stat .x{font-size:10.5px;color:var(--ink-3)}
+.stat.warn .v{color:var(--warn)} .stat.stop .v{color:var(--stop)} .stat.ok .v{color:var(--ok)}
+
+.tw{overflow:auto;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}
+table.t th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;font-weight:700}
+table.t td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t tbody tr[data-open]{cursor:pointer}
+table.t tbody tr[data-open]:hover{background:var(--surface-2)}
+table.t tbody tr:last-child td{border-bottom:0}
+table.t td.r,table.t th.r{text-align:right}
+
+.tabs{display:flex;gap:1px;border-bottom:1px solid var(--line);background:var(--surface);overflow:auto;padding:0 6px;border-radius:var(--r2) var(--r2) 0 0}
+.tab{background:none;border:0;padding:9px 11px;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;font-weight:550;white-space:nowrap;font-size:12.5px}
+.tab[aria-selected="true"]{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+
+dl.kv{display:grid;grid-template-columns:176px 1fr;gap:5px 13px;margin:0}
+dl.kv dt{font-size:11px;color:var(--ink-3);font-weight:650}
+dl.kv dd{margin:0}
+@media(max-width:640px){dl.kv{grid-template-columns:1fr;gap:1px}dl.kv dd{margin-bottom:6px}}
+
+ul.feed{list-style:none;margin:0;padding:0}
+ul.feed li{padding:7px 0 7px 12px;border-left:2px solid var(--line-2);position:relative}
+ul.feed li::before{content:"";position:absolute;left:-4px;top:11px;width:6px;height:6px;border-radius:50%;background:var(--accent-2)}
+ul.feed .m{font-size:10.5px;color:var(--ink-3);font-family:var(--mono)}
+ul.feed .s{font-weight:600;margin-top:1px}
+ul.feed .d{font-size:11.5px;color:var(--ink-2);white-space:pre-wrap}
+
+.inline{background:var(--surface-2);border:1px dashed var(--line-2);border-radius:var(--r2);padding:10px;margin-top:11px}
+.empty{padding:30px 16px;text-align:center;color:var(--ink-2)}
+.empty b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+.demo{background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn);border-radius:var(--r);padding:6px 11px;font-size:11.5px;font-weight:650;margin-bottom:11px}
+.deny{max-width:560px;margin:60px auto;text-align:center}
+.notice{border:1px solid var(--stop);background:var(--stop-soft);color:var(--stop);border-radius:var(--r2);padding:10px 13px;margin-bottom:11px}
+.notice b{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.notice ul{margin:0;padding-left:16px;font-size:12.5px}
+.restricted{border:1px dashed var(--seal);background:var(--seal-soft);border-radius:var(--r2);padding:18px;text-align:center;color:var(--seal)}
+.masked{font-family:var(--mono);letter-spacing:.08em}
+
+.checklist{display:grid;grid-template-columns:1fr auto auto;gap:0;border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.checklist>div{padding:7px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;font-size:12.5px}
+.checklist>div:nth-child(3n){justify-content:center}
+.checklist>div:nth-child(3n-1){justify-content:center}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:6px;align-items:center}
+.toast{background:var(--nav);color:#fff;padding:8px 14px;border-radius:18px;font-size:12.5px;box-shadow:var(--shadow);max-width:92vw}
+.toast.ok{background:var(--ok)} .toast.bad{background:var(--stop)} .toast.seal{background:var(--seal)}
+
+.scrim{position:fixed;inset:0;background:rgba(10,16,22,.55);z-index:60}
+.modal{position:fixed;z-index:61;top:50%;left:50%;transform:translate(-50%,-50%);width:min(620px,94vw);max-height:88vh;overflow:auto;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.modal .mh{padding:12px 15px;border-bottom:1px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:10px}
+.modal .mb{padding:14px}
+.modal .mf{padding:10px 15px;border-top:1px solid var(--line);background:var(--surface);display:flex;gap:8px;justify-content:flex-end}
+
+.sidetoggle{display:none}
+@media(max-width:920px){
+  .side{position:fixed;z-index:70;transform:translateX(-100%);transition:transform .16s}
+  .side.open{transform:none}
+  .sidetoggle{display:inline-flex}
+  .page{padding:10px}
+}
+@media print{.side,.bar,.mf,.inline{display:none}}
+</style>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Main navigation">
+    <div class="logo"><div class="sq" aria-hidden="true">PT</div>
+      <div><b>Ambulance &amp; PTS</b><small>Management System</small></div></div>
+    <div class="menu" id="menu"></div>
+    <div class="sfoot">Demonstration build · Staff and fleet<br>Branding is placeholder</div>
+  </nav>
+  <div class="body">
+    <header class="bar">
+      <button class="btn g sidetoggle" id="sidetoggle" aria-label="Show navigation">☰</button>
+      <div class="search"><input id="gsearch" type="search" placeholder="Search staff, payroll number, fleet number or registration" aria-label="Search"></div>
+      <div class="spacer"></div>
+      <span class="micro">Role</span>
+      <select id="rolepick" aria-label="Signed-in role" style="max-width:215px"></select>
+      <button class="btn g" id="theme" aria-label="Switch theme" title="Switch theme">◐</button>
+    </header>
+    <div class="page" id="page"></div>
+  </div>
+</div>
+<div id="modalhost"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   STAFF AND FLEET
+   Ambulance & Patient Transport Management System
+
+   The system of record behind every refusal the dispatch board
+   already makes. Compliance dates live here; CAD reads them.
+   Nothing in dispatch can override an expiry, so this module has
+   to be the place it gets fixed.
+   ============================================================ */
+
+const KEY="pts:stafffleet:v1", CAD_KEY="pts:cad:v1";
+const SOON=30;   /* days: amber window */
+
+/* ---------- reference data ---------- */
+const GRADES=["Driver","Ambulance Care Assistant","Emergency Medical Technician","Paramedic","Nurse escort"];
+const EMPLOYMENT=["Permanent — full time","Permanent — part time","Bank","Fixed term","Agency"];
+const STAFF_STATUS=["Active","On leave","Suspended","Left"];
+const VEHICLE_TYPES=["PTS car","Wheelchair-accessible vehicle","Stretcher ambulance","A&E-equipped ambulance","Bariatric ambulance","Event response vehicle"];
+const OWNERSHIP=["Owned outright","Leased","Contract hire"];
+const TRAINING=["Manual handling","Safeguarding adults","Safeguarding children","Basic life support",
+  "Infection prevention","Fire safety","Information governance","Conflict resolution","Driving assessment"];
+const COMPETENCIES=["Wheelchair securing","Stretcher handling","Carry chair","Bariatric transfer","Oxygen administration","Suction","Patient observations"];
+const ABSENCE=["Sickness","Annual leave","Unpaid leave","Compassionate leave","Training","Other"];
+const CHECK_ITEMS=["Exterior and bodywork","Interior cleanliness","Tyres and pressures","Lights and indicators",
+  "Fluid levels","Fuel or charge","Clinical equipment","Wheelchair equipment","Stretcher and straps",
+  "Oxygen","Defibrillator","PPE stock","Infection-control supplies","Communications"];
+
+const ROLES=[
+  {id:"hr",      name:"HR & Compliance Officer",     p:["staff","staff.edit","staff.hr","fleet","renewals","audit","approve"]},
+  {id:"fleetmgr",name:"Fleet Manager",               p:["fleet","fleet.edit","renewals","audit","checks"]},
+  {id:"ops",     name:"Operations Manager",          p:["staff","staff.edit","fleet","fleet.edit","renewals","audit","approve","checks"]},
+  {id:"super",   name:"Super Administrator",         p:["staff","staff.edit","staff.hr","fleet","fleet.edit","renewals","audit","approve","checks"]},
+  {id:"director",name:"Company Director",            p:["staff","fleet","renewals","audit"]},
+  {id:"clinical",name:"Clinical Lead",               p:["staff","staff.clinical","renewals","audit"]},
+  {id:"dispatch",name:"Control Room Dispatcher",     p:["staff.status","fleet.status"]},
+  {id:"para",    name:"Paramedic",                   p:["self"]},
+  {id:"emt",     name:"Emergency Medical Technician",p:["self"]},
+  {id:"aca",     name:"Ambulance Care Assistant",    p:["self"]},
+  {id:"driver",  name:"Driver",                      p:["self","checks"]},
+  {id:"event",   name:"Event Medical Staff",         p:["self"]},
+  {id:"finance", name:"Finance Officer",             p:[]},
+  {id:"qa",      name:"Quality Assurance Officer",   p:["staff","fleet","audit"]},
+  {id:"portal",  name:"Commissioner / Customer Portal User", p:[]}
+];
+
+const MENU=[
+  {g:"Operations"},
+  {id:"dashboard",label:"Dashboard",stub:1},{id:"crm",label:"CRM",stub:1},
+  {id:"patients",label:"Patients",stub:1},{id:"bookings",label:"Bookings",stub:1},
+  {id:"cad",label:"CAD and Dispatch",stub:1},{id:"epcr",label:"ePCR",stub:1},{id:"events",label:"Events",stub:1},
+  {g:"Workforce"},
+  {id:"compliance",label:"Compliance board",live:1},
+  {id:"staff",label:"Staff",live:1},
+  {id:"renewals",label:"Renewals due",live:1},
+  {id:"selfservice",label:"My record",live:1},
+  {id:"rota",label:"Rota",stub:1},{id:"training",label:"Training",stub:1},
+  {g:"Assets"},
+  {id:"fleet",label:"Fleet",live:1},
+  {id:"checks",label:"Daily checks",live:1},
+  {id:"equipment",label:"Equipment",stub:1},{id:"stock",label:"Stock and Medicines",stub:1},
+  {g:"Governance"},
+  {id:"incidents",label:"Incidents",stub:1},{id:"safeg",label:"Safeguarding",stub:1},
+  {id:"policies",label:"Policies",stub:1},{id:"audit",label:"Change log",live:1},
+  {g:"Business"},
+  {id:"finance",label:"Finance",stub:1},{id:"reports",label:"Reports",stub:1},{id:"settings",label:"Settings",stub:1}
+];
+
+/* ---------- state ---------- */
+let S={staff:[],vehicles:[],log:[],view:"compliance",roleId:"hr",sel:null,selKind:"",tab:"summary",
+  meId:"s01",f:{q:"",grade:"",status:"Active",compliance:""},vf:{q:"",type:"",status:""},revealed:{}};
+let storageOK=true, cadLinked=false;
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const role=()=>ROLES.find(r=>r.id===S.roleId)||ROLES[0];
+const can=p=>role().p.includes(p);
+const anyAccess=()=>role().p.length>0;
+const selfOnly=()=>can("self")&&!can("staff");
+const statusOnly=()=>(can("staff.status")||can("fleet.status"))&&!can("staff")&&!can("fleet");
+
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const shift=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
+const mshift=n=>{const d=new Date();d.setMonth(d.getMonth()+n);return d.toISOString().slice(0,10);};
+function ukd(iso){if(!iso)return "—";const d=new Date(iso.length<=10?iso+"T00:00:00":iso);if(isNaN(d))return "—";
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();}
+function uks(iso){if(!iso)return "—";const d=new Date(iso);if(isNaN(d))return "—";
+  return ukd(iso)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+function days(iso){if(!iso)return null;return Math.round((new Date(iso+"T00:00:00")-new Date(todayISO()+"T00:00:00"))/864e5);}
+function toast(m,k){const t=document.createElement("div");t.className="toast"+(k?" "+k:"");t.textContent=m;
+  $("#toasts").appendChild(t);setTimeout(()=>{t.style.transition="opacity .3s";t.style.opacity=0;setTimeout(()=>t.remove(),320);},3000);}
+const mask=v=>v?v.slice(0,2)+" ** ** ** "+v.slice(-1):"—";
+
+/* ---------- persistence ---------- */
+async function save(){
+  try{if(window.storage&&storageOK)await window.storage.set(KEY,
+    JSON.stringify({staff:S.staff,vehicles:S.vehicles,log:S.log.slice(-300)}));}
+  catch(e){if(storageOK){storageOK=false;toast("Changes are held for this session only.","bad");}}
+  publishToCAD();
+}
+async function load(){
+  try{if(!window.storage){storageOK=false;return false;}
+    const r=await window.storage.get(KEY);
+    if(r&&r.value){const d=JSON.parse(r.value);
+      if(d&&Array.isArray(d.staff)&&d.staff.length){S.staff=d.staff;S.vehicles=d.vehicles||[];S.log=d.log||[];return true;}}
+  }catch(e){}
+  return false;
+}
+/* push the compliance dates back to the dispatch board so the two agree */
+async function publishToCAD(){
+  try{
+    if(!window.storage) return;
+    const r=await window.storage.get(CAD_KEY);
+    if(!r||!r.value) return;
+    const d=JSON.parse(r.value);
+    if(!d||!Array.isArray(d.staff)) return;
+    d.staff=d.staff.map(cs=>{
+      const s=S.staff.find(x=>x.cadId===cs.id||x.name===cs.name);
+      if(!s) return cs;
+      return Object.assign({},cs,{grade:s.grade,status:s.status==="Active"?"On duty":s.status,
+        dbs:s.dbs.expiry,licence:s.licence.expiry,registration:s.registration.expiry||"",
+        training:{"manual handling":trainDate(s,"Manual handling"),
+          "safeguarding":trainDate(s,"Safeguarding adults"),
+          "basic life support":trainDate(s,"Basic life support")}});
+    });
+    d.vehicles=(d.vehicles||[]).map(cv=>{
+      const v=S.vehicles.find(x=>x.cadId===cv.id||x.fleet===cv.fleet);
+      if(!v) return cv;
+      return Object.assign({},cv,{type:v.type,mot:v.mot,insurance:v.insurance.expiry,tax:v.tax,
+        status:v.status==="Off road"?"Off road":cv.status==="On job"?"On job":v.status,
+        offReason:v.offReason||"",
+        defects:v.defects.filter(x=>x.open).map(x=>({id:x.id,desc:x.desc,severity:x.severity,open:true,raised:x.raised}))});
+    });
+    await window.storage.set(CAD_KEY,JSON.stringify(d));
+    cadLinked=true;
+  }catch(e){}
+}
+const trainDate=(s,n)=>{const t=s.training.find(x=>x.name===n);return t?t.expiry:"";};
+
+function log(action,detail,ref){
+  S.log.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||"",ref:ref||""});
+  if(S.log.length>400) S.log=S.log.slice(-400);
+}
+const stf=id=>S.staff.find(s=>s.id===id);
+const veh=id=>S.vehicles.find(v=>v.id===id);
+const me=()=>stf(S.meId)||S.staff[0];
+
+/* ============================================================
+   COMPLIANCE ENGINE
+   One function decides everything: the matrix cells, the renewals
+   list, the blocked flags, and what gets published to dispatch.
+   ============================================================ */
+function state(dateISO,required){
+  if(!dateISO) return required?"miss":"ok";
+  const d=days(dateISO);
+  if(d<0) return "exp";
+  if(d<=SOON) return "due";
+  return "ok";
+}
+const STAFF_ITEMS=[
+  {k:"dbs",       label:"DBS",            short:"DBS",   get:s=>s.dbs.expiry,          req:true},
+  {k:"rtw",       label:"Right to work",  short:"RTW",   get:s=>s.rightToWork.expiry,  req:true},
+  {k:"licence",   label:"Driving licence",short:"Lic",   get:s=>s.licence.expiry,      req:true},
+  {k:"reg",       label:"Registration",   short:"Reg",   get:s=>s.registration.expiry, req:s=>["Paramedic","Nurse escort"].includes(s.grade)},
+  {k:"mh",        label:"Manual handling",short:"MH",    get:s=>trainDate(s,"Manual handling"),   req:true},
+  {k:"sga",       label:"Safeguarding",   short:"Safeg", get:s=>trainDate(s,"Safeguarding adults"),req:true},
+  {k:"bls",       label:"Life support",   short:"BLS",   get:s=>trainDate(s,"Basic life support"),req:true},
+  {k:"ipc",       label:"Infection prevention",short:"IPC",get:s=>trainDate(s,"Infection prevention"),req:true},
+  {k:"ig",        label:"Information governance",short:"IG",get:s=>trainDate(s,"Information governance"),req:false},
+  {k:"appraisal", label:"Appraisal",      short:"Apprsl",get:s=>s.appraisals.length?addYear(s.appraisals[s.appraisals.length-1].date,1):"", req:false},
+  {k:"supervision",label:"Supervision",   short:"Supvsn",get:s=>s.supervisions.length?addMonth(s.supervisions[s.supervisions.length-1].date,3):"", req:false},
+  {k:"refs",      label:"References",     short:"Refs",  get:s=>s.references.filter(r=>r.received).length>=2?"2099-01-01":"", req:true}
+];
+const VEHICLE_ITEMS=[
+  {k:"mot",   label:"MOT",              short:"MOT",  get:v=>v.mot,               req:true},
+  {k:"ins",   label:"Insurance",        short:"Ins",  get:v=>v.insurance.expiry,  req:true},
+  {k:"tax",   label:"Vehicle tax",      short:"Tax",  get:v=>v.tax,               req:true},
+  {k:"brk",   label:"Breakdown cover",  short:"Brkdn",get:v=>v.breakdown.expiry,  req:false},
+  {k:"svc",   label:"Next service",     short:"Svc",  get:v=>v.nextService,       req:false},
+  {k:"equip", label:"Equipment inspection",short:"Equip",get:v=>v.equipmentDue,   req:true},
+  {k:"clean", label:"Deep clean",       short:"Clean",get:v=>v.deepCleanDue,      req:false},
+  {k:"check", label:"Daily check",      short:"Check",get:v=>v.checks.length&&v.checks[v.checks.length-1].date===todayISO()?todayISO():"", req:true}
+];
+function itemReq(it,rec){ return typeof it.req==="function"?it.req(rec):it.req; }
+function staffCompliance(s){
+  const rows=STAFF_ITEMS.map(it=>{
+    const d=it.get(s), req=itemReq(it,s);
+    return {k:it.k,label:it.label,short:it.short,date:d,req,state:req?state(d,true):(d?state(d,false):"na")};
+  });
+  const blocking=rows.filter(r=>r.req&&(r.state==="exp"||r.state==="miss"));
+  return {rows,blocking,
+    blocked:blocking.length>0||s.status!=="Active",
+    reason:s.status!=="Active"?s.status:blocking.length?blocking.map(b=>b.label).join(", "):""};
+}
+function vehicleCompliance(v){
+  const rows=VEHICLE_ITEMS.map(it=>{
+    const d=it.get(v);
+    return {k:it.k,label:it.label,short:it.short,date:d,req:it.req,state:state(d,it.req)};
+  });
+  const crit=v.defects.filter(d=>d.open&&d.severity==="Safety-critical");
+  const blocking=rows.filter(r=>r.req&&(r.state==="exp"||r.state==="miss"));
+  return {rows,blocking,critical:crit,
+    blocked:blocking.length>0||crit.length>0||v.status==="Off road",
+    reason:v.status==="Off road"?("Off road — "+(v.offReason||"no reason recorded")):
+      crit.length?("Safety-critical defect: "+crit[0].desc):
+      blocking.length?blocking.map(b=>b.label).join(", "):""};
+}
+const addYear=(iso,n)=>{if(!iso)return "";const d=new Date(iso+"T00:00:00");d.setFullYear(d.getFullYear()+n);return d.toISOString().slice(0,10);};
+const addMonth=(iso,n)=>{if(!iso)return "";const d=new Date(iso+"T00:00:00");d.setMonth(d.getMonth()+n);return d.toISOString().slice(0,10);};
+
+function allRenewals(within){
+  const out=[];
+  S.staff.filter(s=>s.status!=="Left").forEach(s=>{
+    staffCompliance(s).rows.forEach(r=>{
+      if(r.state==="na"||r.k==="refs") return;
+      const d=r.date?days(r.date):null;
+      if(r.state==="miss") out.push({kind:"Staff",who:s.forename+" "+s.surname,id:s.id,item:r.label,date:"",d:-9999,state:"miss"});
+      else if(d!==null&&d<=(within||90)) out.push({kind:"Staff",who:s.forename+" "+s.surname,id:s.id,item:r.label,date:r.date,d,state:r.state});
+    });
+  });
+  S.vehicles.forEach(v=>{
+    vehicleCompliance(v).rows.forEach(r=>{
+      if(r.k==="check") return;
+      const d=r.date?days(r.date):null;
+      if(r.state==="miss") out.push({kind:"Vehicle",who:v.fleet+" ("+v.reg+")",id:v.id,item:r.label,date:"",d:-9999,state:"miss"});
+      else if(d!==null&&d<=(within||90)) out.push({kind:"Vehicle",who:v.fleet+" ("+v.reg+")",id:v.id,item:r.label,date:r.date,d,state:r.state});
+    });
+  });
+  return out.sort((a,b)=>a.d-b.d);
+}
+
+/* ============================================================
+   DEMO DATA
+   ============================================================ */
+function seed(){
+  const T=mshift, D=shift;
+  const mk=(o)=>Object.assign({
+    id:uid(),ref:"",forename:"",surname:"",grade:"",status:"Active",employment:"Permanent — full time",
+    startDate:"",payroll:"",ni:"",address:"",phone:"",email:"",
+    emergency:{name:"",relationship:"",phone:""},
+    rightToWork:{status:"Verified",docType:"UK passport",expiry:""},
+    dbs:{number:"",issued:"",expiry:"",updateService:false,level:"Enhanced with barred lists"},
+    licence:{number:"",expiry:"",categories:["B"],points:0,checked:""},
+    registration:{body:"",number:"",expiry:""},
+    qualifications:[],training:[],competencies:[],immunisations:[],
+    occHealth:{status:"Cleared",lastReview:"",restrictions:""},
+    references:[],appraisals:[],supervisions:[],disciplinary:[],absence:[],leave:[],
+    availability:{Mon:true,Tue:true,Wed:true,Thu:true,Fri:true,Sat:false,Sun:false},
+    restrictions:"",documents:[],policies:[],audit:[],cadId:""
+  },o);
+
+  const T2=(n)=>T(n);
+  const trainSet=(offsets)=>TRAINING.slice(0,offsets.length).map((n,i)=>({name:n,completed:T(offsets[i]-24),expiry:offsets[i]===null?"":T(offsets[i])}));
+
+  const rows=[
+    ["s01","Rana","Ahmadi","Emergency Medical Technician",14,30,null,[8,11,17,5,9,21,13,15,10],"cadId:s01"],
+    ["s02","Leah","Corrigan","Ambulance Care Assistant",6,22,null,[3,9,14,7,12,18,16,11,20],"cadId:s02"],
+    ["s03","Pearl","Ndlovu","Paramedic",19,40,13,[10,16,22,12,15,25,19,17,14],"cadId:s03"],
+    ["s04","Keith","Beattie","Driver",9,18,null,[4,6,9,2,8,13,11,7,5],"cadId:s04"],
+    ["s05","Jules","Moreau","Ambulance Care Assistant",-2,25,null,[7,14,19,9,11,20,15,12,17],"cadId:s05"],
+    ["s06","Tom","Hollins","Emergency Medical Technician",21,33,null,[-1,12,18,6,10,22,14,9,16],"cadId:s06"],
+    ["s07","Ana","Ferreira","Ambulance Care Assistant",15,28,null,[11,20,24,15,18,26,21,19,23],"cadId:s07"],
+    ["s08","Mick","Quill","Driver",5,2,null,[9,3,11,4,7,15,10,6,8],"cadId:s08"],
+    ["s09","Sunita","Iyer","Nurse escort",17,26,8,[13,18,23,10,16,24,20,14,21],"cadId:s09"],
+    ["s10","Dele","Okoro","Emergency Medical Technician",12,31,null,[6,8,14,3,9,19,12,10,11],"cadId:s10"],
+    ["s11","Chris","Vaughan","Ambulance Care Assistant",10,20,null,[5,10,16,8,13,21,17,11,15],"cadId:s11"],
+    ["s12","Bea","Ostrowski","Paramedic",16,36,-1,[14,19,25,11,17,23,18,16,22],"cadId:s12"]
+  ];
+
+  S.staff=rows.map((r,i)=>{
+    const [cad,fore,sur,grade,dbsM,licM,regM,tr]=r;
+    const s=mk({ref:"EMP-"+String(1001+i),forename:fore,surname:sur,grade,
+      cadId:cad,
+      startDate:D(-(400+i*90)),payroll:"PR"+String(4400+i*7),
+      ni:"QQ"+String(120000+i*331)+"C",
+      address:(i+4)+" Demonstration Terrace, Testford",postcode:"TF"+(1+i%7)+" "+(2+i%6)+"HG",
+      phone:"07700 9000"+String(10+i),email:fore.toLowerCase()+"."+sur.toLowerCase()+"@demo-provider.test",
+      emergency:{name:"A family member",relationship:i%2?"Partner":"Sibling",phone:"07700 9001"+String(10+i)},
+      rightToWork:{status:"Verified",docType:i%4===3?"Share code":"UK passport",expiry:i%4===3?T(4+i):""},
+      dbs:{number:"00"+String(1234567+i*13),issued:T(dbsM-36),expiry:T(dbsM),updateService:i%3===0,
+        level:"Enhanced with adult barred list"},
+      licence:{number:sur.slice(0,5).toUpperCase()+"9"+String(100+i),expiry:T(licM),
+        categories:grade==="Driver"||grade==="Emergency Medical Technician"?["B","C1","D1"]:["B","C1"],
+        points:i===7?6:0,checked:D(-(30+i*3))},
+      registration:regM===null?{body:"",number:"",expiry:""}
+        :{body:grade==="Paramedic"?"HCPC":"NMC",number:(grade==="Paramedic"?"PA":"NM")+String(220011+i),expiry:T(regM)},
+      training:trainSet(tr),
+      qualifications:grade==="Paramedic"?["BSc Paramedic Science","IHCD Ambulance Technician"]
+        :grade==="Emergency Medical Technician"?["FutureQuals L4 Associate Ambulance Practitioner"]
+        :grade==="Nurse escort"?["BSc Nursing (Adult)"]:["FREC 3","C1 licence acquired"],
+      competencies:COMPETENCIES.map((c,j)=>({name:c,assessed:j<5||i%3?D(-(60+j*20)):"",assessor:"Clinical Lead",
+        valid:(j<5||i%3)&&!(i===5&&j===3)})),
+      immunisations:["Hepatitis B","Tetanus","MMR","Seasonal influenza"].map((n,j)=>({name:n,date:D(-(120+j*90))})),
+      occHealth:{status:i===7?"Cleared with adjustments":"Cleared",lastReview:D(-(180+i*10)),
+        restrictions:i===7?"No lifting above 15 kg pending review":""},
+      references:i===10?[{name:"Previous employer",type:"Employment",received:true}]
+        :[{name:"Previous employer",type:"Employment",received:true},{name:"Character referee",type:"Character",received:true}],
+      appraisals:i%5===0?[{id:uid(),date:D(-400),by:"Operations Manager",notes:"Meeting expectations.",rating:"Good"}]
+        :[{id:uid(),date:D(-(120+i*12)),by:"Operations Manager",notes:"Meeting expectations. Objectives agreed for the year.",rating:"Good"}],
+      supervisions:[{id:uid(),date:D(-(40+i*9)),by:"Clinical Lead",notes:"Routine supervision. No concerns raised."}],
+      absence:i%4===1?[{id:uid(),type:"Sickness",from:D(-(60+i)),to:D(-(57+i)),reason:"Short-term illness",rtw:true}]:[],
+      leave:[{id:uid(),from:D(30+i),to:D(37+i),days:5,status:i%3===0?"Requested":"Approved",note:""}],
+      status:i===10?"On leave":"Active",
+      restrictions:i===7?"Six penalty points — driving reviewed at the next appraisal":"",
+      documents:[{id:uid(),name:"contract-of-employment.pdf",category:"Contract",size:"240 KB",by:"HR",at:D(-(400+i*90))},
+                 {id:uid(),name:"dbs-certificate.pdf",category:"DBS",size:"180 KB",by:"HR",at:T(dbsM-36)}],
+      policies:[{name:"Safeguarding policy",version:"4.1",acknowledged:i%4!==2?D(-(30+i)):""},
+                {name:"Infection prevention policy",version:"2.3",acknowledged:i%3!==1?D(-(50+i)):""},
+                {name:"Driving at work policy",version:"1.8",acknowledged:i%5!==3?D(-(70+i)):""}]
+    });
+    s.audit=[{id:uid(),at:new Date(Date.now()-864e5*(200-i)).toISOString(),by:"HR & Compliance Officer",
+      action:"Employee record created",detail:s.forename+" "+s.surname+" · "+s.grade}];
+    return s;
+  });
+
+  /* ---- vehicles ---- */
+  const mkv=(o)=>Object.assign({
+    id:uid(),fleet:"",reg:"",make:"",model:"",year:2022,type:"",category:"",base:"Kingsway",
+    ownership:"Owned outright",lease:{provider:"",monthly:"",ends:""},
+    insurance:{insurer:"Testford Commercial",policy:"",expiry:""},mot:"",tax:"",
+    breakdown:{provider:"National Fleet Assist",expiry:""},
+    services:[],nextService:"",mileage:0,fuelType:"Diesel",fuelRecords:[],
+    tyres:{lastCheck:"",notes:""},equipment:[],equipmentDue:"",cleaning:[],deepCleanDue:"",
+    checks:[],defects:[],repairs:[],downtime:[],status:"Available",offReason:"",
+    documents:[],audit:[],cadId:""
+  },o);
+
+  const vr=[
+    ["v1","A101","TF21 KMV","Ford","Transit Custom",2021,"Wheelchair-accessible vehicle",7,9,4,88420,"Kingsway"],
+    ["v2","A102","TF22 LNX","Mercedes-Benz","Sprinter",2022,"Stretcher ambulance",3,9,6,132870,"Kingsway"],
+    ["v3","A103","TF19 PRT","Skoda","Octavia Estate",2019,"PTS car",11,9,2,204110,"Riverside"],
+    ["v4","A104","TF23 WGH","Mercedes-Benz","Sprinter Bariatric",2023,"Bariatric ambulance",15,9,10,41260,"Eastfield"],
+    ["v5","A105","TF20 SDR","Peugeot","Boxer",2020,"Wheelchair-accessible vehicle",5,9,8,167900,"Northgate"],
+    ["v6","A106","TF18 JCB","Renault","Master",2018,"Wheelchair-accessible vehicle",-1,9,5,243550,"Riverside"],
+    ["v7","A107","TF23 ZEN","Fiat","Ducato",2023,"A&E-equipped ambulance",13,9,12,29840,"Kingsway"]
+  ];
+  S.vehicles=vr.map((r,i)=>{
+    const [cad,fleet,reg,make,model,year,type,motM,insM,taxM,miles,base]=r;
+    const v=mkv({cadId:cad,fleet,reg,make,model,year,type,base,mileage:miles,
+      category:type.indexOf("A&E")===0?"Category A":"Category C",
+      ownership:i%3===1?"Leased":"Owned outright",
+      lease:i%3===1?{provider:"Fleetline Contract Hire",monthly:"—",ends:mshift(18)}:{provider:"",monthly:"",ends:""},
+      insurance:{insurer:"Testford Commercial",policy:"TC/"+String(88120+i),expiry:mshift(insM)},
+      mot:mshift(motM),tax:mshift(taxM),
+      breakdown:{provider:"National Fleet Assist",expiry:mshift(i===2?1:14)},
+      services:[{id:uid(),date:shift(-(90+i*20)),mileage:miles-4200,type:"Full service",by:"Testford Commercials",notes:""}],
+      nextService:mshift(i===5?0:4),
+      equipment:[{id:uid(),name:"Defibrillator",serial:"DF"+String(3300+i),inspected:shift(-(60+i*10)),next:mshift(i===3?0:6)},
+                 {id:uid(),name:"Stretcher",serial:"ST"+String(4400+i),inspected:shift(-(80+i*8)),next:mshift(8)},
+                 {id:uid(),name:"Carry chair",serial:"CC"+String(5500+i),inspected:shift(-(100+i*6)),next:mshift(10)}],
+      equipmentDue:mshift(i===3?-1:6),
+      cleaning:[{id:uid(),date:shift(-(7+i)),type:i%2?"Deep clean":"Routine clean",by:"Base staff",notes:""}],
+      deepCleanDue:shift(i===1?-3:21),
+      tyres:{lastCheck:shift(-(14+i)),notes:i===5?"Nearside front approaching the limit":""},
+      fuelRecords:[{id:uid(),date:shift(-3),litres:62,cost:"—",mileage:miles-180}]
+    });
+    if(i===4){ v.status="Off road"; v.offReason="Nearside tail lift will not deploy";
+      v.defects.push({id:uid(),desc:"Tail lift fails to lower under load",severity:"Safety-critical",open:true,
+        raised:shift(-1),by:"K. Beattie",repair:"Booked with the lift engineer for Thursday"});
+      v.downtime.push({id:uid(),from:shift(-1),to:"",reason:"Tail lift defect"}); }
+    if(i===5){ v.defects.push({id:uid(),desc:"Interior grab rail loose",severity:"Advisory",open:true,
+      raised:shift(-3),by:"T. Hollins",repair:""}); }
+    if(i!==4) v.checks.push({id:uid(),date:i<4?todayISO():shift(-1),by:"Crew",pass:true,
+      fails:[],mileage:miles,notes:""});
+    v.audit=[{id:uid(),at:new Date(Date.now()-864e5*300).toISOString(),by:"Fleet Manager",
+      action:"Vehicle added to the fleet",detail:fleet+" · "+reg}];
+    return v;
+  });
+
+  S.log=[{id:uid(),at:new Date(Date.now()-72e5).toISOString(),by:"HR & Compliance Officer",
+    action:"Compliance board opened",detail:"Daily review",ref:""}];
+}
+
+/* ---------- filtering ---------- */
+function visibleStaff(){
+  let list=S.staff.slice();
+  if(selfOnly()) list=list.filter(s=>s.id===S.meId);
+  const f=S.f,q=f.q.trim().toLowerCase();
+  return list.filter(s=>{
+    if(f.status&&s.status!==f.status) return false;
+    if(f.grade&&s.grade!==f.grade) return false;
+    if(f.compliance){
+      const c=staffCompliance(s);
+      if(f.compliance==="blocked"&&!c.blocked) return false;
+      if(f.compliance==="due"&&!c.rows.some(r=>r.state==="due")) return false;
+      if(f.compliance==="clear"&&c.blocked) return false;
+    }
+    if(q){const hay=[s.ref,s.forename,s.surname,s.grade,s.payroll,s.email].join(" ").toLowerCase();
+      if(!hay.includes(q)) return false;}
+    return true;
+  }).sort((a,b)=>a.surname.localeCompare(b.surname));
+}
+function visibleVehicles(){
+  const f=S.vf,q=f.q.trim().toLowerCase();
+  return S.vehicles.filter(v=>{
+    if(f.type&&v.type!==f.type) return false;
+    if(f.status==="blocked"&&!vehicleCompliance(v).blocked) return false;
+    if(f.status==="fit"&&vehicleCompliance(v).blocked) return false;
+    if(q){const hay=[v.fleet,v.reg,v.make,v.model,v.type,v.base].join(" ").toLowerCase();
+      if(!hay.includes(q)) return false;}
+    return true;
+  }).sort((a,b)=>a.fleet.localeCompare(b.fleet));
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderMenu(){
+  const blocked=S.staff.filter(s=>staffCompliance(s).blocked).length+S.vehicles.filter(v=>vehicleCompliance(v).blocked).length;
+  const due=allRenewals(30).length;
+  $("#menu").innerHTML=MENU.map(m=>{
+    if(m.g) return '<div class="grp">'+esc(m.g)+'</div>';
+    const cur=S.view===m.id||(m.id==="staff"&&S.selKind==="staff")||(m.id==="fleet"&&S.selKind==="vehicle");
+    const badge=m.id==="compliance"?'<span class="pill'+(blocked?" hot":"")+'">'+blocked+'</span>'
+      :m.id==="renewals"?'<span class="pill">'+due+'</span>'
+      :m.live?"":'<span class="planned">planned</span>';
+    return '<button class="mi'+(m.live?"":" stub")+'" data-go="'+m.id+'"'+(cur?' aria-current="page"':'')+
+      '>'+esc(m.label)+badge+'</button>';
+  }).join("");
+}
+function render(){
+  renderMenu();
+  const p=$("#page");
+  if(!anyAccess()){p.innerHTML=viewDenied();return;}
+  if(S.selKind==="staff"&&S.sel) p.innerHTML=viewStaffRecord();
+  else if(S.selKind==="vehicle"&&S.sel) p.innerHTML=viewVehicleRecord();
+  else if(S.view==="compliance") p.innerHTML=viewCompliance();
+  else if(S.view==="staff") p.innerHTML=viewStaffList();
+  else if(S.view==="fleet") p.innerHTML=viewFleetList();
+  else if(S.view==="renewals") p.innerHTML=viewRenewals();
+  else if(S.view==="checks") p.innerHTML=viewChecks();
+  else if(S.view==="selfservice") p.innerHTML=viewSelf();
+  else if(S.view==="audit") p.innerHTML=viewAudit();
+  else p.innerHTML=viewStub();
+}
+function viewDenied(){
+  return '<div class="deny"><div style="font-size:30px">🔒</div><h1 style="margin:8px 0">No access to staff or fleet records</h1>'+
+    '<p class="muted">The <strong>'+esc(role().name)+'</strong> role does not carry access to employee or vehicle records.</p>'+
+    '<p class="hint">Change the role in the top bar to see how access differs.</p></div>';
+}
+function viewStub(){
+  const m=MENU.find(x=>x.id===S.view)||{label:"Module"};
+  return '<div class="card"><div class="b empty"><b>'+esc(m.label)+' is not in this build</b>'+
+    'This delivery covers staff, fleet and the compliance that governs both. Rostering and dispatch read these records.</div></div>';
+}
+const demoNote='<div class="demo">Demonstration build — fictional employees and vehicles. '+
+  (cadLinked?'Compliance dates are being published to the dispatch board.':'Compliance dates publish to the dispatch board when it has been used here.')+'</div>';
+
+/* ---------- compliance board ---------- */
+function viewCompliance(){
+  if(statusOnly()) return viewStatusOnly();
+  if(!can("staff")&&!can("fleet")) return viewDenied();
+  const blockedS=S.staff.filter(s=>staffCompliance(s).blocked&&s.status!=="Left");
+  const blockedV=S.vehicles.filter(v=>vehicleCompliance(v).blocked);
+  const due30=allRenewals(30);
+
+  const staffMatrix=can("staff")?
+    '<div class="card" style="margin-bottom:12px"><div class="h"><h2>Staff compliance</h2>'+
+      '<span class="muted">Days remaining. Red blocks rostering.</span><div class="spacer"></div>'+
+      '<span class="bdg '+(blockedS.length?"b-stop":"b-ok")+'">'+blockedS.length+' blocked</span></div>'+
+    '<div class="mx"><table><thead><tr><th class="who">Employee</th>'+
+      STAFF_ITEMS.map(i=>'<th title="'+esc(i.label)+'">'+esc(i.short)+'</th>').join("")+
+      '<th>Status</th></tr></thead><tbody>'+
+    S.staff.filter(s=>s.status!=="Left").sort((a,b)=>a.surname.localeCompare(b.surname)).map(s=>{
+      const c=staffCompliance(s);
+      return '<tr'+(c.blocked?' class="blocked"':'')+'>'+
+        '<td class="who" data-openstaff="'+s.id+'" style="cursor:pointer"><div class="n">'+esc(s.surname+", "+s.forename)+'</div>'+
+        '<div class="g">'+esc(s.grade)+'</div></td>'+
+        c.rows.map(r=>cellHTML(r)).join("")+
+        '<td>'+(c.blocked?'<span class="bdg b-stop">Blocked</span>':'<span class="bdg b-ok">Clear</span>')+'</td></tr>';
+    }).join("")+'</tbody></table></div></div>':"";
+
+  const fleetMatrix=can("fleet")?
+    '<div class="card"><div class="h"><h2>Vehicle compliance</h2>'+
+      '<span class="muted">Red blocks allocation on the dispatch board.</span><div class="spacer"></div>'+
+      '<span class="bdg '+(blockedV.length?"b-stop":"b-ok")+'">'+blockedV.length+' blocked</span></div>'+
+    '<div class="mx"><table><thead><tr><th class="who">Vehicle</th>'+
+      VEHICLE_ITEMS.map(i=>'<th title="'+esc(i.label)+'">'+esc(i.short)+'</th>').join("")+
+      '<th>Defects</th><th>Status</th></tr></thead><tbody>'+
+    S.vehicles.map(v=>{
+      const c=vehicleCompliance(v);
+      const open=v.defects.filter(d=>d.open);
+      return '<tr'+(c.blocked?' class="blocked"':'')+'>'+
+        '<td class="who" data-openveh="'+v.id+'" style="cursor:pointer"><div class="n">'+esc(v.fleet)+' <span class="muted mono">'+esc(v.reg)+'</span></div>'+
+        '<div class="g">'+esc(v.type)+'</div></td>'+
+        c.rows.map(r=>cellHTML(r)).join("")+
+        '<td><span class="cell '+(c.critical.length?"exp":open.length?"due":"ok")+'">'+(open.length||"—")+'</span></td>'+
+        '<td>'+(c.blocked?'<span class="bdg b-stop">Blocked</span>':'<span class="bdg b-ok">Fit</span>')+'</td></tr>';
+    }).join("")+'</tbody></table></div></div>':"";
+
+  return demoNote+
+  '<div class="ph"><h1>Compliance board</h1><span class="muted">Everything dispatch checks before it allocates</span></div>'+
+  '<div class="grid g4" style="margin-bottom:12px">'+
+    st(blockedS.length,"Staff blocked","Cannot be rostered",blockedS.length?"stop":"ok","blocked")+
+    st(blockedV.length,"Vehicles blocked","Cannot be allocated",blockedV.length?"stop":"ok","vblocked")+
+    st(due30.length,"Expiring in 30 days","Renew now",due30.length?"warn":"ok","renewals")+
+    st(S.vehicles.filter(v=>!v.checks.some(c=>c.date===todayISO())).length,"Daily checks outstanding","Today",'warn',"checks")+
+  '</div>'+
+  (blockedS.length||blockedV.length?'<div class="notice"><b>Blocked resources</b><ul>'+
+    blockedS.map(s=>'<li><strong>'+esc(s.forename+" "+s.surname)+'</strong> — '+esc(staffCompliance(s).reason)+'</li>').join("")+
+    blockedV.map(v=>'<li><strong>'+esc(v.fleet)+'</strong> — '+esc(vehicleCompliance(v).reason)+'</li>').join("")+
+    '</ul></div>':'')+
+  staffMatrix+fleetMatrix+
+  '<p class="hint">Each cell shows the days left before that item expires. Amber is within 30 days, red is expired or missing, '+
+    'hatched red means never recorded. Rows with a red edge cannot be used until the item is fixed here — the dispatch board '+
+    'will not let anyone override them.</p>';
+}
+function cellHTML(r){
+  if(r.state==="na") return '<td><span class="cell ok">—</span></td>';
+  if(r.state==="miss") return '<td><span class="cell miss" title="Never recorded">none<span class="d">missing</span></span></td>';
+  if(r.k==="refs") return '<td><span class="cell ok">✓</span></td>';
+  if(r.k==="check") return '<td><span class="cell '+(r.state==="ok"?"ok":"exp")+'">'+(r.state==="ok"?"today":"due")+'</span></td>';
+  const d=days(r.date);
+  return '<td><span class="cell '+r.state+'" title="'+esc(r.label+" — "+ukd(r.date))+'">'+
+    (d<0?d:"+"+d)+'<span class="d">'+ukd(r.date).slice(0,5)+'</span></span></td>';
+}
+function st(v,k,x,cls,go){
+  return '<button class="stat '+(cls||"")+'" data-stat="'+esc(go)+'"><div class="v">'+v+'</div>'+
+    '<div class="k">'+esc(k)+'</div><div class="x">'+esc(x)+'</div></button>';
+}
+function viewStatusOnly(){
+  return '<div class="ph"><h1>Who and what can be used</h1><span class="muted">Read-only view for the control room</span></div>'+
+  '<div class="grid g2"><div class="card"><div class="h"><h2>Crew</h2></div><div class="tw" style="border:0">'+
+    '<table class="t"><tbody>'+S.staff.filter(s=>s.status!=="Left").map(s=>{const c=staffCompliance(s);
+      return '<tr><td><strong>'+esc(s.forename+" "+s.surname)+'</strong><div class="muted">'+esc(s.grade)+'</div></td>'+
+      '<td class="r">'+(c.blocked?'<span class="bdg b-stop">Cannot be rostered</span><div class="muted" style="font-size:11px">'+esc(c.reason)+'</div>'
+        :'<span class="bdg b-ok">Clear</span>')+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
+  '<div class="card"><div class="h"><h2>Vehicles</h2></div><div class="tw" style="border:0">'+
+    '<table class="t"><tbody>'+S.vehicles.map(v=>{const c=vehicleCompliance(v);
+      return '<tr><td><strong class="mono">'+esc(v.fleet)+'</strong><div class="muted">'+esc(v.type)+'</div></td>'+
+      '<td class="r">'+(c.blocked?'<span class="bdg b-stop">Cannot be allocated</span><div class="muted" style="font-size:11px">'+esc(c.reason)+'</div>'
+        :'<span class="bdg b-ok">Fit</span>')+'</td></tr>';}).join("")+'</tbody></table></div></div></div>'+
+  '<p class="hint">Dispatchers see the outcome, not the underlying employee or vehicle records. Fixing an expiry is an HR or fleet job.</p>';
+}
+
+/* ---------- staff list ---------- */
+function viewStaffList(){
+  if(!can("staff")) return selfOnly()?viewSelf():viewDenied();
+  const rows=visibleStaff(),f=S.f;
+  return demoNote+
+  '<div class="ph"><h1>Staff</h1><span class="muted">'+rows.length+' of '+S.staff.length+'</span><div class="spacer"></div>'+
+    '<button class="btn" id="export">Export CSV</button>'+
+    (can("staff.edit")?'<button class="btn p" id="new-staff">Add employee</button>':'')+'</div>'+
+  '<div class="card" style="margin-bottom:11px"><div class="b"><div class="row" style="align-items:flex-end">'+
+    '<label class="f" style="flex:2 1 220px;margin:0"><span>Search</span><input type="search" id="f-q" value="'+esc(f.q)+'" placeholder="Name, payroll number, email"></label>'+
+    '<label class="f" style="margin:0"><span>Grade</span><select id="f-grade"><option value="">All grades</option>'+
+      GRADES.map(g=>'<option'+(f.grade===g?' selected':'')+'>'+esc(g)+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Status</span><select id="f-status"><option value="">All</option>'+
+      STAFF_STATUS.map(s=>'<option'+(f.status===s?' selected':'')+'>'+esc(s)+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Compliance</span><select id="f-compliance"><option value="">Any</option>'+
+      '<option value="blocked"'+(f.compliance==="blocked"?" selected":"")+'>Blocked</option>'+
+      '<option value="due"'+(f.compliance==="due"?" selected":"")+'>Expiring soon</option>'+
+      '<option value="clear"'+(f.compliance==="clear"?" selected":"")+'>Clear</option></select></label>'+
+    '<button class="btn g" id="f-clear">Clear</button>'+
+  '</div></div></div>'+
+  (rows.length?'<div class="tw"><table class="t"><thead><tr><th>Ref</th><th>Employee</th><th>Grade</th>'+
+    '<th>Employment</th><th>Started</th><th>Compliance</th><th>Next expiry</th><th>Status</th></tr></thead><tbody>'+
+    rows.map(s=>{const c=staffCompliance(s);
+      const next=c.rows.filter(r=>r.date&&r.date<"2099").sort((a,b)=>a.date.localeCompare(b.date))[0];
+      return '<tr tabindex="0" data-openstaff="'+s.id+'">'+
+        '<td class="mono nowrap" style="color:var(--accent-2);font-weight:600">'+esc(s.ref)+'</td>'+
+        '<td><strong>'+esc(s.surname.toUpperCase()+", "+s.forename)+'</strong><div class="muted">'+esc(s.email)+'</div></td>'+
+        '<td class="nowrap">'+esc(s.grade)+'</td><td class="nowrap muted">'+esc(s.employment)+'</td>'+
+        '<td class="num nowrap">'+ukd(s.startDate)+'</td>'+
+        '<td>'+(c.blocked?'<span class="bdg b-stop">Blocked</span><div class="muted" style="font-size:11px">'+esc(c.reason)+'</div>'
+          :c.rows.some(r=>r.state==="due")?'<span class="bdg b-warn">Expiring soon</span>':'<span class="bdg b-ok">Clear</span>')+'</td>'+
+        '<td class="nowrap">'+(next?esc(next.label)+'<div class="num muted">'+ukd(next.date)+'</div>':'<span class="muted">—</span>')+'</td>'+
+        '<td><span class="bdg '+(s.status==="Active"?"b-ok":"b-grey")+'">'+esc(s.status)+'</span></td></tr>';
+    }).join("")+'</tbody></table></div>'
+  :'<div class="card"><div class="b empty"><b>No employees match these filters</b>Clear the filters to see everyone.</div></div>');
+}
+
+/* ---------- staff record ---------- */
+function viewStaffRecord(){
+  const s=stf(S.sel);
+  if(!s) return viewStaffList();
+  const c=staffCompliance(s);
+  const tabs=[["summary","Summary"],["compliance","Compliance"],["training","Training & competencies"],
+    ["reviews","Appraisals & supervision"],["absence","Absence & leave"],["documents","Documents"],
+    ...(can("staff.hr")?[["hr","HR record"]]:[]),["audit","History"]];
+
+  return '<div class="ph"><button class="btn g" data-go="staff">← All staff</button>'+
+    '<div><div class="micro">'+esc(s.ref)+' · '+esc(s.grade)+'</div>'+
+      '<h1>'+esc(s.forename+" "+s.surname)+'</h1></div>'+
+    '<span class="bdg '+(s.status==="Active"?"b-ok":"b-grey")+'">'+esc(s.status)+'</span>'+
+    (c.blocked?'<span class="bdg b-stop">Cannot be rostered</span>':'')+
+    '<div class="spacer"></div>'+
+    (can("staff.edit")?'<button class="btn" id="add-doc-btn">Attach document</button>':'')+
+    '<button class="btn" id="printrec">Print</button></div>'+
+  (c.blocked?'<div class="notice"><b>Blocked from rostering</b><ul>'+
+    (s.status!=="Active"?'<li>Employment status is '+esc(s.status)+'.</li>':'')+
+    c.blocking.map(b=>'<li>'+esc(b.label)+' — '+(b.state==="miss"?"never recorded":"expired "+ukd(b.date))+'</li>').join("")+
+    '</ul></div>':'')+
+  '<div class="tabs" role="tablist">'+tabs.map(([id,l])=>
+    '<button class="tab" role="tab" data-tab="'+id+'" aria-selected="'+(S.tab===id)+'">'+esc(l)+'</button>').join("")+'</div>'+
+  '<div class="card" style="border-radius:0 0 var(--r2) var(--r2);border-top:0"><div class="b">'+staffTab(s)+'</div></div>';
+}
+function staffTab(s){
+  const t=S.tab;
+  if(t==="summary"){
+    return '<div class="grid g2"><div><dl class="kv">'+
+      '<dt>Job role</dt><dd>'+esc(s.grade)+'</dd>'+
+      '<dt>Employment</dt><dd>'+esc(s.employment)+'</dd>'+
+      '<dt>Start date</dt><dd class="num">'+ukd(s.startDate)+'</dd>'+
+      '<dt>Payroll number</dt><dd class="mono">'+esc(s.payroll)+'</dd>'+
+      '<dt>National Insurance</dt><dd>'+(can("staff.hr")?
+        (S.revealed[s.id]?'<span class="mono">'+esc(s.ni)+'</span> <button class="btn xs g" id="hide-ni">Hide</button>'
+          :'<span class="masked">'+esc(mask(s.ni))+'</span> <button class="btn xs g" id="reveal-ni">Reveal</button>')
+        :'<span class="bdg b-seal">Restricted</span>')+'</dd>'+
+      '<dt>Telephone</dt><dd class="num">'+esc(s.phone)+'</dd>'+
+      '<dt>Email</dt><dd>'+esc(s.email)+'</dd>'+
+      '<dt>Address</dt><dd>'+esc(s.address)+'</dd>'+
+    '</dl></div><div><dl class="kv">'+
+      '<dt>Emergency contact</dt><dd>'+esc(s.emergency.name)+' <span class="muted">('+esc(s.emergency.relationship)+')</span>'+
+        '<div class="num">'+esc(s.emergency.phone)+'</div></dd>'+
+      '<dt>Qualifications</dt><dd>'+(s.qualifications.length?s.qualifications.map(esc).join("<br>"):"—")+'</dd>'+
+      '<dt>Registration</dt><dd>'+(s.registration.body?esc(s.registration.body)+' '+esc(s.registration.number)+
+        '<div class="num muted">expires '+ukd(s.registration.expiry)+'</div>':'<span class="muted">Not applicable to this grade</span>')+'</dd>'+
+      '<dt>Licence categories</dt><dd class="mono">'+esc(s.licence.categories.join(", "))+
+        (s.licence.points?' <span class="bdg b-warn">'+s.licence.points+' points</span>':'')+'</dd>'+
+      '<dt>Working restrictions</dt><dd>'+esc(s.restrictions||"None recorded")+'</dd>'+
+      '<dt>Availability</dt><dd>'+Object.entries(s.availability).map(([d,v])=>
+        '<span class="bdg '+(v?"b-ok":"b-grey")+'" style="margin:1px">'+d+'</span>').join("")+'</dd>'+
+    '</dl></div></div>'+
+    (can("staff.edit")?'<div class="inline"><div class="row">'+
+      '<label class="f" style="margin:0"><span>Employment status</span><select id="e-status">'+
+        STAFF_STATUS.map(x=>'<option'+(s.status===x?' selected':'')+'>'+esc(x)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Grade</span><select id="e-grade">'+
+        GRADES.map(g=>'<option'+(s.grade===g?' selected':'')+'>'+esc(g)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Telephone</span><input type="tel" id="e-phone" value="'+esc(s.phone)+'"></label>'+
+      '</div><label class="f" style="margin-top:8px"><span>Working restrictions</span>'+
+      '<input type="text" id="e-restrict" value="'+esc(s.restrictions)+'"></label>'+
+      '<button class="btn p xs" id="save-summary">Save changes</button>'+
+      '<p class="hint">Changing the grade or status republishes to the dispatch board immediately.</p></div>':'');
+  }
+
+  if(t==="compliance"){
+    const c=staffCompliance(s);
+    return '<div class="tw" style="border:0"><table class="t"><thead><tr><th>Item</th><th>Reference</th><th>Expires</th>'+
+      '<th>Days</th><th>Status</th>'+(can("staff.edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      '<tr><td><strong>DBS</strong><div class="muted">'+esc(s.dbs.level)+(s.dbs.updateService?' · Update Service':'')+'</div></td>'+
+        '<td class="mono">'+esc(s.dbs.number)+'</td><td class="num">'+ukd(s.dbs.expiry)+'</td>'+
+        '<td class="num">'+dLabel(s.dbs.expiry)+'</td><td>'+sBadge(state(s.dbs.expiry,true))+'</td>'+
+        (can("staff.edit")?'<td class="r"><button class="btn xs" data-renew="dbs">Renew</button></td>':'')+'</tr>'+
+      '<tr><td><strong>Right to work</strong><div class="muted">'+esc(s.rightToWork.docType)+'</div></td>'+
+        '<td>'+esc(s.rightToWork.status)+'</td><td class="num">'+(s.rightToWork.expiry?ukd(s.rightToWork.expiry):"No expiry")+'</td>'+
+        '<td class="num">'+(s.rightToWork.expiry?dLabel(s.rightToWork.expiry):"—")+'</td>'+
+        '<td>'+sBadge(s.rightToWork.expiry?state(s.rightToWork.expiry,true):"ok")+'</td>'+
+        (can("staff.edit")?'<td class="r"><button class="btn xs" data-renew="rtw">Renew</button></td>':'')+'</tr>'+
+      '<tr><td><strong>Driving licence</strong><div class="muted">'+esc(s.licence.categories.join(", "))+
+        ' · last checked '+ukd(s.licence.checked)+'</div></td>'+
+        '<td class="mono">'+esc(s.licence.number)+'</td><td class="num">'+ukd(s.licence.expiry)+'</td>'+
+        '<td class="num">'+dLabel(s.licence.expiry)+'</td><td>'+sBadge(state(s.licence.expiry,true))+'</td>'+
+        (can("staff.edit")?'<td class="r"><button class="btn xs" data-renew="licence">Renew</button></td>':'')+'</tr>'+
+      (s.registration.body?'<tr><td><strong>Professional registration</strong><div class="muted">'+esc(s.registration.body)+'</div></td>'+
+        '<td class="mono">'+esc(s.registration.number)+'</td><td class="num">'+ukd(s.registration.expiry)+'</td>'+
+        '<td class="num">'+dLabel(s.registration.expiry)+'</td><td>'+sBadge(state(s.registration.expiry,true))+'</td>'+
+        (can("staff.edit")?'<td class="r"><button class="btn xs" data-renew="reg">Renew</button></td>':'')+'</tr>':'')+
+      '<tr><td><strong>References</strong></td><td>'+s.references.filter(r=>r.received).length+' of 2 received</td>'+
+        '<td>—</td><td>—</td><td>'+sBadge(s.references.filter(r=>r.received).length>=2?"ok":"miss")+'</td>'+
+        (can("staff.edit")?'<td></td>':'')+'</tr>'+
+      '<tr><td><strong>Occupational health</strong><div class="muted">'+esc(s.occHealth.restrictions||"No restrictions")+'</div></td>'+
+        '<td>'+esc(s.occHealth.status)+'</td><td class="num">'+ukd(s.occHealth.lastReview)+'</td><td>—</td>'+
+        '<td>'+sBadge("ok")+'</td>'+(can("staff.edit")?'<td></td>':'')+'</tr>'+
+      '</tbody></table></div>'+
+      '<h3 style="font-size:12.5px;margin:16px 0 7px">Immunisations</h3>'+
+      '<div class="row">'+s.immunisations.map(i=>'<span class="bdg b-grey" style="flex:0 0 auto">'+esc(i.name)+' · '+ukd(i.date)+'</span>').join("")+'</div>';
+  }
+
+  if(t==="training"){
+    return '<div class="tw" style="border:0"><table class="t"><thead><tr><th>Course</th><th>Completed</th><th>Expires</th>'+
+      '<th>Days</th><th>Status</th>'+(can("staff.edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      s.training.map(x=>'<tr><td><strong>'+esc(x.name)+'</strong></td>'+
+        '<td class="num">'+ukd(x.completed)+'</td><td class="num">'+ukd(x.expiry)+'</td>'+
+        '<td class="num">'+dLabel(x.expiry)+'</td><td>'+sBadge(state(x.expiry,true))+'</td>'+
+        (can("staff.edit")?'<td class="r"><button class="btn xs" data-retrain="'+esc(x.name)+'">Record refresher</button></td>':'')+
+        '</tr>').join("")+'</tbody></table></div>'+
+      '<h3 style="font-size:12.5px;margin:16px 0 7px">Competency assessments</h3>'+
+      '<div class="tw" style="border:0"><table class="t"><thead><tr><th>Competency</th><th>Assessed</th><th>Assessor</th><th>Outcome</th>'+
+      (can("staff.edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      s.competencies.map(x=>'<tr><td>'+esc(x.name)+'</td><td class="num">'+ukd(x.assessed)+'</td>'+
+        '<td class="muted">'+esc(x.assessed?x.assessor:"—")+'</td>'+
+        '<td>'+(x.valid?'<span class="bdg b-ok">Competent</span>':x.assessed?'<span class="bdg b-stop">Not yet competent</span>'
+          :'<span class="bdg b-warn">Not assessed</span>')+'</td>'+
+        (can("staff.edit")?'<td class="r"><button class="btn xs" data-assess="'+esc(x.name)+'">Assess</button></td>':'')+
+        '</tr>').join("")+'</tbody></table></div>'+
+      '<p class="hint">A missing competency does not block rostering on its own, but dispatch will not put a crew member on a '+
+      'journey that needs a skill they have not been signed off for.</p>';
+  }
+
+  if(t==="reviews"){
+    const lastA=s.appraisals[s.appraisals.length-1], lastS=s.supervisions[s.supervisions.length-1];
+    return '<div class="grid g2">'+
+      '<div class="card"><div class="h"><h2>Appraisals</h2>'+
+        (lastA&&days(addYear(lastA.date,1))<0?'<span class="bdg b-stop" style="margin-left:auto">Overdue</span>':'')+'</div><div class="b">'+
+        (s.appraisals.length?'<ul class="feed">'+s.appraisals.slice().reverse().map(a=>
+          '<li><div class="m">'+ukd(a.date)+' · '+esc(a.by)+'</div><div class="s">'+esc(a.rating)+'</div>'+
+          '<div class="d">'+esc(a.notes)+'</div></li>').join("")+'</ul>'
+          :'<p class="muted">No appraisal recorded.</p>')+
+        '<div class="hint">Next due '+(lastA?ukd(addYear(lastA.date,1)):"—")+'</div>'+
+        (can("staff.edit")?'<button class="btn p xs" id="add-appraisal" style="margin-top:8px">Record an appraisal</button>':'')+
+      '</div></div>'+
+      '<div class="card"><div class="h"><h2>Supervisions</h2>'+
+        (lastS&&days(addMonth(lastS.date,3))<0?'<span class="bdg b-warn" style="margin-left:auto">Overdue</span>':'')+'</div><div class="b">'+
+        (s.supervisions.length?'<ul class="feed">'+s.supervisions.slice().reverse().map(a=>
+          '<li><div class="m">'+ukd(a.date)+' · '+esc(a.by)+'</div><div class="d">'+esc(a.notes)+'</div></li>').join("")+'</ul>'
+          :'<p class="muted">No supervision recorded.</p>')+
+        '<div class="hint">Next due '+(lastS?ukd(addMonth(lastS.date,3)):"—")+'</div>'+
+        (can("staff.edit")?'<button class="btn p xs" id="add-supervision" style="margin-top:8px">Record a supervision</button>':'')+
+      '</div></div></div>';
+  }
+
+  if(t==="absence"){
+    return '<h3 style="font-size:12.5px;margin:0 0 7px">Absence</h3>'+
+      (s.absence.length?'<div class="tw" style="border:0"><table class="t"><thead><tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Return-to-work</th></tr></thead><tbody>'+
+        s.absence.map(a=>'<tr><td>'+esc(a.type)+'</td><td class="num">'+ukd(a.from)+'</td><td class="num">'+ukd(a.to)+'</td>'+
+          '<td class="num">'+(days(a.to)-days(a.from)+1)+'</td>'+
+          '<td>'+(a.rtw?'<span class="bdg b-ok">Completed</span>':'<span class="bdg b-warn">Outstanding</span>')+'</td></tr>').join("")+
+        '</tbody></table></div>':'<p class="muted">No absence recorded in the current year.</p>')+
+      '<h3 style="font-size:12.5px;margin:16px 0 7px">Annual leave</h3>'+
+      (s.leave.length?'<div class="tw" style="border:0"><table class="t"><thead><tr><th>From</th><th>To</th><th>Days</th><th>Status</th>'+
+        (can("approve")?'<th></th>':'')+'</tr></thead><tbody>'+
+        s.leave.map(l=>'<tr><td class="num">'+ukd(l.from)+'</td><td class="num">'+ukd(l.to)+'</td><td class="num">'+l.days+'</td>'+
+          '<td><span class="bdg '+(l.status==="Approved"?"b-ok":l.status==="Declined"?"b-stop":"b-warn")+'">'+esc(l.status)+'</span></td>'+
+          (can("approve")?'<td class="r">'+(l.status==="Requested"?
+            '<button class="btn xs" data-leave="'+l.id+'|approve">Approve</button> '+
+            '<button class="btn xs danger" data-leave="'+l.id+'|decline">Decline</button>':'')+'</td>':'')+
+          '</tr>').join("")+'</tbody></table></div>':'<p class="muted">No leave requests.</p>');
+  }
+
+  if(t==="documents"){
+    return (s.documents.length?'<div class="tw" style="border:0"><table class="t"><thead><tr><th>Document</th><th>Category</th><th>Size</th><th>Added</th>'+
+      (can("staff.edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      s.documents.map(d=>'<tr><td>'+esc(d.name)+'</td><td class="muted">'+esc(d.category)+'</td>'+
+        '<td class="num muted">'+esc(d.size)+'</td><td class="num muted nowrap">'+ukd(d.at)+'<div class="muted">'+esc(d.by)+'</div></td>'+
+        (can("staff.edit")?'<td class="r"><button class="btn xs g" data-rmdoc="'+d.id+'">Remove</button></td>':'')+'</tr>').join("")+
+      '</tbody></table></div>':'<div class="empty"><b>No documents</b>Contracts, certificates and check evidence attach here.</div>')+
+      '<h3 style="font-size:12.5px;margin:16px 0 7px">Policy acknowledgements</h3>'+
+      '<div class="tw" style="border:0"><table class="t"><thead><tr><th>Policy</th><th>Version</th><th>Acknowledged</th></tr></thead><tbody>'+
+      s.policies.map(p=>'<tr><td>'+esc(p.name)+'</td><td class="mono">'+esc(p.version)+'</td>'+
+        '<td>'+(p.acknowledged?'<span class="num">'+ukd(p.acknowledged)+'</span>':'<span class="bdg b-warn">Outstanding</span>')+'</td></tr>').join("")+
+      '</tbody></table></div>'+
+      (can("staff.edit")?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0;flex:2 1 200px"><span>File</span><input type="file" id="dc-file" style="padding:4px"></label>'+
+        '<label class="f" style="margin:0"><span>Category</span><select id="dc-cat">'+
+          ["Contract","DBS","Right to work","Licence","Registration","Training certificate","Occupational health","Reference","Other"]
+          .map(x=>'<option>'+x+'</option>').join("")+'</select></label>'+
+        '</div><button class="btn p xs" id="add-doc" style="margin-top:9px">Attach</button>'+
+        '<p class="hint">Only the file name and metadata are stored in this build.</p></div>':'');
+  }
+
+  if(t==="hr"){
+    if(!can("staff.hr")) return '<div class="restricted">The HR record is limited to HR and administrator roles.</div>';
+    return '<div class="card" style="margin-bottom:11px"><div class="b">'+
+      '<div class="micro">Occupational health</div>'+
+      '<dl class="kv" style="margin-top:6px"><dt>Status</dt><dd>'+esc(s.occHealth.status)+'</dd>'+
+      '<dt>Last review</dt><dd class="num">'+ukd(s.occHealth.lastReview)+'</dd>'+
+      '<dt>Adjustments</dt><dd>'+esc(s.occHealth.restrictions||"None")+'</dd></dl></div></div>'+
+      '<h3 style="font-size:12.5px;margin:0 0 7px">Disciplinary and grievance</h3>'+
+      (s.disciplinary.length?'<ul class="feed">'+s.disciplinary.map(d=>
+        '<li><div class="m">'+ukd(d.date)+' · '+esc(d.by)+'</div><div class="s">'+esc(d.type)+'</div>'+
+        '<div class="d">'+esc(d.outcome)+'</div></li>').join("")+'</ul>'
+        :'<p class="muted">No disciplinary or grievance matters recorded.</p>')+
+      '<p class="hint">Access to this tab is recorded in the change log. Employment matters are held separately from '+
+      'operational compliance so that rostering decisions never depend on them.</p>';
+  }
+
+  return '<ul class="feed">'+s.audit.slice().sort((a,b)=>b.at.localeCompare(a.at)).map(a=>
+    '<li><div class="m">'+uks(a.at)+' · '+esc(a.by)+'</div><div class="s">'+esc(a.action)+'</div>'+
+    (a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</li>').join("")+'</ul>';
+}
+function dLabel(iso){if(!iso)return "—";const d=days(iso);return d<0?d:"+"+d;}
+function sBadge(st){
+  return st==="exp"?'<span class="bdg b-stop">Expired</span>':st==="miss"?'<span class="bdg b-stop">Missing</span>'
+    :st==="due"?'<span class="bdg b-warn">Expiring</span>':'<span class="bdg b-ok">Valid</span>';
+}
+
+/* ---------- fleet ---------- */
+function viewFleetList(){
+  if(!can("fleet")) return viewDenied();
+  const rows=visibleVehicles(),f=S.vf;
+  return demoNote+
+  '<div class="ph"><h1>Fleet</h1><span class="muted">'+rows.length+' of '+S.vehicles.length+'</span><div class="spacer"></div>'+
+    '<button class="btn" id="export-fleet">Export CSV</button>'+
+    (can("fleet.edit")?'<button class="btn p" id="new-vehicle">Add vehicle</button>':'')+'</div>'+
+  '<div class="card" style="margin-bottom:11px"><div class="b"><div class="row" style="align-items:flex-end">'+
+    '<label class="f" style="flex:2 1 200px;margin:0"><span>Search</span><input type="search" id="vf-q" value="'+esc(f.q)+'" placeholder="Fleet number, registration, make"></label>'+
+    '<label class="f" style="margin:0"><span>Type</span><select id="vf-type"><option value="">All types</option>'+
+      VEHICLE_TYPES.map(x=>'<option'+(f.type===x?' selected':'')+'>'+esc(x)+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Status</span><select id="vf-status"><option value="">All</option>'+
+      '<option value="fit"'+(f.status==="fit"?" selected":"")+'>Fit to allocate</option>'+
+      '<option value="blocked"'+(f.status==="blocked"?" selected":"")+'>Blocked</option></select></label>'+
+    '<button class="btn g" id="vf-clear">Clear</button></div></div></div>'+
+  '<div class="tw"><table class="t"><thead><tr><th>Fleet</th><th>Vehicle</th><th>Type</th><th>Base</th>'+
+    '<th>Mileage</th><th>MOT</th><th>Insurance</th><th>Tax</th><th>Open defects</th><th>Status</th></tr></thead><tbody>'+
+    rows.map(v=>{const c=vehicleCompliance(v),open=v.defects.filter(d=>d.open);
+      const dt=(d,req)=>{const st=state(d,req);return '<span class="'+(st==="exp"?"bdg b-stop":st==="due"?"bdg b-warn":"num")+'">'+ukd(d)+'</span>';};
+      return '<tr tabindex="0" data-openveh="'+v.id+'">'+
+        '<td class="mono nowrap" style="color:var(--accent-2);font-weight:600">'+esc(v.fleet)+'</td>'+
+        '<td><strong class="mono">'+esc(v.reg)+'</strong><div class="muted">'+esc(v.make+" "+v.model+" · "+v.year)+'</div></td>'+
+        '<td class="nowrap">'+esc(v.type)+'</td><td class="nowrap muted">'+esc(v.base)+'</td>'+
+        '<td class="num">'+v.mileage.toLocaleString("en-GB")+'</td>'+
+        '<td class="nowrap">'+dt(v.mot,true)+'</td><td class="nowrap">'+dt(v.insurance.expiry,true)+'</td>'+
+        '<td class="nowrap">'+dt(v.tax,true)+'</td>'+
+        '<td>'+(open.length?'<span class="bdg '+(open.some(d=>d.severity==="Safety-critical")?"b-stop":"b-warn")+'">'+open.length+'</span>':'<span class="muted">—</span>')+'</td>'+
+        '<td>'+(c.blocked?'<span class="bdg b-stop">Blocked</span>':'<span class="bdg b-ok">Fit</span>')+'</td></tr>';
+    }).join("")+'</tbody></table></div>';
+}
+function viewVehicleRecord(){
+  const v=veh(S.sel);
+  if(!v) return viewFleetList();
+  const c=vehicleCompliance(v);
+  const tabs=[["summary","Details"],["compliance","Compliance"],["defects","Defects & repairs"],
+    ["checks","Daily checks"],["service","Service & cleaning"],["equipment","Equipment"],["audit","History"]];
+  return '<div class="ph"><button class="btn g" data-go="fleet">← All vehicles</button>'+
+    '<div><div class="micro">'+esc(v.reg)+' · '+esc(v.type)+'</div><h1 class="mono">'+esc(v.fleet)+'</h1></div>'+
+    '<span class="bdg '+(v.status==="Off road"?"b-stop":"b-ok")+'">'+esc(v.status)+'</span>'+
+    (c.blocked&&v.status!=="Off road"?'<span class="bdg b-stop">Cannot be allocated</span>':'')+
+    '<div class="spacer"></div>'+
+    (can("checks")?'<button class="btn" id="do-check">Daily check</button>':'')+
+    (can("fleet.edit")?'<button class="btn" id="log-defect">Log a defect</button>':'')+
+    (can("fleet.edit")&&v.status!=="Off road"?'<button class="btn danger" id="off-road">Take off road</button>'
+      :can("fleet.edit")?'<button class="btn" id="on-road">Return to service</button>':'')+
+  '</div>'+
+  (c.blocked?'<div class="notice"><b>Blocked from allocation</b><ul><li>'+esc(c.reason)+'</li>'+
+    c.blocking.map(b=>'<li>'+esc(b.label)+' — '+(b.state==="miss"?"not recorded":"expired "+ukd(b.date))+'</li>').join("")+
+    '</ul></div>':'')+
+  '<div class="tabs" role="tablist">'+tabs.map(([id,l])=>
+    '<button class="tab" role="tab" data-tab="'+id+'" aria-selected="'+(S.tab===id)+'">'+esc(l)+'</button>').join("")+'</div>'+
+  '<div class="card" style="border-radius:0 0 var(--r2) var(--r2);border-top:0"><div class="b">'+vehicleTab(v)+'</div></div>';
+}
+function vehicleTab(v){
+  const t=S.tab;
+  if(t==="summary"){
+    return '<div class="grid g2"><div><dl class="kv">'+
+      '<dt>Fleet number</dt><dd class="mono">'+esc(v.fleet)+'</dd>'+
+      '<dt>Registration</dt><dd class="mono">'+esc(v.reg)+'</dd>'+
+      '<dt>Make and model</dt><dd>'+esc(v.make+" "+v.model)+'</dd>'+
+      '<dt>Year</dt><dd class="num">'+v.year+'</dd>'+
+      '<dt>Vehicle type</dt><dd>'+esc(v.type)+'</dd>'+
+      '<dt>Ambulance category</dt><dd>'+esc(v.category)+'</dd>'+
+      '<dt>Base</dt><dd>'+esc(v.base)+'</dd>'+
+    '</dl></div><div><dl class="kv">'+
+      '<dt>Ownership</dt><dd>'+esc(v.ownership)+(v.lease.provider?'<div class="muted">'+esc(v.lease.provider)+' — ends '+ukd(v.lease.ends)+'</div>':'')+'</dd>'+
+      '<dt>Mileage</dt><dd class="num">'+v.mileage.toLocaleString("en-GB")+'</dd>'+
+      '<dt>Fuel type</dt><dd>'+esc(v.fuelType)+'</dd>'+
+      '<dt>Insurer</dt><dd>'+esc(v.insurance.insurer)+' <span class="mono muted">'+esc(v.insurance.policy)+'</span></dd>'+
+      '<dt>Breakdown cover</dt><dd>'+esc(v.breakdown.provider)+'<div class="num muted">to '+ukd(v.breakdown.expiry)+'</div></dd>'+
+      '<dt>Tyres last checked</dt><dd class="num">'+ukd(v.tyres.lastCheck)+
+        (v.tyres.notes?'<div class="muted">'+esc(v.tyres.notes)+'</div>':'')+'</dd>'+
+      '<dt>Downtime</dt><dd>'+(v.downtime.length?v.downtime.map(d=>ukd(d.from)+(d.to?" – "+ukd(d.to):" – ongoing")+" · "+esc(d.reason)).join("<br>"):"None recorded")+'</dd>'+
+    '</dl></div></div>'+
+    (can("fleet.edit")?'<div class="inline"><div class="row">'+
+      '<label class="f" style="margin:0"><span>Mileage</span><input type="number" id="e-mileage" value="'+v.mileage+'"></label>'+
+      '<label class="f" style="margin:0"><span>Base</span><input type="text" id="e-base" value="'+esc(v.base)+'"></label>'+
+      '<label class="f" style="margin:0"><span>Tyre notes</span><input type="text" id="e-tyres" value="'+esc(v.tyres.notes)+'"></label>'+
+      '</div><button class="btn p xs" id="save-vehicle" style="margin-top:9px">Save</button></div>':'');
+  }
+  if(t==="compliance"){
+    const c=vehicleCompliance(v);
+    return '<div class="tw" style="border:0"><table class="t"><thead><tr><th>Item</th><th>Due</th><th>Days</th><th>Status</th>'+
+      (can("fleet.edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      c.rows.filter(r=>r.k!=="check").map(r=>'<tr><td><strong>'+esc(r.label)+'</strong></td>'+
+        '<td class="num">'+ukd(r.date)+'</td><td class="num">'+dLabel(r.date)+'</td>'+
+        '<td>'+sBadge(r.state)+'</td>'+
+        (can("fleet.edit")?'<td class="r"><button class="btn xs" data-vrenew="'+r.k+'">Renew</button></td>':'')+'</tr>').join("")+
+      '</tbody></table></div>'+
+      '<p class="hint">MOT, insurance and tax are hard blocks — an expired document stops the vehicle being allocated on the '+
+      'dispatch board and cannot be overridden there. In production these are verified against the DVLA and DVSA services.</p>';
+  }
+  if(t==="defects"){
+    return (v.defects.length?'<div class="tw" style="border:0"><table class="t"><thead><tr><th>Defect</th><th>Severity</th><th>Raised</th><th>By</th><th>Repair</th><th>Status</th>'+
+      (can("fleet.edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      v.defects.slice().reverse().map(d=>'<tr><td><strong>'+esc(d.desc)+'</strong></td>'+
+        '<td>'+(d.severity==="Safety-critical"?'<span class="bdg b-stop">Safety-critical</span>':'<span class="bdg b-warn">Advisory</span>')+'</td>'+
+        '<td class="num">'+ukd(d.raised)+'</td><td class="muted">'+esc(d.by||"—")+'</td>'+
+        '<td class="muted">'+esc(d.repair||"Not booked")+'</td>'+
+        '<td>'+(d.open?'<span class="bdg b-stop">Open</span>':'<span class="bdg b-ok">Closed '+ukd(d.closed)+'</span>')+'</td>'+
+        (can("fleet.edit")?'<td class="r">'+(d.open?'<button class="btn xs" data-closedefect="'+d.id+'">Close</button>':'')+'</td>':'')+
+        '</tr>').join("")+'</tbody></table></div>'
+      :'<div class="empty"><b>No defects recorded</b>Defects raised on a daily check appear here automatically.</div>')+
+      '<p class="hint">A safety-critical defect takes the vehicle off road the moment it is logged and releases any journeys '+
+      'already allocated to it on the dispatch board.</p>';
+  }
+  if(t==="checks"){
+    return (v.checks.length?'<div class="tw" style="border:0"><table class="t"><thead><tr><th>Date</th><th>By</th><th>Mileage</th><th>Result</th><th>Items failed</th></tr></thead><tbody>'+
+      v.checks.slice().reverse().map(c=>'<tr><td class="num">'+ukd(c.date)+'</td><td>'+esc(c.by)+'</td>'+
+        '<td class="num">'+(c.mileage?c.mileage.toLocaleString("en-GB"):"—")+'</td>'+
+        '<td>'+(c.pass?'<span class="bdg b-ok">Pass</span>':'<span class="bdg b-stop">Fail</span>')+'</td>'+
+        '<td class="muted">'+(c.fails.length?esc(c.fails.join(", ")):"—")+'</td></tr>').join("")+
+      '</tbody></table></div>':'<div class="empty"><b>No checks recorded</b>A vehicle without today\'s check cannot be allocated.</div>')+
+      (can("checks")?'<button class="btn p xs" id="do-check" style="margin-top:11px">Complete today\'s check</button>':'');
+  }
+  if(t==="service"){
+    return '<h3 style="font-size:12.5px;margin:0 0 7px">Service history</h3>'+
+      '<div class="tw" style="border:0"><table class="t"><thead><tr><th>Date</th><th>Mileage</th><th>Type</th><th>By</th></tr></thead><tbody>'+
+      v.services.slice().reverse().map(s=>'<tr><td class="num">'+ukd(s.date)+'</td><td class="num">'+s.mileage.toLocaleString("en-GB")+'</td>'+
+        '<td>'+esc(s.type)+'</td><td class="muted">'+esc(s.by)+'</td></tr>').join("")+'</tbody></table></div>'+
+      '<div class="hint">Next service due '+ukd(v.nextService)+'</div>'+
+      '<h3 style="font-size:12.5px;margin:16px 0 7px">Cleaning and infection control</h3>'+
+      '<div class="tw" style="border:0"><table class="t"><thead><tr><th>Date</th><th>Type</th><th>By</th></tr></thead><tbody>'+
+      v.cleaning.slice().reverse().map(cl=>'<tr><td class="num">'+ukd(cl.date)+'</td><td>'+esc(cl.type)+'</td>'+
+        '<td class="muted">'+esc(cl.by)+'</td></tr>').join("")+'</tbody></table></div>'+
+      '<div class="hint">Next deep clean due '+ukd(v.deepCleanDue)+
+        (days(v.deepCleanDue)<0?' <span class="bdg b-warn">Overdue</span>':'')+'</div>'+
+      (can("fleet.edit")?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0"><span>Record</span><select id="sv-type">'+
+          ["Routine clean","Deep clean","Full service","Interim service","Repair"].map(x=>'<option>'+x+'</option>').join("")+'</select></label>'+
+        '<label class="f" style="margin:0"><span>Date</span><input type="date" id="sv-date" value="'+todayISO()+'"></label>'+
+        '</div><button class="btn p xs" id="add-service" style="margin-top:9px">Record</button></div>':'');
+  }
+  if(t==="equipment"){
+    return '<div class="tw" style="border:0"><table class="t"><thead><tr><th>Item</th><th>Serial</th><th>Last inspected</th><th>Next due</th><th>Status</th></tr></thead><tbody>'+
+      v.equipment.map(e=>'<tr><td><strong>'+esc(e.name)+'</strong></td><td class="mono">'+esc(e.serial)+'</td>'+
+        '<td class="num">'+ukd(e.inspected)+'</td><td class="num">'+ukd(e.next)+'</td>'+
+        '<td>'+sBadge(state(e.next,true))+'</td></tr>').join("")+'</tbody></table></div>'+
+      '<p class="hint">Equipment inspection is a blocking item: if any item on the vehicle is out of inspection, the vehicle '+
+      'cannot be allocated.</p>';
+  }
+  return '<ul class="feed">'+v.audit.slice().sort((a,b)=>b.at.localeCompare(a.at)).map(a=>
+    '<li><div class="m">'+uks(a.at)+' · '+esc(a.by)+'</div><div class="s">'+esc(a.action)+'</div>'+
+    (a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</li>').join("")+'</ul>';
+}
+
+/* ---------- renewals ---------- */
+function viewRenewals(){
+  if(!can("renewals")) return viewDenied();
+  const list=allRenewals(90);
+  const grp=[["Expired or missing",list.filter(r=>r.d<0)],
+    ["Next 30 days",list.filter(r=>r.d>=0&&r.d<=30)],
+    ["31 to 90 days",list.filter(r=>r.d>30)]];
+  return demoNote+
+  '<div class="ph"><h1>Renewals due</h1><span class="muted">Staff and fleet, next 90 days</span></div>'+
+  grp.map(([label,rows])=>
+    '<div class="card" style="margin-bottom:11px"><div class="h"><h2>'+esc(label)+'</h2>'+
+      '<span class="bdg '+(label.indexOf("Expired")===0?"b-stop":label.indexOf("Next")===0?"b-warn":"b-grey")+'" style="margin-left:auto">'+rows.length+'</span></div>'+
+    (rows.length?'<div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)"><table class="t"><tbody>'+
+      rows.map(r=>'<tr tabindex="0" data-'+(r.kind==="Staff"?"openstaff":"openveh")+'="'+r.id+'">'+
+        '<td style="width:70px"><span class="bdg '+(r.kind==="Staff"?"b-info":"b-grey")+'">'+esc(r.kind)+'</span></td>'+
+        '<td><strong>'+esc(r.who)+'</strong></td><td>'+esc(r.item)+'</td>'+
+        '<td class="num nowrap">'+(r.date?ukd(r.date):"not recorded")+'</td>'+
+        '<td class="r nowrap">'+(r.state==="miss"?'<span class="bdg b-stop">Missing</span>'
+          :r.d<0?'<span class="bdg b-stop">'+Math.abs(r.d)+' days over</span>'
+          :'<span class="bdg '+(r.d<=30?"b-warn":"b-grey")+'">'+r.d+' days</span>')+'</td></tr>').join("")+
+      '</tbody></table></div>':'<div class="b empty" style="padding:16px"><b>Nothing here</b></div>')+
+    '</div>').join("");
+}
+
+/* ---------- daily checks ---------- */
+function viewChecks(){
+  if(!can("checks")&&!can("fleet")) return viewDenied();
+  const done=S.vehicles.filter(v=>v.checks.some(c=>c.date===todayISO()));
+  const todo=S.vehicles.filter(v=>!v.checks.some(c=>c.date===todayISO()));
+  return demoNote+
+  '<div class="ph"><h1>Daily vehicle checks</h1><span class="muted">'+done.length+' of '+S.vehicles.length+' completed today</span></div>'+
+  (todo.length?'<div class="card" style="margin-bottom:11px"><div class="h"><h2>Outstanding</h2>'+
+    '<span class="bdg b-warn" style="margin-left:auto">'+todo.length+'</span></div><div class="b"><div class="grid g3">'+
+    todo.map(v=>'<div class="card"><div class="b"><div class="mono" style="font-weight:700">'+esc(v.fleet)+'</div>'+
+      '<div class="muted" style="font-size:11.5px">'+esc(v.reg)+' · '+esc(v.type)+'</div>'+
+      (v.status==="Off road"?'<div class="bdg b-stop" style="margin-top:6px">Off road</div>'
+        :can("checks")?'<button class="btn p xs" data-check="'+v.id+'" style="margin-top:8px">Start check</button>':'')+
+      '</div></div>').join("")+'</div></div></div>':
+    '<div class="card" style="margin-bottom:11px"><div class="b empty" style="padding:18px"><b>All checks completed</b>Every vehicle in service has been checked today.</div></div>')+
+  '<div class="card"><div class="h"><h2>Completed today</h2></div>'+
+    (done.length?'<div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)"><table class="t"><thead><tr>'+
+      '<th>Vehicle</th><th>By</th><th>Mileage</th><th>Result</th><th>Failed items</th></tr></thead><tbody>'+
+      done.map(v=>{const c=v.checks[v.checks.length-1];
+        return '<tr tabindex="0" data-openveh="'+v.id+'"><td class="mono"><strong>'+esc(v.fleet)+'</strong></td>'+
+        '<td>'+esc(c.by)+'</td><td class="num">'+(c.mileage?c.mileage.toLocaleString("en-GB"):"—")+'</td>'+
+        '<td>'+(c.pass?'<span class="bdg b-ok">Pass</span>':'<span class="bdg b-stop">Fail</span>')+'</td>'+
+        '<td class="muted">'+(c.fails.length?esc(c.fails.join(", ")):"—")+'</td></tr>';}).join("")+
+      '</tbody></table></div>':'<div class="b empty" style="padding:16px"><b>None yet today</b></div>')+
+  '</div>'+
+  '<p class="hint">A vehicle with no check recorded today cannot be allocated on the dispatch board. Failing a safety-critical '+
+    'item during the check raises a defect and takes the vehicle off road immediately.</p>';
+}
+
+/* ---------- self service ---------- */
+function viewSelf(){
+  const s=me();
+  if(!s) return viewDenied();
+  const c=staffCompliance(s);
+  const outstanding=s.policies.filter(p=>!p.acknowledged);
+  return '<div class="ph"><div><div class="micro">'+esc(s.ref)+'</div><h1>My record</h1></div>'+
+    (selfOnly()?'<div class="spacer"></div><label class="micro" for="mepick">Viewing as</label>'+
+      '<select id="mepick" style="width:auto;padding:5px 8px;border:1px solid var(--line-2);border-radius:6px">'+
+      S.staff.map(x=>'<option value="'+x.id+'"'+(x.id===S.meId?' selected':'')+'>'+esc(x.forename+" "+x.surname)+'</option>').join("")+
+      '</select>':'')+'</div>'+
+  (c.blocked?'<div class="notice"><b>You cannot be rostered</b><ul>'+
+    c.blocking.map(b=>'<li>'+esc(b.label)+' — '+(b.state==="miss"?"we have no record of this":"expired "+ukd(b.date))+
+      '. Please upload the current document below or contact HR.</li>').join("")+'</ul></div>'
+    :c.rows.some(r=>r.state==="due")?'<div class="card" style="margin-bottom:11px;border-color:var(--warn)"><div class="b">'+
+      '<strong style="color:var(--warn)">Expiring soon:</strong> '+
+      c.rows.filter(r=>r.state==="due").map(r=>esc(r.label)+" ("+ukd(r.date)+")").join(", ")+'</div></div>':'')+
+
+  '<div class="grid g2" style="align-items:start">'+
+    '<div class="card"><div class="h"><h2>My compliance</h2></div><div class="tw" style="border:0">'+
+      '<table class="t"><tbody>'+c.rows.filter(r=>r.state!=="na"&&r.k!=="refs").map(r=>
+        '<tr><td>'+esc(r.label)+'</td><td class="num nowrap">'+(r.date&&r.date<"2099"?ukd(r.date):"—")+'</td>'+
+        '<td class="r">'+sBadge(r.state)+'</td></tr>').join("")+'</tbody></table></div></div>'+
+
+    '<div class="card"><div class="h"><h2>My availability</h2></div><div class="b">'+
+      '<div class="row">'+Object.entries(s.availability).map(([d,v])=>
+        '<label class="chk" style="flex:0 0 auto"><input type="checkbox" class="av" data-day="'+d+'"'+(v?" checked":"")+'> '+d+'</label>').join("")+'</div>'+
+      '<button class="btn p xs" id="save-avail" style="margin-top:9px">Update availability</button>'+
+      '<p class="hint">The rota uses this when open shifts are offered.</p></div></div>'+
+
+    '<div class="card"><div class="h"><h2>Annual leave</h2></div><div class="b">'+
+      (s.leave.length?'<div class="tw" style="border:0;margin-bottom:9px"><table class="t"><tbody>'+
+        s.leave.map(l=>'<tr><td class="num nowrap">'+ukd(l.from)+' – '+ukd(l.to)+'</td><td class="num">'+l.days+' days</td>'+
+        '<td class="r"><span class="bdg '+(l.status==="Approved"?"b-ok":l.status==="Declined"?"b-stop":"b-warn")+'">'+esc(l.status)+'</span></td></tr>').join("")+
+        '</tbody></table></div>':'<p class="muted">No leave booked.</p>')+
+      '<div class="row"><label class="f" style="margin:0"><span>From</span><input type="date" id="lv-from" value="'+shift(21)+'"></label>'+
+      '<label class="f" style="margin:0"><span>To</span><input type="date" id="lv-to" value="'+shift(28)+'"></label></div>'+
+      '<div class="msg" id="m-lv">The end date must be after the start date.</div>'+
+      '<button class="btn p xs" id="request-leave" style="margin-top:8px">Request leave</button></div></div>'+
+
+    '<div class="card"><div class="h"><h2>Policies to read</h2>'+
+      (outstanding.length?'<span class="bdg b-warn" style="margin-left:auto">'+outstanding.length+'</span>':'')+'</div><div class="b">'+
+      (s.policies.length?'<div class="tw" style="border:0"><table class="t"><tbody>'+
+        s.policies.map(p=>'<tr><td>'+esc(p.name)+' <span class="muted mono">v'+esc(p.version)+'</span></td>'+
+        '<td class="r">'+(p.acknowledged?'<span class="bdg b-ok">Read '+ukd(p.acknowledged)+'</span>'
+          :'<button class="btn xs p" data-ack="'+esc(p.name)+'">Acknowledge</button>')+'</td></tr>').join("")+
+        '</tbody></table></div>':'<p class="muted">Nothing outstanding.</p>')+
+    '</div></div>'+
+
+    '<div class="card"><div class="h"><h2>My training</h2></div><div class="tw" style="border:0">'+
+      '<table class="t"><tbody>'+s.training.map(x=>
+        '<tr><td>'+esc(x.name)+'</td><td class="num nowrap">'+ukd(x.expiry)+'</td>'+
+        '<td class="r">'+sBadge(state(x.expiry,true))+'</td></tr>').join("")+'</tbody></table></div></div>'+
+
+    '<div class="card"><div class="h"><h2>My details</h2></div><div class="b">'+
+      '<div class="row"><label class="f" style="margin:0"><span>Telephone</span><input type="tel" id="me-phone" value="'+esc(s.phone)+'"></label>'+
+      '<label class="f" style="margin:0"><span>Email</span><input type="email" id="me-email" value="'+esc(s.email)+'"></label></div>'+
+      '<label class="f" style="margin-top:8px"><span>Address</span><input type="text" id="me-address" value="'+esc(s.address)+'"></label>'+
+      '<div class="row"><label class="f" style="margin:0"><span>Emergency contact</span><input type="text" id="me-emname" value="'+esc(s.emergency.name)+'"></label>'+
+      '<label class="f" style="margin:0"><span>Their number</span><input type="tel" id="me-emphone" value="'+esc(s.emergency.phone)+'"></label></div>'+
+      '<button class="btn p xs" id="save-me" style="margin-top:8px">Save my details</button>'+
+      '<p class="hint">Pay, DBS and registration details are maintained by HR and cannot be edited here.</p></div></div>'+
+  '</div>';
+}
+
+/* ---------- change log ---------- */
+function viewAudit(){
+  if(!can("audit")) return viewDenied();
+  const rows=S.log.slice().sort((a,b)=>b.at.localeCompare(a.at));
+  return demoNote+
+  '<div class="ph"><h1>Change log</h1><span class="muted">'+rows.length+' entries</span></div>'+
+  '<div class="tw"><table class="t"><thead><tr><th>When</th><th>Record</th><th>Action</th><th>Detail</th><th>By</th></tr></thead><tbody>'+
+  rows.map(a=>'<tr><td class="mono muted nowrap">'+uks(a.at)+'</td>'+
+    '<td class="mono" style="color:var(--accent-2)">'+esc(a.ref||"—")+'</td>'+
+    '<td class="nowrap">'+esc(a.action)+'</td><td>'+esc(a.detail)+'</td>'+
+    '<td class="nowrap muted">'+esc(a.by)+'</td></tr>').join("")+'</tbody></table></div>';
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function modal(title,body,foot){
+  $("#modalhost").innerHTML='<div class="scrim" data-mclose="1"></div>'+
+    '<div class="modal" role="dialog" aria-modal="true" aria-label="'+esc(title)+'">'+
+    '<div class="mh"><h2 style="font-size:14px">'+esc(title)+'</h2><div class="spacer"></div>'+
+    '<button class="btn g xs" data-mclose="1" aria-label="Close">✕</button></div>'+
+    '<div class="mb">'+body+'</div><div class="mf">'+foot+'</div></div>';
+}
+const closeModal=()=>{$("#modalhost").innerHTML="";};
+
+function modalCheck(v){
+  modal("Daily check — "+v.fleet,
+    '<div class="row" style="margin-bottom:10px">'+
+      '<label class="f" style="margin:0"><span>Checked by</span><input type="text" id="ck-by" value="'+esc(me()?me().forename+" "+me().surname:"Crew")+'"></label>'+
+      '<label class="f" style="margin:0"><span>Mileage</span><input type="number" id="ck-miles" value="'+v.mileage+'"></label>'+
+    '</div>'+
+    '<div class="checklist"><div style="font-weight:650">Item</div><div class="micro">Pass</div><div class="micro">Fail</div>'+
+      CHECK_ITEMS.map((it,i)=>'<div>'+esc(it)+'</div>'+
+        '<div><input type="radio" name="ck'+i+'" value="pass" checked></div>'+
+        '<div><input type="radio" name="ck'+i+'" value="fail"></div>').join("")+
+    '</div>'+
+    '<label class="f" style="margin-top:10px"><span>Notes</span><input type="text" id="ck-notes" placeholder="Anything the next crew should know"></label>'+
+    '<p class="hint" style="margin:0">Any failed item raises a defect. Mark it safety-critical on the next screen if the vehicle is not fit to drive.</p>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="ck-save" data-veh="'+v.id+'">Submit check</button>');
+}
+function modalDefect(v,presetDesc){
+  modal("Log a defect — "+v.fleet,
+    '<label class="f"><span>Defect<span class="rq">*</span></span><input type="text" id="df-desc" value="'+esc(presetDesc||"")+'" placeholder="What is wrong">'+
+      '<div class="msg" id="m-df">Describe the defect.</div></label>'+
+    '<div class="row"><label class="f" style="margin:0"><span>Severity</span><select id="df-sev">'+
+      '<option>Advisory</option><option>Safety-critical</option></select></label>'+
+      '<label class="f" style="margin:0"><span>Repair booked</span><input type="text" id="df-repair" placeholder="Garage and date, if known"></label></div>'+
+    '<p class="hint" style="margin:0">A safety-critical defect takes '+esc(v.fleet)+' off road at once and releases its journeys '+
+    'on the dispatch board.</p>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="df-save" data-veh="'+v.id+'">Log defect</button>');
+}
+function modalRenew(kind,id,label,current){
+  modal("Renew "+label,
+    '<p style="margin-top:0">Current expiry: <strong class="num">'+(current?ukd(current):"not recorded")+'</strong></p>'+
+    '<div class="row"><label class="f" style="margin:0"><span>New expiry<span class="rq">*</span></span>'+
+      '<input type="date" id="rn-date" value="'+mshift(12)+'"><div class="msg" id="m-rn">Set the new expiry date.</div></label>'+
+      '<label class="f" style="margin:0"><span>Evidence seen</span><select id="rn-ev">'+
+      '<option>Original document</option><option>Certified copy</option><option>Online verification</option><option>Not yet seen</option></select></label></div>'+
+    '<label class="f" style="margin:0"><span>Note</span><input type="text" id="rn-note" placeholder="Optional"></label>',
+    '<button class="btn g" data-mclose="1">Cancel</button>'+
+    '<button class="btn p" id="rn-save" data-kind="'+esc(kind)+'" data-id="'+esc(id)+'">Record renewal</button>');
+}
+function modalNewStaff(){
+  modal("Add employee",
+    '<div class="row"><label class="f" style="margin:0"><span>Forename<span class="rq">*</span></span><input type="text" id="ns-fore"><div class="msg" id="m-ns-fore">Enter a forename.</div></label>'+
+    '<label class="f" style="margin:0"><span>Surname<span class="rq">*</span></span><input type="text" id="ns-sur"><div class="msg" id="m-ns-sur">Enter a surname.</div></label></div>'+
+    '<div class="row" style="margin-top:8px"><label class="f" style="margin:0"><span>Grade<span class="rq">*</span></span><select id="ns-grade">'+
+      '<option value="">Select…</option>'+GRADES.map(g=>'<option>'+esc(g)+'</option>').join("")+'</select>'+
+      '<div class="msg" id="m-ns-grade">Select a grade.</div></label>'+
+    '<label class="f" style="margin:0"><span>Employment</span><select id="ns-emp">'+
+      EMPLOYMENT.map(e=>'<option>'+esc(e)+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Start date</span><input type="date" id="ns-start" value="'+todayISO()+'"></label></div>'+
+    '<div class="row" style="margin-top:8px"><label class="f" style="margin:0"><span>Email</span><input type="email" id="ns-email"></label>'+
+    '<label class="f" style="margin:0"><span>Telephone</span><input type="tel" id="ns-phone"></label></div>'+
+    '<p class="hint">The record is created blocked from rostering until DBS, right to work, licence, references and mandatory '+
+    'training have been recorded. That is deliberate.</p>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="ns-save">Create record</button>');
+}
+function modalNewVehicle(){
+  const bases=Array.from(new Set(S.vehicles.map(v=>v.base))).sort();
+  modal("Add vehicle",
+    '<div class="row"><label class="f" style="margin:0"><span>Fleet number<span class="rq">*</span></span>'+
+      '<input type="text" id="nv-fleet" placeholder="A108"><div class="msg" id="m-nv-fleet">Enter a fleet number that is not already in use.</div></label>'+
+    '<label class="f" style="margin:0"><span>Registration<span class="rq">*</span></span>'+
+      '<input type="text" id="nv-reg" placeholder="TF24 ABC"><div class="msg" id="m-nv-reg">Enter a registration that is not already in use.</div></label></div>'+
+    '<div class="row" style="margin-top:8px"><label class="f" style="margin:0"><span>Make</span><input type="text" id="nv-make"></label>'+
+    '<label class="f" style="margin:0"><span>Model</span><input type="text" id="nv-model"></label>'+
+    '<label class="f" style="margin:0"><span>Year</span><input type="number" id="nv-year" min="1990" max="2030" value="'+(new Date().getFullYear())+'"></label></div>'+
+    '<div class="row" style="margin-top:8px"><label class="f" style="margin:0"><span>Vehicle type<span class="rq">*</span></span>'+
+      '<select id="nv-type"><option value="">Select…</option>'+VEHICLE_TYPES.map(t=>'<option>'+esc(t)+'</option>').join("")+'</select>'+
+      '<div class="msg" id="m-nv-type">Select a type — it decides which journeys dispatch will allow.</div></label>'+
+    '<label class="f" style="margin:0"><span>Base</span><select id="nv-base">'+
+      bases.map(b=>'<option>'+esc(b)+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Ownership</span><select id="nv-own">'+
+      OWNERSHIP.map(o=>'<option>'+esc(o)+'</option>').join("")+'</select></label></div>'+
+    '<div class="row" style="margin-top:8px"><label class="f" style="margin:0"><span>Fuel</span><select id="nv-fuel">'+
+      ["Diesel","Petrol","Petrol hybrid","Electric"].map(f=>'<option>'+esc(f)+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Odometer</span><input type="number" id="nv-miles" min="0" value="0"></label>'+
+    '<label class="f" style="margin:0"><span>Status on entry</span><select id="nv-status">'+
+      '<option>Off road</option><option>Available</option></select>'+
+      '<div class="hint">Leave off road until the vehicle has been inspected.</div></label></div>'+
+    '<p class="hint">The record is created with no MOT, tax, insurance or equipment inspection dates, so it is blocked from '+
+    'allocation until those are recorded on the compliance tab. That is deliberate — the same rule that applies to a new employee.</p>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="nv-save">Create record</button>');
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function go(v){S.view=v;S.sel=null;S.selKind="";render();window.scrollTo(0,0);$("#side").classList.remove("open");}
+function openStaff(id){
+  if(!can("staff")&&!(selfOnly()&&id===S.meId)){toast("Your role cannot open employee records.","bad");return;}
+  S.sel=id;S.selKind="staff";S.tab="summary";render();window.scrollTo(0,0);
+}
+function openVeh(id){
+  if(!can("fleet")){toast("Your role cannot open vehicle records.","bad");return;}
+  S.sel=id;S.selKind="vehicle";S.tab="summary";render();window.scrollTo(0,0);
+}
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():"";};
+function mark(id,mid,ok){const e=document.getElementById(id),m=document.getElementById(mid);
+  if(e)e.classList.toggle("bad",!ok);if(m)m.classList.toggle("on",!ok);return ok;}
+function sAudit(s,action,detail){s.audit.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||""});}
+function vAudit(v,action,detail){v.audit.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||""});}
+
+document.addEventListener("click", async e=>{
+  const t=e.target.closest("[data-go],[data-tab],[data-openstaff],[data-openveh],[data-mclose],[data-stat],"+
+    "[data-renew],[data-vrenew],[data-retrain],[data-assess],[data-leave],[data-ack],[data-check],"+
+    "[data-closedefect],[data-rmdoc],button");
+  if(!t) return;
+  const s=S.selKind==="staff"?stf(S.sel):null;
+  const v=S.selKind==="vehicle"?veh(S.sel):null;
+
+  if(t.dataset.mclose){closeModal();return;}
+  if(t.dataset.go){const m=MENU.find(x=>x.id===t.dataset.go);
+    if(m&&!m.live){S.view=t.dataset.go;S.sel=null;S.selKind="";render();$("#side").classList.remove("open");return;}
+    go(t.dataset.go);return;}
+  if(t.dataset.tab){S.tab=t.dataset.tab;render();return;}
+  if(t.dataset.openstaff){openStaff(t.dataset.openstaff);return;}
+  if(t.dataset.openveh){openVeh(t.dataset.openveh);return;}
+  if(t.dataset.stat){
+    const g=t.dataset.stat;
+    if(g==="blocked"){S.f={q:"",grade:"",status:"",compliance:"blocked"};go("staff");return;}
+    if(g==="vblocked"){S.vf={q:"",type:"",status:"blocked"};go("fleet");return;}
+    go(g);return;
+  }
+
+  const id=t.id;
+  if(id==="theme"){const n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",n);
+    try{if(window.storage)window.storage.set("pts:theme",n);}catch(_){}return;}
+  if(id==="sidetoggle"){$("#side").classList.toggle("open");return;}
+  if(id==="f-clear"){S.f={q:"",grade:"",status:"Active",compliance:""};render();return;}
+  if(id==="vf-clear"){S.vf={q:"",type:"",status:""};render();return;}
+  if(id==="printrec"){window.print();return;}
+  if(id==="export"){exportStaff();return;}
+  if(id==="export-fleet"){exportFleet();return;}
+  if(id==="new-staff"){modalNewStaff();return;}
+
+  /* create employee */
+  if(id==="ns-save"){
+    let ok=true;
+    ok=mark("ns-fore","m-ns-fore",!!val("ns-fore"))&&ok;
+    ok=mark("ns-sur","m-ns-sur",!!val("ns-sur"))&&ok;
+    ok=mark("ns-grade","m-ns-grade",!!val("ns-grade"))&&ok;
+    if(!ok){toast("Check the highlighted fields.","bad");return;}
+    const rec={id:uid(),ref:"EMP-"+String(1001+S.staff.length),forename:val("ns-fore"),surname:val("ns-sur"),
+      grade:val("ns-grade"),status:"Active",employment:val("ns-emp"),startDate:val("ns-start"),
+      payroll:"PR"+String(4400+S.staff.length*7),ni:"",address:"",phone:val("ns-phone"),email:val("ns-email"),
+      emergency:{name:"",relationship:"",phone:""},
+      rightToWork:{status:"Not verified",docType:"",expiry:""},
+      dbs:{number:"",issued:"",expiry:"",updateService:false,level:"Enhanced with adult barred list"},
+      licence:{number:"",expiry:"",categories:["B"],points:0,checked:""},
+      registration:{body:"",number:"",expiry:""},
+      qualifications:[],training:TRAINING.slice(0,9).map(n=>({name:n,completed:"",expiry:""})),
+      competencies:COMPETENCIES.map(c=>({name:c,assessed:"",assessor:"",valid:false})),
+      immunisations:[],occHealth:{status:"Not assessed",lastReview:"",restrictions:""},
+      references:[],appraisals:[],supervisions:[],disciplinary:[],absence:[],leave:[],
+      availability:{Mon:true,Tue:true,Wed:true,Thu:true,Fri:true,Sat:false,Sun:false},
+      restrictions:"",documents:[],policies:[],audit:[],cadId:""};
+    sAudit(rec,"Employee record created",rec.forename+" "+rec.surname+" · "+rec.grade);
+    S.staff.push(rec);
+    log("Employee added",rec.forename+" "+rec.surname+" — blocked until pre-employment checks are recorded",rec.ref);
+    await save();closeModal();toast("Created "+rec.ref+" — blocked until checks are recorded","bad");openStaff(rec.id);return;
+  }
+  if(id==="new-vehicle"){modalNewVehicle();return;}
+  if(id==="nv-save"){
+    const fleetNo=val("nv-fleet").toUpperCase(), reg=val("nv-reg").toUpperCase().replace(/\s+/g," ").trim();
+    let ok=true;
+    ok=mark("nv-fleet","m-nv-fleet",!!fleetNo&&!S.vehicles.some(v=>v.fleet.toUpperCase()===fleetNo))&&ok;
+    ok=mark("nv-reg","m-nv-reg",!!reg&&!S.vehicles.some(v=>v.reg.toUpperCase().replace(/\s+/g," ")===reg))&&ok;
+    ok=mark("nv-type","m-nv-type",!!val("nv-type"))&&ok;
+    if(!ok){toast("Check the highlighted fields.","bad");return;}
+    const rec={id:uid(),fleet:fleetNo,reg,make:val("nv-make"),model:val("nv-model"),
+      year:parseInt(val("nv-year"),10)||new Date().getFullYear(),type:val("nv-type"),category:"",
+      base:val("nv-base"),ownership:val("nv-own"),lease:{provider:"",monthly:"",ends:""},
+      insurance:{insurer:"",policy:"",expiry:""},mot:"",tax:"",
+      breakdown:{provider:"",expiry:""},
+      services:[],nextService:"",mileage:parseInt(val("nv-miles"),10)||0,fuelType:val("nv-fuel"),fuelRecords:[],
+      tyres:{lastCheck:"",notes:""},equipment:[],equipmentDue:"",cleaning:[],deepCleanDue:"",
+      checks:[],defects:[],repairs:[],downtime:[],
+      status:val("nv-status"),offReason:val("nv-status")==="Off road"?"Awaiting inspection and compliance records":"",
+      documents:[],audit:[],cadId:""};
+    if(rec.status==="Off road") rec.downtime.push({id:uid(),from:todayISO(),to:"",reason:"Awaiting inspection and compliance records"});
+    vAudit(rec,"Vehicle added to the fleet",rec.fleet+" · "+rec.reg+" · "+rec.type);
+    S.vehicles.push(rec);
+    log("Vehicle added",rec.fleet+" ("+rec.reg+") — blocked until MOT, tax, insurance and equipment inspection are recorded",
+      rec.fleet);
+    await save();closeModal();
+    toast("Created "+rec.fleet+" — blocked until compliance dates are recorded","bad");
+    openVeh(rec.id);return;
+  }
+
+  /* ---- staff record actions ---- */
+  if(s){
+    if(id==="reveal-ni"){S.revealed[s.id]=true;
+      sAudit(s,"National Insurance number revealed","");log("NI number revealed",s.forename+" "+s.surname,s.ref);
+      await save();toast("Revealed — recorded in the change log","seal");render();return;}
+    if(id==="hide-ni"){delete S.revealed[s.id];render();return;}
+    if(id==="save-summary"){
+      const ch=[];
+      const st=val("e-status"),gr=val("e-grade"),ph=val("e-phone"),rs=val("e-restrict");
+      if(st!==s.status){ch.push("status "+s.status+" → "+st);s.status=st;}
+      if(gr!==s.grade){ch.push("grade "+s.grade+" → "+gr);s.grade=gr;}
+      if(ph!==s.phone){ch.push("telephone updated");s.phone=ph;}
+      if(rs!==s.restrictions){ch.push("restrictions updated");s.restrictions=rs;}
+      if(!ch.length){toast("Nothing to save.");return;}
+      sAudit(s,"Record updated",ch.join("; "));log("Employee updated",s.forename+" "+s.surname+" — "+ch.join("; "),s.ref);
+      await save();toast("Saved and republished to dispatch","ok");render();return;
+    }
+    if(t.dataset.renew){
+      const k=t.dataset.renew;
+      const cur=k==="dbs"?s.dbs.expiry:k==="rtw"?s.rightToWork.expiry:k==="licence"?s.licence.expiry:s.registration.expiry;
+      const lbl=k==="dbs"?"DBS check":k==="rtw"?"right to work":k==="licence"?"driving licence":"professional registration";
+      modalRenew("staff:"+k,s.id,lbl,cur);return;
+    }
+    if(t.dataset.retrain){
+      const n=t.dataset.retrain;
+      const item=s.training.find(x=>x.name===n);
+      item.completed=todayISO();item.expiry=mshift(n==="Basic life support"?12:36);
+      sAudit(s,"Training refreshed",n+" — valid to "+ukd(item.expiry));
+      log("Training refreshed",s.forename+" "+s.surname+" — "+n,s.ref);
+      await save();toast(n+" refreshed","ok");render();return;
+    }
+    if(t.dataset.assess){
+      const n=t.dataset.assess;
+      const c=s.competencies.find(x=>x.name===n);
+      c.assessed=todayISO();c.assessor=role().name;c.valid=true;
+      sAudit(s,"Competency assessed",n);log("Competency assessed",s.forename+" "+s.surname+" — "+n,s.ref);
+      await save();toast(n+" signed off","ok");render();return;
+    }
+    if(id==="add-appraisal"){
+      s.appraisals.push({id:uid(),date:todayISO(),by:role().name,rating:"Good",notes:"Recorded from the compliance module."});
+      sAudit(s,"Appraisal recorded","");log("Appraisal recorded",s.forename+" "+s.surname,s.ref);
+      await save();toast("Appraisal recorded","ok");render();return;
+    }
+    if(id==="add-supervision"){
+      s.supervisions.push({id:uid(),date:todayISO(),by:role().name,notes:"Routine supervision. No concerns raised."});
+      sAudit(s,"Supervision recorded","");log("Supervision recorded",s.forename+" "+s.surname,s.ref);
+      await save();toast("Supervision recorded","ok");render();return;
+    }
+    if(t.dataset.leave){
+      const [lid,act]=t.dataset.leave.split("|");
+      const l=s.leave.find(x=>x.id===lid);
+      l.status=act==="approve"?"Approved":"Declined";
+      sAudit(s,"Leave "+l.status.toLowerCase(),ukd(l.from)+" – "+ukd(l.to));
+      log("Leave "+l.status.toLowerCase(),s.forename+" "+s.surname,s.ref);
+      await save();toast("Leave "+l.status.toLowerCase(),"ok");render();return;
+    }
+    if(id==="add-doc"||id==="add-doc-btn"){
+      const f=$("#dc-file")?$("#dc-file").files[0]:null;
+      if(!f){S.tab="documents";render();toast("Choose a file on the Documents tab.","bad");return;}
+      s.documents.push({id:uid(),name:f.name,category:val("dc-cat"),size:(f.size/1024).toFixed(0)+" KB",
+        by:role().name,at:todayISO()});
+      sAudit(s,"Document attached",f.name);await save();toast("Attached "+f.name,"ok");render();return;
+    }
+    if(t.dataset.rmdoc){
+      const d=s.documents.find(x=>x.id===t.dataset.rmdoc);
+      s.documents=s.documents.filter(x=>x.id!==t.dataset.rmdoc);
+      sAudit(s,"Document removed",d?d.name:"");await save();render();return;
+    }
+  }
+
+  /* ---- self service ---- */
+  if(id==="save-avail"){
+    const m=me();
+    $$(".av").forEach(x=>{m.availability[x.dataset.day]=x.checked;});
+    sAudit(m,"Availability updated",Object.entries(m.availability).filter(([,x])=>x).map(([d])=>d).join(", "));
+    await save();toast("Availability updated","ok");render();return;
+  }
+  if(id==="request-leave"){
+    const m=me();
+    if(!mark("lv-to","m-lv",val("lv-to")>val("lv-from"))) return;
+    const d=days(val("lv-to"))-days(val("lv-from"))+1;
+    m.leave.push({id:uid(),from:val("lv-from"),to:val("lv-to"),days:d,status:"Requested",note:""});
+    sAudit(m,"Leave requested",ukd(val("lv-from"))+" – "+ukd(val("lv-to")));
+    log("Leave requested",m.forename+" "+m.surname,m.ref);
+    await save();toast("Leave requested — awaiting approval","ok");render();return;
+  }
+  if(t.dataset.ack){
+    const m=me();
+    const p=m.policies.find(x=>x.name===t.dataset.ack);
+    p.acknowledged=todayISO();
+    sAudit(m,"Policy acknowledged",p.name+" v"+p.version);
+    await save();toast("Acknowledged","ok");render();return;
+  }
+  if(id==="save-me"){
+    const m=me();
+    m.phone=val("me-phone");m.email=val("me-email");m.address=val("me-address");
+    m.emergency.name=val("me-emname");m.emergency.phone=val("me-emphone");
+    sAudit(m,"Personal details updated by the employee","");
+    await save();toast("Details saved","ok");render();return;
+  }
+
+  /* ---- vehicle actions ---- */
+  if(t.dataset.check){modalCheck(veh(t.dataset.check));return;}
+  if(id==="do-check"&&v){modalCheck(v);return;}
+  if(id==="ck-save"){
+    const vv=veh(t.dataset.veh);
+    const fails=[];
+    CHECK_ITEMS.forEach((it,i)=>{
+      const r=document.querySelector('input[name="ck'+i+'"]:checked');
+      if(r&&r.value==="fail") fails.push(it);
+    });
+    const miles=parseInt(val("ck-miles"),10)||vv.mileage;
+    vv.mileage=miles;
+    vv.checks.push({id:uid(),date:todayISO(),by:val("ck-by")||"Crew",pass:fails.length===0,fails,mileage:miles,notes:val("ck-notes")});
+    vAudit(vv,"Daily check completed",fails.length?"Failed: "+fails.join(", "):"All items passed");
+    log("Daily check",vv.fleet+(fails.length?" — failed "+fails.length+" item(s)":" — pass"),vv.fleet);
+    await save();closeModal();
+    if(fails.length){ toast(fails.length+" item(s) failed — raise a defect","bad"); modalDefect(vv,fails.join("; ")); }
+    else toast(vv.fleet+" check passed","ok");
+    render();return;
+  }
+  if(id==="log-defect"&&v){modalDefect(v);return;}
+  if(id==="df-save"){
+    const vv=veh(t.dataset.veh);
+    if(!mark("df-desc","m-df",!!val("df-desc"))) return;
+    const sev=val("df-sev");
+    vv.defects.push({id:uid(),desc:val("df-desc"),severity:sev,open:true,raised:todayISO(),
+      by:role().name,repair:val("df-repair")});
+    if(sev==="Safety-critical"){vv.status="Off road";vv.offReason=val("df-desc");
+      vv.downtime.push({id:uid(),from:todayISO(),to:"",reason:val("df-desc")});}
+    vAudit(vv,"Defect logged",sev+": "+val("df-desc"));
+    log("Defect logged",vv.fleet+" — "+sev+": "+val("df-desc"),vv.fleet);
+    await save();closeModal();
+    toast(sev==="Safety-critical"?vv.fleet+" off road — dispatch board updated":"Advisory defect logged",
+      sev==="Safety-critical"?"bad":"ok");
+    render();return;
+  }
+  if(t.dataset.closedefect&&v){
+    const d=v.defects.find(x=>x.id===t.dataset.closedefect);
+    d.open=false;d.closed=todayISO();
+    const stillCrit=v.defects.some(x=>x.open&&x.severity==="Safety-critical");
+    if(!stillCrit&&v.status==="Off road"){v.status="Available";v.offReason="";
+      const dt=v.downtime.find(x=>!x.to); if(dt) dt.to=todayISO();}
+    vAudit(v,"Defect closed",d.desc);log("Defect closed",v.fleet+" — "+d.desc,v.fleet);
+    await save();toast(stillCrit?"Defect closed — vehicle still off road":"Defect closed — "+v.fleet+" back in service","ok");
+    render();return;
+  }
+  if(id==="off-road"&&v){
+    v.status="Off road";v.offReason=v.offReason||"Taken off road by "+role().name;
+    v.downtime.push({id:uid(),from:todayISO(),to:"",reason:v.offReason});
+    vAudit(v,"Taken off road",v.offReason);log("Vehicle off road",v.fleet,v.fleet);
+    await save();toast(v.fleet+" off road — dispatch board updated","bad");render();return;
+  }
+  if(id==="on-road"&&v){
+    if(v.defects.some(d=>d.open&&d.severity==="Safety-critical")){
+      toast("Close the safety-critical defect first.","bad");return;}
+    v.status="Available";v.offReason="";
+    const dt=v.downtime.find(x=>!x.to); if(dt) dt.to=todayISO();
+    vAudit(v,"Returned to service","");log("Vehicle returned to service",v.fleet,v.fleet);
+    await save();toast(v.fleet+" back in service","ok");render();return;
+  }
+  if(id==="save-vehicle"&&v){
+    const ch=[];
+    const m=parseInt(val("e-mileage"),10)||v.mileage;
+    if(m!==v.mileage){ch.push("mileage "+v.mileage+" → "+m);v.mileage=m;}
+    const b=val("e-base");if(b!==v.base){ch.push("base "+v.base+" → "+b);v.base=b;}
+    const ty=val("e-tyres");if(ty!==v.tyres.notes){ch.push("tyre notes updated");v.tyres.notes=ty;}
+    if(!ch.length){toast("Nothing to save.");return;}
+    vAudit(v,"Vehicle updated",ch.join("; "));await save();toast("Saved","ok");render();return;
+  }
+  if(id==="add-service"&&v){
+    const ty=val("sv-type"),dt=val("sv-date");
+    if(ty.indexOf("clean")>-1||ty.indexOf("Clean")>-1){
+      v.cleaning.push({id:uid(),date:dt,type:ty,by:role().name,notes:""});
+      if(ty==="Deep clean") v.deepCleanDue=addMonth(dt,1);
+    } else {
+      v.services.push({id:uid(),date:dt,mileage:v.mileage,type:ty,by:"Recorded in the fleet module",notes:""});
+      if(ty.indexOf("service")>-1) v.nextService=addMonth(dt,6);
+    }
+    vAudit(v,"Record added",ty+" on "+ukd(dt));await save();toast(ty+" recorded","ok");render();return;
+  }
+  if(t.dataset.vrenew&&v){
+    const k=t.dataset.vrenew;
+    const cur={mot:v.mot,ins:v.insurance.expiry,tax:v.tax,brk:v.breakdown.expiry,
+      svc:v.nextService,equip:v.equipmentDue,clean:v.deepCleanDue}[k];
+    const lbl={mot:"MOT",ins:"insurance",tax:"vehicle tax",brk:"breakdown cover",
+      svc:"service",equip:"equipment inspection",clean:"deep clean"}[k];
+    modalRenew("vehicle:"+k,v.id,lbl,cur);return;
+  }
+
+  /* renewal save */
+  if(id==="rn-save"){
+    if(!mark("rn-date","m-rn",!!val("rn-date"))) return;
+    const [kind,k]=t.dataset.kind.split(":");
+    const d=val("rn-date"), note=val("rn-ev")+(val("rn-note")?" · "+val("rn-note"):"");
+    if(kind==="staff"){
+      const ss=stf(t.dataset.id);
+      if(k==="dbs") ss.dbs.expiry=d;
+      if(k==="rtw"){ss.rightToWork.expiry=d;ss.rightToWork.status="Verified";}
+      if(k==="licence"){ss.licence.expiry=d;ss.licence.checked=todayISO();}
+      if(k==="reg") ss.registration.expiry=d;
+      sAudit(ss,"Compliance renewed",k+" to "+ukd(d)+" · "+note);
+      log("Compliance renewed",ss.forename+" "+ss.surname+" — "+k+" to "+ukd(d),ss.ref);
+    } else {
+      const vv=veh(t.dataset.id);
+      if(k==="mot") vv.mot=d;
+      if(k==="ins") vv.insurance.expiry=d;
+      if(k==="tax") vv.tax=d;
+      if(k==="brk") vv.breakdown.expiry=d;
+      if(k==="svc") vv.nextService=d;
+      if(k==="equip"){vv.equipmentDue=d;vv.equipment.forEach(e=>{if(days(e.next)<0){e.inspected=todayISO();e.next=d;}});}
+      if(k==="clean"){vv.deepCleanDue=d;vv.cleaning.push({id:uid(),date:todayISO(),type:"Deep clean",by:role().name,notes:""});}
+      vAudit(vv,"Compliance renewed",k+" to "+ukd(d)+" · "+note);
+      log("Compliance renewed",vv.fleet+" — "+k+" to "+ukd(d),vv.fleet);
+    }
+    await save();closeModal();toast("Renewal recorded and published to dispatch","ok");render();return;
+  }
+});
+
+document.addEventListener("change", e=>{
+  const el=e.target;
+  if(el.id==="rolepick"){S.roleId=el.value;S.sel=null;S.selKind="";S.revealed={};
+    S.view=selfOnly()?"selfservice":can("fleet")&&!can("staff")?"fleet":"compliance";
+    render();toast("Signed in as "+role().name);return;}
+  if(el.id==="mepick"){S.meId=el.value;render();return;}
+  const m={"f-grade":"grade","f-status":"status","f-compliance":"compliance"};
+  if(m[el.id]){S.f[m[el.id]]=el.value;render();return;}
+  const vm={"vf-type":"type","vf-status":"status"};
+  if(vm[el.id]){S.vf[vm[el.id]]=el.value;render();return;}
+});
+
+let tm;
+document.addEventListener("input", e=>{
+  const isStaffQ=e.target.id==="f-q", isVehQ=e.target.id==="vf-q", isG=e.target.id==="gsearch";
+  if(!isStaffQ&&!isVehQ&&!isG) return;
+  if(isStaffQ) S.f.q=e.target.value;
+  if(isVehQ) S.vf.q=e.target.value;
+  if(isG){S.f.q=e.target.value;S.vf.q=e.target.value;}
+  clearTimeout(tm);
+  tm=setTimeout(()=>{
+    const pos=e.target.selectionStart, tid=e.target.id;
+    if(isG&&S.view!=="staff"&&S.view!=="fleet"){S.sel=null;S.selKind="";S.view="staff";}
+    render();
+    const el=document.getElementById(tid);
+    if(el){el.focus();try{el.setSelectionRange(pos,pos);}catch(_){}}
+  },220);
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"&&$("#modalhost").innerHTML){closeModal();return;}
+  if((e.key==="Enter"||e.key===" ")&&e.target.dataset){
+    if(e.target.dataset.openstaff){e.preventDefault();openStaff(e.target.dataset.openstaff);}
+    if(e.target.dataset.openveh){e.preventDefault();openVeh(e.target.dataset.openveh);}
+  }
+});
+
+/* ---------- export ---------- */
+function exportStaff(){
+  const rows=visibleStaff();
+  if(!rows.length){toast("Nothing to export.","bad");return;}
+  const head=["Ref","Surname","Forename","Grade","Employment","Start date","Status",
+    "DBS expiry","Right to work","Licence expiry","Registration expiry",
+    "Manual handling","Safeguarding","Life support","Blocked","Reason"];
+  const q=x=>'"'+String(x==null?"":x).replace(/"/g,'""')+'"';
+  const body=rows.map(s=>{const c=staffCompliance(s);
+    return [s.ref,s.surname,s.forename,s.grade,s.employment,ukd(s.startDate),s.status,
+      ukd(s.dbs.expiry),s.rightToWork.expiry?ukd(s.rightToWork.expiry):"No expiry",
+      ukd(s.licence.expiry),s.registration.expiry?ukd(s.registration.expiry):"n/a",
+      ukd(trainDate(s,"Manual handling")),ukd(trainDate(s,"Safeguarding adults")),ukd(trainDate(s,"Basic life support")),
+      c.blocked?"Yes":"No",c.reason].map(q).join(",");}).join("\r\n");
+  dl("staff-compliance-"+todayISO()+".csv","\ufeff"+head.map(q).join(",")+"\r\n"+body);
+  toast("Exported "+rows.length+" employees","ok");
+}
+function exportFleet(){
+  const rows=visibleVehicles();
+  const head=["Fleet","Registration","Make","Model","Year","Type","Base","Mileage",
+    "MOT","Insurance","Tax","Next service","Equipment due","Open defects","Blocked","Reason"];
+  const q=x=>'"'+String(x==null?"":x).replace(/"/g,'""')+'"';
+  const body=rows.map(v=>{const c=vehicleCompliance(v);
+    return [v.fleet,v.reg,v.make,v.model,v.year,v.type,v.base,v.mileage,
+      ukd(v.mot),ukd(v.insurance.expiry),ukd(v.tax),ukd(v.nextService),ukd(v.equipmentDue),
+      v.defects.filter(d=>d.open).length,c.blocked?"Yes":"No",c.reason].map(q).join(",");}).join("\r\n");
+  dl("fleet-compliance-"+todayISO()+".csv","\ufeff"+head.map(q).join(",")+"\r\n"+body);
+  toast("Exported "+rows.length+" vehicles","ok");
+}
+function dl(name,text){
+  const url=URL.createObjectURL(new Blob([text],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),800);
+}
+
+/* ---------- boot ---------- */
+(async function(){
+  $("#rolepick").innerHTML=ROLES.map(r=>'<option value="'+r.id+'"'+(r.id===S.roleId?' selected':'')+'>'+esc(r.name)+'</option>').join("");
+  try{if(window.storage){const th=await window.storage.get("pts:theme");
+    if(th&&th.value)document.documentElement.setAttribute("data-theme",th.value);}}catch(_){}
+  const had=await load();
+  if(!had){seed();}
+  await save();
+  render();
+  if(cadLinked) toast("Compliance dates published to the dispatch board","ok");
+  if(!storageOK) toast("Changes are held for this session only.","bad");
+})();
+
+})();
+</script>

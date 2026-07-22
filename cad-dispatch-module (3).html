@@ -1,0 +1,1604 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAD and Dispatch | Ambulance &amp; PTS Management System</title>
+<style>
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface-2:#F6F8FA; --surface-3:#EEF1F5;
+  --line:#D6DCE3; --line-2:#BAC4CF;
+  --ink:#111820; --ink-2:#4B5763; --ink-3:#78848F;
+  --nav:#1A222C; --nav-ink:#B7C3CF; --nav-ink-2:#7C8B99;
+  --accent:#0B6A66; --accent-2:#0E837E; --accent-soft:#DFEEED;
+  --ok:#166534; --ok-soft:#E3F2E8;
+  --warn:#96560A; --warn-soft:#FBEEDC;
+  --stop:#A81C24; --stop-soft:#FAE7E8;
+  --info:#1E4E8C; --info-soft:#E6EEF8;
+  --live:#5B21A8; --live-soft:#EFE6FA;
+  --r:6px; --r2:10px;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --shadow:0 1px 2px rgba(17,24,32,.05),0 6px 18px rgba(17,24,32,.06);
+  --px:1.55; /* pixels per minute on the board */
+}
+html[data-theme="dark"]{
+  --bg:#0D1218; --surface:#151D26; --surface-2:#1B2530; --surface-3:#212C38;
+  --line:#2A3744; --line-2:#3B4C5C;
+  --ink:#E7EDF3; --ink-2:#AFBDC9; --ink-3:#8394A2;
+  --nav:#0A0F14; --nav-ink:#AEBDCA; --nav-ink-2:#6D7E8D;
+  --accent:#2FA39D; --accent-2:#3CB8B1; --accent-soft:#10312F;
+  --ok:#63C088; --ok-soft:#11301E; --warn:#DFA45C; --warn-soft:#33260F;
+  --stop:#EE868D; --stop-soft:#361619; --info:#7BAEEA; --info-soft:#12253C;
+  --live:#B79BE8; --live-soft:#241636;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:13.5px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:640;letter-spacing:-.005em}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent-2)}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.micro{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.muted{color:var(--ink-3)} .nowrap{white-space:nowrap} .spacer{flex:1}
+
+.shell{display:flex;min-height:100vh}
+.side{width:208px;flex:0 0 208px;background:var(--nav);color:var(--nav-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.logo{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:9px;align-items:center}
+.logo .sq{width:28px;height:28px;flex:0 0 28px;border-radius:5px;background:var(--accent-2);display:grid;place-items:center;color:#04211F;font-weight:800;font-size:11px}
+.logo b{display:block;color:#fff;font-size:12.5px;line-height:1.25}
+.logo small{display:block;color:var(--nav-ink-2);font-size:10px}
+.menu{flex:1;overflow:auto;padding:6px}
+.menu .grp{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--nav-ink-2);padding:12px 8px 5px}
+.mi{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;color:var(--nav-ink);padding:6px 8px;border-radius:5px;cursor:pointer;font-size:12.5px}
+.mi:hover{background:rgba(255,255,255,.06);color:#fff}
+.mi[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+.mi.stub{color:var(--nav-ink-2)}
+.mi .pill{margin-left:auto;font:600 10px/1 var(--mono);background:rgba(255,255,255,.13);padding:3px 5px;border-radius:9px}
+.mi .pill.hot{background:var(--stop);color:#fff}
+.mi .planned{margin-left:auto;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--nav-ink-2)}
+.sfoot{padding:9px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:9.5px;color:var(--nav-ink-2);line-height:1.5}
+
+.body{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);padding:7px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.clock{font:700 15px/1 var(--mono);letter-spacing:-.01em}
+.role select,.bar select,.bar input[type=date]{padding:5px 8px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2)}
+.vtabs{display:flex;gap:2px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:2px}
+.vtab{background:none;border:0;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12.5px;color:var(--ink-2)}
+.vtab[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:600}
+.page{padding:14px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);padding:6px 11px;border-radius:var(--r);cursor:pointer;font-weight:550;font-size:12.5px}
+.btn:hover{border-color:var(--accent);color:var(--accent-2)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.p:hover{background:var(--accent-2);color:#fff}
+.btn.danger{border-color:var(--stop);color:var(--stop)}
+.btn.danger:hover{background:var(--stop-soft)}
+.btn.g{background:transparent}
+.btn.xs{padding:3px 8px;font-size:11.5px}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.card>.h{padding:9px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.card>.h h2{font-size:12.5px}
+.card>.b{padding:12px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+label.f{display:block;margin-bottom:9px}
+label.f>span{display:block;font-size:11px;font-weight:640;color:var(--ink-2);margin-bottom:3px}
+input[type=text],input[type=time],input[type=date],input[type=number],input[type=search],select,textarea{
+  width:100%;padding:6px 9px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface)}
+textarea{min-height:60px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--accent-2);outline:2px solid var(--accent-soft)}
+.msg{display:none;color:var(--stop);font-size:11.5px;margin-top:3px}
+.msg.on{display:block}
+.hint{font-size:11px;color:var(--ink-3);margin-top:3px}
+.chk{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:2px 0}
+.chk input{width:auto}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+
+.bdg{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:3px;border:1px solid;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.b-stop{background:var(--stop-soft);color:var(--stop);border-color:var(--stop)}
+.b-info{background:var(--info-soft);color:var(--info);border-color:var(--info)}
+.b-live{background:var(--live-soft);color:var(--live);border-color:var(--live)}
+.b-grey{background:var(--surface-3);color:var(--ink-2);border-color:var(--line-2)}
+
+/* ---- assistance banner ---- */
+.mayday{background:var(--stop);color:#fff;border-radius:var(--r2);padding:10px 14px;margin-bottom:12px;
+  display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)}
+.mayday b{font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+.mayday .btn{background:#fff;border-color:#fff;color:var(--stop)}
+
+/* ---- unallocated tray ---- */
+.tray{display:flex;gap:8px;overflow-x:auto;padding:3px 1px 6px}
+.job{flex:0 0 210px;border:1px solid var(--line-2);border-left:4px solid var(--info);border-radius:var(--r);
+  background:var(--surface);padding:8px 10px;cursor:grab;box-shadow:var(--shadow)}
+.job:active{cursor:grabbing}
+.job.sel{outline:2px solid var(--accent-2);outline-offset:1px}
+.job.p-Urgent{border-left-color:var(--warn)}
+.job.p-Timecritical{border-left-color:var(--stop)}
+.job .r{font:700 11.5px/1.2 var(--mono);color:var(--accent-2)}
+.job .t{font:700 15px/1.2 var(--mono);margin-top:2px}
+.job .n{font-size:12px;font-weight:600;margin-top:2px}
+.job .m{font-size:11px;color:var(--ink-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.job .f{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}
+.job .f span{font-size:9.5px;font-weight:700;padding:1px 4px;border-radius:2px;background:var(--surface-3);color:var(--ink-2)}
+
+/* ---- SIGNATURE: the dispatch board ---- */
+.board{border:1px solid var(--line);border-radius:var(--r2);background:var(--surface);overflow:auto;position:relative}
+.brow{display:flex;border-bottom:1px solid var(--line);min-height:56px}
+.brow:last-child{border-bottom:0}
+.bhead{flex:0 0 208px;position:sticky;left:0;z-index:3;background:var(--surface-2);border-right:1px solid var(--line-2);padding:7px 10px}
+.bhead.top{background:var(--surface-3)}
+.bhead .fn{font:700 12.5px/1.2 var(--mono)}
+.bhead .ty{font-size:11px;color:var(--ink-3)}
+.bhead .cr{font-size:11px;margin-top:3px}
+.bhead .st{margin-top:4px}
+.btrack{flex:1;position:relative;min-width:0}
+.btime{display:flex;height:26px;background:var(--surface-3);border-bottom:1px solid var(--line-2);position:sticky;top:0;z-index:2}
+.btime .hr{flex:0 0 auto;border-right:1px solid var(--line);font:11px/26px var(--mono);color:var(--ink-3);padding-left:5px}
+.btrack.drop{background:var(--accent-soft);outline:2px dashed var(--accent);outline-offset:-3px}
+.btrack.deny{background:var(--stop-soft);outline:2px dashed var(--stop);outline-offset:-3px}
+.blk{position:absolute;top:5px;height:46px;border-radius:4px;border:1px solid;padding:3px 6px;overflow:hidden;
+  cursor:grab;font-size:11px;background:var(--info-soft);border-color:var(--info);color:var(--info)}
+.blk .r{font:700 10.5px/1.2 var(--mono)}
+.blk .n{font-weight:650;font-size:11px;line-height:1.2;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk .m{font-size:10px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk.s-live{background:var(--live-soft);border-color:var(--live);color:var(--live)}
+.blk.s-done{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.blk.s-stop{background:var(--stop-soft);border-color:var(--stop);color:var(--stop)}
+.blk.ret{opacity:.86;border-style:dashed}
+.blk.clash{box-shadow:0 0 0 2px var(--stop)}
+.blk.sel{box-shadow:0 0 0 2px var(--accent-2)}
+.nowline{position:absolute;top:0;bottom:0;width:2px;background:var(--stop);z-index:4;pointer-events:none}
+.nowline::before{content:"";position:absolute;top:0;left:-4px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--stop)}
+.gridline{position:absolute;top:0;bottom:0;width:1px;background:var(--line);pointer-events:none}
+
+/* ---- resource cards ---- */
+.res{border:1px solid var(--line);border-radius:var(--r2);background:var(--surface);padding:11px;box-shadow:var(--shadow)}
+.res.off{opacity:.72;border-style:dashed}
+.res .top{display:flex;gap:8px;align-items:flex-start}
+.res .fn{font:700 13px/1.2 var(--mono)}
+.res .reg{font:11px/1.2 var(--mono);color:var(--ink-3);margin-top:2px}
+.res ul{margin:8px 0 0;padding-left:15px;font-size:11.5px;color:var(--ink-2)}
+.res li.bad{color:var(--stop);font-weight:600}
+
+.tw{overflow:auto;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);
+   font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;font-weight:700}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr[data-job]{cursor:pointer}
+tbody tr[data-job]:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+
+/* ---- calendar ---- */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .dh{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700;text-align:center;padding:3px}
+.cd{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:7px 8px;min-height:78px;cursor:pointer;text-align:left}
+.cd:hover{border-color:var(--accent)}
+.cd.today{border-color:var(--accent);border-width:2px}
+.cd.other{opacity:.45}
+.cd .dn{font:700 13px/1 var(--mono)}
+.cd .c{font-size:11px;margin-top:5px;color:var(--ink-2)}
+.cd .u{font-size:11px;color:var(--stop);font-weight:650}
+
+/* ---- map ---- */
+.mapwrap{border:1px solid var(--line);border-radius:var(--r2);background:var(--surface);overflow:hidden}
+.mapwrap svg{display:block;width:100%;height:auto}
+.mk{cursor:pointer}
+
+/* ---- detail drawer ---- */
+.scrim{position:fixed;inset:0;background:rgba(10,16,22,.5);z-index:60}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(700px,100%);background:var(--bg);z-index:61;
+  display:flex;flex-direction:column;border-left:1px solid var(--line);box-shadow:-14px 0 36px rgba(8,20,35,.25)}
+.drawer .dh{background:var(--surface);border-bottom:1px solid var(--line);padding:13px 16px}
+.drawer .db{overflow:auto;padding:14px 16px 30px;flex:1}
+.drawer .df{border-top:1px solid var(--line);background:var(--surface);padding:10px 16px;display:flex;gap:7px;flex-wrap:wrap}
+.tabs{display:flex;gap:1px;border-bottom:1px solid var(--line);background:var(--surface);overflow:auto;padding:0 6px}
+.tab{background:none;border:0;padding:8px 11px;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;font-weight:550;white-space:nowrap;font-size:12.5px}
+.tab[aria-selected="true"]{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+
+dl.kv{display:grid;grid-template-columns:158px 1fr;gap:5px 12px;margin:0}
+dl.kv dt{font-size:11px;color:var(--ink-3);font-weight:650}
+dl.kv dd{margin:0}
+@media(max-width:640px){dl.kv{grid-template-columns:1fr;gap:1px}dl.kv dd{margin-bottom:6px}}
+
+ul.feed{list-style:none;margin:0;padding:0}
+ul.feed li{padding:7px 0 7px 12px;border-left:2px solid var(--line-2);position:relative}
+ul.feed li::before{content:"";position:absolute;left:-4px;top:11px;width:6px;height:6px;border-radius:50%;background:var(--accent-2)}
+ul.feed .m{font-size:10.5px;color:var(--ink-3);font-family:var(--mono)}
+ul.feed .s{font-weight:600;margin-top:1px}
+ul.feed .d{font-size:11.5px;color:var(--ink-2)}
+
+.chat{display:flex;flex-direction:column;gap:7px;max-height:320px;overflow:auto;padding:2px}
+.bub{max-width:78%;padding:7px 10px;border-radius:10px;font-size:12.5px}
+.bub.out{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:3px}
+.bub.in{align-self:flex-start;background:var(--surface-3);border-bottom-left-radius:3px}
+.bub .m{font-size:10px;opacity:.75;margin-top:3px;font-family:var(--mono)}
+
+.blockbox{border:1px solid var(--stop);background:var(--stop-soft);border-radius:var(--r2);padding:11px 13px;margin-bottom:11px}
+.blockbox b{display:block;color:var(--stop);font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px}
+.blockbox ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--stop)}
+.warnbox{border:1px solid var(--warn);background:var(--warn-soft);border-radius:var(--r2);padding:11px 13px;margin-bottom:11px}
+.warnbox b{display:block;color:var(--warn);font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px}
+.warnbox ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--warn)}
+
+.inline{background:var(--surface-2);border:1px dashed var(--line-2);border-radius:var(--r2);padding:10px;margin-top:11px}
+.empty{padding:30px 16px;text-align:center;color:var(--ink-2)}
+.empty b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+.demo{background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn);border-radius:var(--r);padding:6px 11px;font-size:11.5px;font-weight:650;margin-bottom:11px}
+.deny{max-width:560px;margin:60px auto;text-align:center}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:6px;align-items:center}
+.toast{background:var(--nav);color:#fff;padding:8px 14px;border-radius:18px;font-size:12.5px;box-shadow:var(--shadow);max-width:92vw}
+.toast.ok{background:var(--ok)} .toast.bad{background:var(--stop)} .toast.live{background:var(--live)}
+
+.modal{position:fixed;z-index:70;top:50%;left:50%;transform:translate(-50%,-50%);width:min(560px,94vw);max-height:88vh;overflow:auto;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.modal .mh{padding:12px 15px;border-bottom:1px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:10px}
+.modal .mb{padding:14px}
+.modal .mf{padding:10px 15px;border-top:1px solid var(--line);background:var(--surface);display:flex;gap:8px;justify-content:flex-end}
+
+.sidetoggle{display:none}
+@media(max-width:920px){
+  .side{position:fixed;z-index:75;transform:translateX(-100%);transition:transform .16s}
+  .side.open{transform:none}
+  .sidetoggle{display:inline-flex}
+  .page{padding:10px}
+}
+@media print{.side,.bar,.df,.tray{display:none}}
+</style>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Main navigation">
+    <div class="logo"><div class="sq" aria-hidden="true">PT</div>
+      <div><b>Ambulance &amp; PTS</b><small>Management System</small></div></div>
+    <div class="menu" id="menu"></div>
+    <div class="sfoot">Demonstration build · CAD and Dispatch<br>Branding is placeholder</div>
+  </nav>
+  <div class="body">
+    <header class="bar">
+      <button class="btn g sidetoggle" id="sidetoggle" aria-label="Show navigation">☰</button>
+      <div class="clock" id="clock">--:--</div>
+      <input type="date" id="daypick" aria-label="Operating date" style="width:auto">
+      <div class="vtabs" id="vtabs"></div>
+      <div class="spacer"></div>
+      <span class="micro">Role</span>
+      <select id="rolepick" aria-label="Signed-in role" style="max-width:210px"></select>
+      <button class="btn g" id="theme" aria-label="Switch theme" title="Switch theme">◐</button>
+    </header>
+    <div class="page" id="page"></div>
+  </div>
+</div>
+<div id="drawerhost"></div>
+<div id="modalhost"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CAD AND DISPATCH
+   Ambulance & Patient Transport Management System
+
+   Takes confirmed journeys from Bookings and puts them on
+   vehicles and crews. The allocation rules are hard blocks, not
+   warnings: the spec says a journey may not be allocated to an
+   unsuitable vehicle or an unqualified, expired or already-booked
+   crew member, so the board refuses and says why.
+   ============================================================ */
+
+const KEY="pts:cad:v1", BOOK_KEY="pts:bookings:v1";
+const DAY_START=6*60, DAY_END=20*60;          /* board window, minutes from midnight */
+
+/* ---------- reference data ---------- */
+const GRADES=["Driver","Ambulance Care Assistant","Emergency Medical Technician","Paramedic","Nurse escort"];
+const GRADE_RANK={"Driver":0,"Ambulance Care Assistant":1,"Emergency Medical Technician":2,"Paramedic":3,"Nurse escort":3};
+const VEHICLE_TYPES=["PTS car","Wheelchair-accessible vehicle","Stretcher ambulance","A&E-equipped ambulance","Bariatric ambulance","Event response vehicle"];
+const EQUIPMENT=["Carry chair","Stretcher","Bariatric stretcher","Wheelchair","Oxygen cylinder","Suction unit","Defibrillator","Hoist and sling","Infection-control pack"];
+const CREW_STATUSES=["Accept Job","Dispatched","Mobile","Arrived at Collection","Patient On Board",
+  "Arrived at Destination","Handover Started","Handover Completed","Available","Stand Down","Request Assistance"];
+/* how a crew status maps onto the booking lifecycle */
+const STATUS_MAP={"Accept Job":"Allocated","Dispatched":"Dispatched","Mobile":"Crew Mobile",
+  "Arrived at Collection":"At Collection","Patient On Board":"Patient On Board",
+  "Arrived at Destination":"At Destination","Handover Started":"Handover in Progress",
+  "Handover Completed":"Completed","Stand Down":"Unallocated"};
+const LIVE=["Dispatched","Crew Mobile","At Collection","Patient On Board","At Destination","Handover in Progress"];
+
+const ROLES=[
+  {id:"dispatch",name:"Control Room Dispatcher",      p:["view","allocate","status","message","notes","resources"]},
+  {id:"ops",     name:"Operations Manager",           p:["view","allocate","status","message","notes","resources","roster","audit"]},
+  {id:"super",   name:"Super Administrator",          p:["view","allocate","status","message","notes","resources","roster","audit"]},
+  {id:"director",name:"Company Director",             p:["view","resources","audit"]},
+  {id:"clinical",name:"Clinical Lead",                p:["view","message","resources","audit"]},
+  {id:"para",    name:"Paramedic",                    p:["view.own","status.own","message"]},
+  {id:"emt",     name:"Emergency Medical Technician", p:["view.own","status.own","message"]},
+  {id:"aca",     name:"Ambulance Care Assistant",     p:["view.own","status.own","message"]},
+  {id:"driver",  name:"Driver",                       p:["view.own","status.own","message"]},
+  {id:"event",   name:"Event Medical Staff",          p:[]},
+  {id:"hr",      name:"HR & Compliance Officer",      p:[]},
+  {id:"fleet",   name:"Fleet Manager",                p:["view","resources"]},
+  {id:"finance", name:"Finance Officer",              p:[]},
+  {id:"qa",      name:"Quality Assurance Officer",    p:["view","audit"]},
+  {id:"portal",  name:"Commissioner / Customer Portal User", p:[]}
+];
+
+const MENU=[
+  {g:"Operations"},
+  {id:"dashboard",label:"Dashboard",stub:1},{id:"crm",label:"CRM",stub:1},
+  {id:"patients",label:"Patients",stub:1},{id:"bookings",label:"Bookings",stub:1},
+  {id:"cad",label:"CAD and Dispatch",live:1},
+  {id:"resources",label:"Crews and vehicles",live:1,indent:1},
+  {id:"messages",label:"Dispatch messages",live:1,indent:1},
+  {id:"epcr",label:"ePCR",stub:1},{id:"events",label:"Events",stub:1},
+  {g:"Workforce"},
+  {id:"staff",label:"Staff",stub:1},{id:"rota",label:"Rota",stub:1},{id:"training",label:"Training",stub:1},
+  {g:"Assets"},
+  {id:"fleet",label:"Fleet",stub:1},{id:"equipment",label:"Equipment",stub:1},{id:"stock",label:"Stock and Medicines",stub:1},
+  {g:"Governance"},
+  {id:"incidents",label:"Incidents",stub:1},{id:"safeg",label:"Safeguarding",stub:1},
+  {id:"qa",label:"Quality Assurance",stub:1},{id:"policies",label:"Policies",stub:1},
+  {id:"audit",label:"Dispatch log",live:1},
+  {g:"Business"},
+  {id:"finance",label:"Finance",stub:1},{id:"reports",label:"Reports",stub:1},{id:"settings",label:"Settings",stub:1}
+];
+
+/* ---------- state ---------- */
+let S={jobs:[],vehicles:[],staff:[],messages:{},log:[],
+  view:"cad",board:"board",roleId:"dispatch",day:"",selected:null,tab:"journey",
+  crewId:"s01", dragging:null, bookingsLinked:false};
+let storageOK=true, tick=null;
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const role=()=>ROLES.find(r=>r.id===S.roleId)||ROLES[0];
+const can=p=>role().p.includes(p);
+const anyAccess=()=>role().p.length>0;
+const crewMode=()=>can("view.own");
+
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const shiftDay=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
+function ukd(iso){if(!iso)return "—";const d=new Date(iso.length<=10?iso+"T00:00:00":iso);if(isNaN(d))return "—";
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();}
+function uks(iso){if(!iso)return "—";const d=new Date(iso);if(isNaN(d))return "—";
+  return ukd(iso)+" "+hhmm(d);}
+const hhmm=d=>String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+const m2t=m=>String(Math.floor(m/60)%24).padStart(2,"0")+":"+String(Math.round(m)%60).padStart(2,"0");
+const t2m=t=>{if(!t)return 0;const[a,b]=t.split(":");return (+a)*60+(+b);};
+const nowMins=()=>{const d=new Date();return d.getHours()*60+d.getMinutes();};
+const isToday=()=>S.day===todayISO();
+
+function toast(m,k){const t=document.createElement("div");t.className="toast"+(k?" "+k:"");t.textContent=m;
+  $("#toasts").appendChild(t);setTimeout(()=>{t.style.transition="opacity .3s";t.style.opacity=0;setTimeout(()=>t.remove(),320);},3200);}
+
+/* ---------- persistence ---------- */
+async function save(){
+  try{if(window.storage&&storageOK)await window.storage.set(KEY,
+    JSON.stringify({jobs:S.jobs,vehicles:S.vehicles,staff:S.staff,messages:S.messages,log:S.log.slice(-300)}));}
+  catch(e){if(storageOK){storageOK=false;toast("Changes are held for this session only.","bad");}}
+}
+async function load(){
+  try{if(!window.storage){storageOK=false;return false;}
+    const r=await window.storage.get(KEY);
+    if(r&&r.value){const d=JSON.parse(r.value);
+      if(d&&Array.isArray(d.jobs)&&d.jobs.length){
+        S.jobs=d.jobs;S.vehicles=d.vehicles||[];S.staff=d.staff||[];S.messages=d.messages||{};S.log=d.log||[];
+        return true;}}
+  }catch(e){}
+  return false;
+}
+async function loadBookings(){
+  try{if(!window.storage)return false;
+    const r=await window.storage.get(BOOK_KEY);
+    if(!r||!r.value) return false;
+    const d=JSON.parse(r.value);
+    if(!d||!Array.isArray(d.bookings)) return false;
+    const pats={}; (d.patients||[]).forEach(p=>pats[p.id]=p);
+    const custs={}; (d.customers||[]).forEach(c=>custs[c.ref]=c);
+    const usable=d.bookings.filter(b=>["Confirmed","Unallocated","Allocated"].includes(b.status));
+    if(!usable.length) return false;
+    S.jobs=usable.map(b=>{
+      const p=pats[b.patientId];
+      return mkJob({ref:b.ref,date:b.collectDate,time:b.collectTime,returnTime:b.returnTime,
+        patient:p?p.forename+" "+p.surname:"Event cover",mobility:b.mobility,clinical:b.clinical,
+        vehicleType:b.vehicleType,crewGrade:b.crewGrade,staffCount:b.staffCount,priority:b.priority,
+        from:b.fromAddr,to:b.toAddr,mileage:b.mileage,waiting:b.waitingMins,
+        customer:(custs[b.customerRef]||{}).name||"",ipc:b.ipc,type:b.type,shape:b.shape,
+        status:b.status==="Confirmed"?"Unallocated":b.status,
+        alerts:p?(p.alerts||[]).map(a=>a.k+": "+a.t):[]});
+    });
+    return true;
+  }catch(e){}
+  return false;
+}
+
+/* ---------- log ---------- */
+function dlog(action,detail,ref){
+  S.log.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||"",ref:ref||""});
+  if(S.log.length>400) S.log=S.log.slice(-400);
+}
+const veh=id=>S.vehicles.find(v=>v.id===id);
+const stf=id=>S.staff.find(s=>s.id===id);
+const job=id=>S.jobs.find(j=>j.id===id);
+
+/* ============================================================
+   JOURNEY LEGS AND TIMING
+   ============================================================ */
+function travelMins(miles){ return Math.max(6, Math.round((miles||0)/22*60)+4); } /* ~22 mph average, urban */
+function legsOf(j){
+  const out=[];
+  const t=travelMins(j.mileage);
+  out.push({k:"out",start:t2m(j.time),mins:15+t+10,label:"Collection → destination"});
+  if(j.shape==="Return"&&j.returnTime)
+    out.push({k:"ret",start:t2m(j.returnTime),mins:10+t+10,label:"Return leg"});
+  return out;
+}
+const jobEnd=j=>{const L=legsOf(j);return L[L.length-1].start+L[L.length-1].mins;};
+const jobStart=j=>legsOf(j)[0].start;
+function etaText(j){
+  if(!isToday()) return "—";
+  const t=travelMins(j.mileage);
+  const s=j.statusLog.filter(x=>x.status==="Mobile").slice(-1)[0];
+  if(s){ const d=new Date(s.at); d.setMinutes(d.getMinutes()+t); return hhmm(d); }
+  const c=t2m(j.time);
+  return m2t(c+t);
+}
+function lateBy(j){
+  if(!isToday()||j.status==="Completed") return 0;
+  const due=t2m(j.time);
+  const arrived=j.statusLog.some(x=>x.status==="Arrived at Collection");
+  if(arrived) return 0;
+  return Math.max(0, nowMins()-due);
+}
+
+/* ============================================================
+   THE ALLOCATION GATE — hard blocks, with reasons
+   ============================================================ */
+function expired(d){ return d && d<S.day; }
+function staffProblems(s,j){
+  const out=[];
+  if(!s) return ["Crew member not found."];
+  if(s.status!=="On duty") out.push(s.name+" is "+s.status.toLowerCase()+" today.");
+  if(expired(s.dbs)) out.push(s.name+"'s DBS check expired on "+ukd(s.dbs)+".");
+  if(expired(s.licence)) out.push(s.name+"'s driving licence expired on "+ukd(s.licence)+".");
+  if(s.registration&&expired(s.registration)) out.push(s.name+"'s professional registration lapsed on "+ukd(s.registration)+".");
+  Object.entries(s.training).forEach(([k,v])=>{
+    if(!v) out.push(s.name+" has no record of "+k+" training.");
+    else if(expired(v)) out.push(s.name+"'s "+k+" training expired on "+ukd(v)+".");
+  });
+  return out;
+}
+function overlaps(aS,aE,bS,bE){ return aS<bE && bS<aE; }
+function clashesFor(vehicleId,j){
+  const out=[];
+  const mine=legsOf(j);
+  S.jobs.filter(x=>x.id!==j.id&&x.vehicleId===vehicleId&&x.date===j.date&&x.status!=="Cancelled").forEach(x=>{
+    legsOf(x).forEach(lx=>{ mine.forEach(lm=>{
+      if(overlaps(lm.start,lm.start+lm.mins,lx.start,lx.start+lx.mins))
+        out.push(x.ref+" already runs "+m2t(lx.start)+"–"+m2t(lx.start+lx.mins)+" on this vehicle.");
+    });});
+  });
+  return out;
+}
+function vehicleSuits(v,j){
+  const out=[];
+  const m=j.mobility||"";
+  if(m==="Bariatric stretcher"&&v.type!=="Bariatric ambulance")
+    out.push("Bariatric patient — only a bariatric ambulance may be used. "+v.fleet+" is a "+v.type.toLowerCase()+".");
+  else if(m==="Stretcher"&&!["Stretcher ambulance","A&E-equipped ambulance","Bariatric ambulance"].includes(v.type))
+    out.push("Stretcher patient — "+v.fleet+" ("+v.type.toLowerCase()+") cannot carry a stretcher.");
+  else if((m.indexOf("wheelchair")>-1||m==="Carry chair")&&v.type==="PTS car")
+    out.push("Wheelchair patient — "+v.fleet+" is a PTS car with no ramp or tail lift.");
+  if(j.vehicleType&&j.vehicleType!==v.type){
+    const rank={"PTS car":0,"Wheelchair-accessible vehicle":1,"Stretcher ambulance":2,"A&E-equipped ambulance":3,"Bariatric ambulance":4,"Event response vehicle":1};
+    if((rank[v.type]||0)<(rank[j.vehicleType]||0))
+      out.push("Booking asks for a "+j.vehicleType.toLowerCase()+"; "+v.fleet+" is a "+v.type.toLowerCase()+".");
+  }
+  return out;
+}
+function allocationCheck(j,vehicleId){
+  const blocks=[],warns=[];
+  const v=veh(vehicleId);
+  if(!v) return {ok:false,blocks:["Vehicle not found."],warns:[]};
+
+  /* vehicle */
+  if(v.status==="Off road") blocks.push(v.fleet+" is off road: "+(v.offReason||"no reason recorded")+".");
+  if(v.status==="Not in service") blocks.push(v.fleet+" is not in service today.");
+  if(expired(v.mot)) blocks.push(v.fleet+"'s MOT expired on "+ukd(v.mot)+".");
+  if(expired(v.insurance)) blocks.push(v.fleet+"'s insurance expired on "+ukd(v.insurance)+".");
+  if(expired(v.tax)) blocks.push(v.fleet+"'s vehicle tax expired on "+ukd(v.tax)+".");
+  const crit=v.defects.filter(d=>d.open&&d.severity==="Safety-critical");
+  crit.forEach(d=>blocks.push(v.fleet+" has an unresolved safety-critical defect: "+d.desc+"."));
+  v.defects.filter(d=>d.open&&d.severity!=="Safety-critical").forEach(d=>warns.push(v.fleet+" has an open advisory defect: "+d.desc+"."));
+  vehicleSuits(v,j).forEach(x=>blocks.push(x));
+
+  /* crew rostered to this vehicle */
+  const crew=[stf(v.crew.driverId),stf(v.crew.attendantId)].filter(Boolean);
+  if(!crew.length) blocks.push(v.fleet+" has no crew rostered today.");
+  crew.forEach(s=>staffProblems(s,j).forEach(x=>blocks.push(x)));
+
+  const best=crew.reduce((a,s)=>Math.max(a,GRADE_RANK[s.grade]||0),-1);
+  const need=GRADE_RANK[j.crewGrade]!==undefined?GRADE_RANK[j.crewGrade]:0;
+  if(crew.length&&best<need)
+    blocks.push("Journey needs a "+j.crewGrade.toLowerCase()+"; the highest grade on "+v.fleet+" is "+
+      crew.reduce((a,s)=>(GRADE_RANK[s.grade]>GRADE_RANK[a.grade]?s:a),crew[0]).grade.toLowerCase()+".");
+  if(j.clinical==="Paramedic escort"&&!crew.some(s=>s.grade==="Paramedic"))
+    blocks.push("Journey needs a paramedic escort; no paramedic is rostered on "+v.fleet+".");
+  if(j.clinical==="Nurse escort"&&!crew.some(s=>s.grade==="Nurse escort"))
+    blocks.push("Journey needs a nurse escort; none is rostered on "+v.fleet+".");
+  if(j.staffCount>crew.length)
+    blocks.push("Journey needs "+j.staffCount+" crew; "+crew.length+" rostered on "+v.fleet+".");
+
+  /* double booking */
+  clashesFor(vehicleId,j).forEach(x=>blocks.push(x));
+
+  /* shift cover */
+  const s0=jobStart(j), s1=jobEnd(j);
+  if(s1<=t2m(v.shiftStart)||s0>=t2m(v.shiftEnd))
+    blocks.push(v.fleet+" is crewed "+v.shiftStart+"–"+v.shiftEnd+"; the journey runs "+m2t(s0)+"–"+m2t(s1)+".");
+  else if(s1>t2m(v.shiftEnd))
+    warns.push("Journey is expected to finish at "+m2t(s1)+", after the shift ends at "+v.shiftEnd+".");
+
+  /* softer checks */
+  if(["Stretcher","Bariatric stretcher"].includes(j.mobility)&&crew.length<2)
+    warns.push("Stretcher journeys normally need two crew.");
+  if(j.ipc&&j.ipc!=="None") warns.push("Infection precautions apply — "+j.ipc.toLowerCase()+". Vehicle will need cleaning after.");
+  if(v.fuel<25) warns.push(v.fleet+" is showing "+v.fuel+"% fuel.");
+
+  return {ok:blocks.length===0,blocks,warns};
+}
+
+/* ---------- allocate / release ---------- */
+function allocate(j,vehicleId,force){
+  const chk=allocationCheck(j,vehicleId);
+  if(!chk.ok) return chk;
+  const v=veh(vehicleId);
+  const was=j.vehicleId;
+  j.vehicleId=vehicleId;
+  j.crew={driverId:v.crew.driverId,attendantId:v.crew.attendantId,escort:j.crew?j.crew.escort:""};
+  if(j.status==="Unallocated") j.status="Allocated";
+  pushStatus(j,"Allocated",was?("reallocated from "+veh(was).fleet+" to "+v.fleet):("allocated to "+v.fleet));
+  dlog(was?"Journey reallocated":"Journey allocated",j.ref+" → "+v.fleet+
+    " ("+[stf(v.crew.driverId),stf(v.crew.attendantId)].filter(Boolean).map(s=>s.name).join(", ")+")",j.ref);
+  return chk;
+}
+function release(j,reason){
+  const was=j.vehicleId?veh(j.vehicleId).fleet:"—";
+  j.vehicleId="";j.crew=null;j.status="Unallocated";
+  pushStatus(j,"Unallocated","released from "+was+(reason?" · "+reason:""));
+  dlog("Journey released",j.ref+" released from "+was+(reason?" · "+reason:""),j.ref);
+}
+function pushStatus(j,status,detail){
+  j.status=status;
+  j.statusLog.push({id:uid(),at:new Date().toISOString(),status,by:role().name,detail:detail||"",
+    gps:fakeGPS(j)});
+}
+function fakeGPS(j){
+  const v=j.vehicleId?veh(j.vehicleId):null;
+  const b=v?[v.x,v.y]:[450,260];
+  return {lat:(52.4+(b[1]/10000)).toFixed(5),lng:(-1.9+(b[0]/10000)).toFixed(5)};
+}
+
+/* ============================================================
+   DEMO DATA
+   ============================================================ */
+function mkJob(d){
+  return Object.assign({
+    id:uid(),ref:"",date:S.day||todayISO(),time:"09:00",returnTime:"",shape:"One-way",
+    patient:"",mobility:"",clinical:"None",vehicleType:"",crewGrade:"",staffCount:1,priority:"Standard",
+    from:"",to:"",mileage:0,waiting:0,customer:"",ipc:"None",type:"",alerts:[],
+    status:"Unallocated",vehicleId:"",crew:null,equipment:[],notes:[],statusLog:[],assistance:false
+  },d);
+}
+function seed(){
+  const D=S.day||todayISO();
+  /* ---- staff ---- */
+  const T=(m)=>{const d=new Date();d.setMonth(d.getMonth()+m);return d.toISOString().slice(0,10);};
+  S.staff=[
+    {id:"s01",name:"R. Ahmadi",grade:"Emergency Medical Technician",status:"On duty",
+      dbs:T(14),licence:T(30),registration:"",training:{"manual handling":T(8),"safeguarding":T(11),"basic life support":T(5)},phone:"07700 900001"},
+    {id:"s02",name:"L. Corrigan",grade:"Ambulance Care Assistant",status:"On duty",
+      dbs:T(6),licence:T(22),registration:"",training:{"manual handling":T(3),"safeguarding":T(9),"basic life support":T(7)},phone:"07700 900002"},
+    {id:"s03",name:"P. Ndlovu",grade:"Paramedic",status:"On duty",
+      dbs:T(19),licence:T(40),registration:T(13),training:{"manual handling":T(10),"safeguarding":T(16),"basic life support":T(12)},phone:"07700 900003"},
+    {id:"s04",name:"K. Beattie",grade:"Driver",status:"On duty",
+      dbs:T(9),licence:T(18),registration:"",training:{"manual handling":T(4),"safeguarding":T(6),"basic life support":T(2)},phone:"07700 900004"},
+    {id:"s05",name:"J. Moreau",grade:"Ambulance Care Assistant",status:"On duty",
+      dbs:T(-2),licence:T(25),registration:"",training:{"manual handling":T(7),"safeguarding":T(14),"basic life support":T(9)},phone:"07700 900005"},
+    {id:"s06",name:"T. Hollins",grade:"Emergency Medical Technician",status:"On duty",
+      dbs:T(21),licence:T(33),registration:"",training:{"manual handling":T(-1),"safeguarding":T(12),"basic life support":T(6)},phone:"07700 900006"},
+    {id:"s07",name:"A. Ferreira",grade:"Ambulance Care Assistant",status:"On duty",
+      dbs:T(15),licence:T(28),registration:"",training:{"manual handling":T(11),"safeguarding":T(20),"basic life support":T(15)},phone:"07700 900007"},
+    {id:"s08",name:"M. Quill",grade:"Driver",status:"On duty",
+      dbs:T(5),licence:T(2),registration:"",training:{"manual handling":T(9),"safeguarding":T(3),"basic life support":T(4)},phone:"07700 900008"},
+    {id:"s09",name:"S. Iyer",grade:"Nurse escort",status:"On duty",
+      dbs:T(17),licence:T(26),registration:T(8),training:{"manual handling":T(13),"safeguarding":T(18),"basic life support":T(10)},phone:"07700 900009"},
+    {id:"s10",name:"D. Okoro",grade:"Emergency Medical Technician",status:"On duty",
+      dbs:T(12),licence:T(31),registration:"",training:{"manual handling":T(6),"safeguarding":T(8),"basic life support":T(3)},phone:"07700 900010"},
+    {id:"s11",name:"C. Vaughan",grade:"Ambulance Care Assistant",status:"On leave",
+      dbs:T(10),licence:T(20),registration:"",training:{"manual handling":T(5),"safeguarding":T(10),"basic life support":T(8)},phone:"07700 900011"},
+    {id:"s12",name:"B. Ostrowski",grade:"Paramedic",status:"On duty",
+      dbs:T(16),licence:T(36),registration:T(-1),training:{"manual handling":T(14),"safeguarding":T(19),"basic life support":T(11)},phone:"07700 900012"}
+  ];
+
+  /* ---- vehicles ---- */
+  S.vehicles=[
+    {id:"v1",fleet:"A101",reg:"TF21 KMV",type:"Wheelchair-accessible vehicle",base:"Kingsway",status:"Available",
+      mot:T(7),insurance:T(9),tax:T(4),defects:[],crew:{driverId:"s04",attendantId:"s02"},
+      shiftStart:"07:00",shiftEnd:"19:00",fuel:82,x:180,y:150,odometer:88420},
+    {id:"v2",fleet:"A102",reg:"TF22 LNX",type:"Stretcher ambulance",base:"Kingsway",status:"Available",
+      mot:T(3),insurance:T(9),tax:T(6),defects:[],crew:{driverId:"s01",attendantId:"s07"},
+      shiftStart:"07:00",shiftEnd:"19:00",fuel:64,x:330,y:230,odometer:132870},
+    {id:"v3",fleet:"A103",reg:"TF19 PRT",type:"PTS car",base:"Riverside",status:"Available",
+      mot:T(11),insurance:T(9),tax:T(2),defects:[],crew:{driverId:"s08",attendantId:""},
+      shiftStart:"08:00",shiftEnd:"18:00",fuel:41,x:520,y:120,odometer:204110},
+    {id:"v4",fleet:"A104",reg:"TF23 WGH",type:"Bariatric ambulance",base:"Eastfield",status:"Available",
+      mot:T(15),insurance:T(9),tax:T(10),defects:[],crew:{driverId:"s10",attendantId:"s03"},
+      shiftStart:"07:30",shiftEnd:"19:30",fuel:77,x:660,y:320,odometer:41260},
+    {id:"v5",fleet:"A105",reg:"TF20 SDR",type:"Wheelchair-accessible vehicle",base:"Northgate",status:"Off road",
+      offReason:"Nearside tail lift will not deploy",mot:T(5),insurance:T(9),tax:T(8),
+      defects:[{id:uid(),desc:"Tail lift fails to lower under load",severity:"Safety-critical",open:true,raised:shiftDay(-1)}],
+      crew:{driverId:"",attendantId:""},shiftStart:"07:00",shiftEnd:"19:00",fuel:55,x:240,y:400,odometer:167900},
+    {id:"v6",fleet:"A106",reg:"TF18 JCB",type:"Wheelchair-accessible vehicle",base:"Riverside",status:"Available",
+      mot:T(-1),insurance:T(9),tax:T(5),defects:[{id:uid(),desc:"Interior grab rail loose",severity:"Advisory",open:true,raised:shiftDay(-3)}],
+      crew:{driverId:"s06",attendantId:"s05"},shiftStart:"09:00",shiftEnd:"17:00",fuel:19,x:430,y:410,odometer:243550},
+    {id:"v7",fleet:"A107",reg:"TF23 ZEN",type:"A&E-equipped ambulance",base:"Kingsway",status:"Available",
+      mot:T(13),insurance:T(9),tax:T(12),defects:[],crew:{driverId:"s12",attendantId:"s09"},
+      shiftStart:"06:30",shiftEnd:"18:30",fuel:90,x:300,y:70,odometer:29840}
+  ];
+
+  S.messages={v1:[{id:uid(),at:new Date(Date.now()-22*6e4).toISOString(),dir:"in",by:"A101 crew",
+      text:"On board with the first renal patient, running about ten minutes behind. Unit informed."},
+    {id:uid(),at:new Date(Date.now()-19*6e4).toISOString(),dir:"out",by:"Control",
+      text:"Understood, thanks. Your return is unchanged."}],
+    v2:[],v3:[],v4:[],v5:[],v6:[],v7:[]};
+
+  S.log=[{id:uid(),at:new Date(Date.now()-36e5).toISOString(),by:"Control Room Dispatcher",
+    action:"Shift opened",detail:"Board loaded for "+ukd(D),ref:""}];
+}
+
+function seedJobs(){
+  const D=S.day||todayISO();
+  let n=1;
+  const J=(o)=>mkJob(Object.assign({ref:"JOB-"+String(10+n++).padStart(5,"0"),date:D},o));
+  S.jobs=[
+    J({time:"07:45",returnTime:"12:30",shape:"Return",patient:"Elsie Fairweather",mobility:"Own wheelchair",
+      vehicleType:"Wheelchair-accessible vehicle",crewGrade:"Ambulance Care Assistant",staffCount:1,priority:"Standard",
+      from:"14 Larkspur Close, Testford",to:"Renal Unit, St Aldrich General Hospital",mileage:9,waiting:45,
+      customer:"St Aldrich General Hospital",type:"Hospital appointment",
+      alerts:["Allergy: Penicillin — rash and facial swelling","Mobility: Own wheelchair, cannot self-transfer"]}),
+    J({time:"08:15",returnTime:"13:00",shape:"Return",patient:"Harold Callow",mobility:"Walking, needs assistance",
+      vehicleType:"PTS car",crewGrade:"Driver",staffCount:1,priority:"Standard",
+      from:"3 Beckett Row, Testford",to:"Renal Unit, St Aldrich General Hospital",mileage:6,waiting:30,
+      customer:"St Aldrich General Hospital",type:"Hospital appointment",
+      alerts:["Clinical: Hypoglycaemia risk after dialysis"]}),
+    J({time:"09:00",shape:"One-way",patient:"Amara Duku",mobility:"Stretcher",clinical:"Oxygen",
+      vehicleType:"Stretcher ambulance",crewGrade:"Emergency Medical Technician",staffCount:2,priority:"Urgent",
+      from:"Hollow Lane Care Home, Testford",to:"Greenfell Hospice, Testford",mileage:14,waiting:0,
+      customer:"Meadowvale Integrated Care Board",type:"Inter-hospital transfer",
+      alerts:["Allergy: Morphine — nausea and confusion","Clinical: Palliative, oxygen and syringe driver in situ",
+              "Mobility: Full hoist transfer, stretcher only"]}),
+    J({time:"10:30",shape:"One-way",patient:"Joseph Nkemelu",mobility:"Bariatric stretcher",
+      vehicleType:"Bariatric ambulance",crewGrade:"Emergency Medical Technician",staffCount:2,priority:"Standard",
+      from:"22 Rowan Avenue, Testford",to:"Lindhurst Private Hospital",mileage:11,waiting:0,
+      customer:"Sentinel Health Insurance plc",type:"Bariatric transport",
+      alerts:["Mobility: Bariatric — 214 kg, four-person transfer","Access: Narrow front doorway, use the patio doors"]}),
+    J({time:"09:45",returnTime:"14:15",shape:"Return",patient:"Doris Whitcombe",mobility:"Carry chair",
+      vehicleType:"Wheelchair-accessible vehicle",crewGrade:"Ambulance Care Assistant",staffCount:2,priority:"Routine",
+      from:"Brackenfield Lodge, Testford",to:"Memory Clinic, St Aldrich",mileage:7,waiting:30,
+      customer:"Brackenfield Nursing Group",type:"Care-home transfer",
+      alerts:["Allergy: Aspirin — gastric bleeding","Behavioural: Distressed in confined spaces — allow extra time"]}),
+    J({time:"11:20",returnTime:"15:40",shape:"Return",patient:"Malcolm Ferris",mobility:"Walking, unaided",
+      vehicleType:"PTS car",crewGrade:"Ambulance Care Assistant",staffCount:1,priority:"Standard",ipc:"Contact precautions",
+      from:"8 Quarry Bank, Testford",to:"Orthopaedic Outpatients, St Aldrich",mileage:5,waiting:20,
+      customer:"St Aldrich General Hospital",type:"Hospital appointment",
+      alerts:["Infection: MRSA colonised — contact precautions and deep clean"]}),
+    J({time:"12:00",returnTime:"16:20",shape:"Return",patient:"Priya Sandhu",mobility:"Own wheelchair",
+      vehicleType:"Wheelchair-accessible vehicle",crewGrade:"Ambulance Care Assistant",staffCount:1,priority:"Standard",
+      from:"51 Millgate, Testford",to:"Antenatal Clinic, St Aldrich",mileage:8,waiting:25,
+      customer:"Meadowvale Integrated Care Board",type:"Non-emergency patient transport",
+      alerts:["Allergy: Latex — non-latex gloves only","Communication: Punjabi interpreter required"]}),
+    J({time:"13:30",shape:"One-way",patient:"Grace Okonjo",mobility:"Walking frame",
+      vehicleType:"Wheelchair-accessible vehicle",crewGrade:"Ambulance Care Assistant",staffCount:1,priority:"Standard",
+      from:"Cardiology Ward 12, St Aldrich",to:"17 Chandler Street, Testford",mileage:6,waiting:0,
+      customer:"Northshire County Council",type:"Hospital discharge",
+      alerts:["Safeguarding: Do not leave unattended at home — hand over to a named person"]}),
+    J({time:"07:10",shape:"One-way",patient:"William Traynor",mobility:"Stretcher",clinical:"Paramedic escort",
+      vehicleType:"A&E-equipped ambulance",crewGrade:"Paramedic",staffCount:2,priority:"Urgent",
+      from:"2 Foundry Mews, Testford",to:"Respiratory Ward, Lindhurst Private Hospital",mileage:22,waiting:0,
+      customer:"Sentinel Health Insurance plc",type:"Planned ambulance transport",
+      alerts:["Allergy: Latex — rash","Clinical: Oxygen dependent, must sit upright"]}),
+    J({time:"14:45",returnTime:"17:30",shape:"Return",patient:"Nina Ashworth",mobility:"Walking, needs assistance",
+      vehicleType:"PTS car",crewGrade:"Ambulance Care Assistant",staffCount:1,priority:"Routine",
+      from:"Ridgeway House, Testford",to:"Community Mental Health Team, Testford",mileage:4,waiting:40,
+      customer:"Northshire County Council",type:"Non-emergency patient transport",
+      alerts:["Behavioural: May decline transport — do not persuade, contact control"]}),
+    J({time:"15:30",shape:"One-way",patient:"Patrick Halloran",mobility:"Walking, needs assistance",
+      vehicleType:"Wheelchair-accessible vehicle",crewGrade:"Ambulance Care Assistant",staffCount:1,priority:"Standard",
+      from:"Oncology Day Unit, St Aldrich",to:"9 Cooper's Yard, Testford",mileage:7,waiting:0,
+      customer:"Meadowvale Integrated Care Board",type:"Hospital appointment",
+      alerts:["Communication: Significant hearing loss — face him and speak clearly"]}),
+    J({time:"16:10",shape:"One-way",patient:"Margaret Beauchamp",mobility:"Walking, needs assistance",
+      vehicleType:"PTS car",crewGrade:"Driver",staffCount:1,priority:"Routine",
+      from:"Ophthalmology, St Aldrich",to:"31 Selby Gardens, Testford",mileage:6,waiting:0,
+      customer:"Self-funding",type:"Hospital appointment",
+      alerts:["Communication: Severe sight loss — guide and describe","Mobility: Unsteady, high falls risk"]})
+  ];
+
+}
+
+/* fill the morning so the board opens with work on it, whatever the source of the journeys */
+function preAllocate(){
+  const today=dayJobs().filter(j=>j.status==="Unallocated").sort((a,b)=>a.time.localeCompare(b.time));
+  let done=0;
+  today.forEach(j=>{
+    if(done>=5) return;
+    const v=S.vehicles.find(vv=>allocationCheck(j,vv.id).ok);
+    if(!v) return;
+    j.vehicleId=v.id; j.status="Allocated";
+    j.crew={driverId:v.crew.driverId,attendantId:v.crew.attendantId,escort:""};
+    j.statusLog.push({id:uid(),at:new Date(Date.now()-864e5/12).toISOString(),status:"Allocated",
+      by:"Control Room Dispatcher",detail:"allocated to "+v.fleet,gps:fakeGPS(j)});
+    done++;
+  });
+  /* run the earliest one forward so live tracking and the map have something in them */
+  const live=dayJobs().filter(j=>j.vehicleId).sort((a,b)=>a.time.localeCompare(b.time))[0];
+  if(live){
+    const crewName=(stf(live.crew.driverId)||{}).name||"Crew";
+    ["Accept Job","Dispatched","Mobile","Arrived at Collection","Patient On Board"].forEach((st,i)=>{
+      live.statusLog.push({id:uid(),at:new Date(Date.now()-(50-i*9)*6e4).toISOString(),status:st,
+        by:crewName,detail:"",gps:{lat:"52.41"+i,lng:"-1.90"+i}});
+    });
+    live.status="Patient On Board";
+    veh(live.vehicleId).status="On job";
+  }
+}
+
+/* ---------- day helpers ---------- */
+const dayJobs=()=>S.jobs.filter(j=>j.date===S.day);
+const unallocated=()=>dayJobs().filter(j=>j.status==="Unallocated");
+const myVehicle=()=>S.vehicles.find(v=>v.crew.driverId===S.crewId||v.crew.attendantId===S.crewId);
+function myJobs(){ const v=myVehicle(); return v?dayJobs().filter(j=>j.vehicleId===v.id):[]; }
+const assistanceJobs=()=>dayJobs().filter(j=>j.assistance);
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderMenu(){
+  const un=unallocated().length, ma=assistanceJobs().length;
+  $("#menu").innerHTML=MENU.map(m=>{
+    if(m.g) return '<div class="grp">'+esc(m.g)+'</div>';
+    const cur=S.view===m.id;
+    const badge=m.id==="cad"?'<span class="pill'+(ma?" hot":"")+'">'+(ma?"!":un)+'</span>'
+      :m.live?"":'<span class="planned">planned</span>';
+    return '<button class="mi'+(m.live?"":" stub")+'" data-go="'+m.id+'"'+(cur?' aria-current="page"':'')+
+      (m.indent?' style="padding-left:22px"':'')+'>'+esc(m.label)+badge+'</button>';
+  }).join("");
+}
+function renderTabs(){
+  const tabs=crewMode()?[["crew","My journeys"],["map","Map"]]
+    :[["board","Board"],["list","List"],["calendar","Calendar"],["map","Live map"]];
+  $("#vtabs").innerHTML=tabs.map(([id,l])=>
+    '<button class="vtab" data-board="'+id+'" aria-pressed="'+(S.board===id)+'">'+esc(l)+'</button>').join("");
+  $("#vtabs").style.display=(S.view==="cad")?"":"none";
+}
+function render(){
+  renderMenu();renderTabs();
+  $("#daypick").value=S.day;
+  $("#daypick").style.display=(S.view==="cad")?"":"none";
+  const p=$("#page");
+  if(!anyAccess()){p.innerHTML=viewDenied();renderDrawer();return;}
+  if(S.view==="cad"){
+    if(crewMode()) p.innerHTML=(S.board==="map"?viewMap():viewCrew());
+    else if(S.board==="board") p.innerHTML=viewBoard();
+    else if(S.board==="list") p.innerHTML=viewList();
+    else if(S.board==="calendar") p.innerHTML=viewCalendar();
+    else p.innerHTML=viewMap();
+  }
+  else if(S.view==="resources") p.innerHTML=viewResources();
+  else if(S.view==="messages") p.innerHTML=viewMessages();
+  else if(S.view==="audit") p.innerHTML=viewAudit();
+  else p.innerHTML=viewStub();
+  renderDrawer();
+}
+function viewDenied(){
+  return '<div class="deny"><div style="font-size:30px">🔒</div><h1 style="margin:8px 0">No access to dispatch</h1>'+
+    '<p class="muted">The <strong>'+esc(role().name)+'</strong> role does not carry access to the control room board.</p>'+
+    '<p class="hint">Change the role in the top bar to see how access differs.</p></div>';
+}
+function viewStub(){
+  const m=MENU.find(x=>x.id===S.view)||{label:"Module"};
+  return '<div class="card"><div class="b empty"><b>'+esc(m.label)+' is not in this build</b>'+
+    'This delivery covers CAD and Dispatch. Journeys arrive from Bookings; crew and vehicle records come from Staff, Rota and Fleet.</div></div>';
+}
+const demoNote='<div class="demo">Demonstration build — fictional crews, vehicles and journeys. '+
+  (S.bookingsLinked?'Journeys loaded live from the Bookings module.':'Journeys mirrored from the Bookings module.')+'</div>';
+
+function maydayBanner(){
+  const list=assistanceJobs();
+  if(!list.length) return "";
+  return list.map(j=>{
+    const v=j.vehicleId?veh(j.vehicleId):null;
+    return '<div class="mayday"><b>Assistance requested</b>'+
+      '<div>'+esc(v?v.fleet:"—")+' — '+esc(j.ref)+' · '+esc(j.patient)+
+      '<div style="font-size:11.5px;opacity:.9">'+esc(j.assistanceNote||"No detail given")+'</div></div>'+
+      '<div class="spacer"></div>'+
+      '<button class="btn xs" data-openjob="'+j.id+'">Open journey</button>'+
+      (can("status")?'<button class="btn xs" data-clearmayday="'+j.id+'">Acknowledge</button>':'')+'</div>';
+  }).join("");
+}
+
+/* ---------- THE BOARD ---------- */
+function viewBoard(){
+  const D=dayJobs();
+  const un=unallocated();
+  const hours=[];
+  for(let h=DAY_START;h<DAY_END;h+=60) hours.push(h);
+  const trackW=(DAY_END-DAY_START)*1.55;
+
+  const timeAxis='<div class="brow" style="min-height:0"><div class="bhead top"><div class="micro">Vehicle</div>'+
+    '<div class="ty">'+D.filter(j=>j.vehicleId).length+' allocated · '+un.length+' waiting</div></div>'+
+    '<div class="btrack" style="min-width:'+trackW+'px"><div class="btime">'+
+      hours.map(h=>'<div class="hr" style="width:'+(60*1.55)+'px">'+m2t(h)+'</div>').join("")+
+    '</div></div></div>';
+
+  const rows=S.vehicles.map(v=>{
+    const crew=[stf(v.crew.driverId),stf(v.crew.attendantId)].filter(Boolean);
+    const jobs=D.filter(j=>j.vehicleId===v.id);
+    const blocks=[];
+    jobs.forEach(j=>{
+      legsOf(j).forEach(l=>{
+        const left=(l.start-DAY_START)*1.55, w=Math.max(38,l.mins*1.55);
+        const clash=jobs.some(o=>o.id!==j.id&&legsOf(o).some(lo=>overlaps(l.start,l.start+l.mins,lo.start,lo.start+lo.mins)));
+        const cls=j.status==="Completed"?"s-done":LIVE.includes(j.status)?"s-live":
+          j.status==="Cancelled"?"s-stop":"";
+        blocks.push('<div class="blk '+cls+(l.k==="ret"?" ret":"")+(clash?" clash":"")+(S.selected===j.id?" sel":"")+'" '+
+          'draggable="'+(can("allocate")?"true":"false")+'" data-drag="'+j.id+'" data-openjob="'+j.id+'" '+
+          'style="left:'+left+'px;width:'+w+'px" title="'+esc(j.ref+" "+j.patient+" · "+l.label)+'">'+
+          '<div class="r">'+esc(j.ref.replace("JOB-",""))+(l.k==="ret"?" R":"")+'</div>'+
+          '<div class="n">'+esc(j.patient)+'</div>'+
+          '<div class="m">'+m2t(l.start)+'–'+m2t(l.start+l.mins)+'</div></div>');
+      });
+    });
+    const gridlines=hours.map(h=>'<div class="gridline" style="left:'+((h-DAY_START)*1.55)+'px"></div>').join("");
+    const nowl=(isToday()&&nowMins()>=DAY_START&&nowMins()<=DAY_END)
+      ?'<div class="nowline" style="left:'+((nowMins()-DAY_START)*1.55)+'px"></div>':'';
+    const vstat=v.status==="Off road"?'<span class="bdg b-stop">Off road</span>'
+      :v.status==="On job"?'<span class="bdg b-live">On job</span>'
+      :v.status==="Not in service"?'<span class="bdg b-grey">Not in service</span>'
+      :'<span class="bdg b-ok">Available</span>';
+    const flags=[];
+    if(expired(v.mot)) flags.push('<span class="bdg b-stop">MOT expired</span>');
+    if(v.defects.some(d=>d.open&&d.severity==="Safety-critical")) flags.push('<span class="bdg b-stop">Defect</span>');
+    if(v.fuel<25) flags.push('<span class="bdg b-warn">Fuel '+v.fuel+'%</span>');
+
+    return '<div class="brow">'+
+      '<div class="bhead"><div class="fn">'+esc(v.fleet)+' <span class="muted" style="font-weight:400">'+esc(v.reg)+'</span></div>'+
+        '<div class="ty">'+esc(v.type)+' · '+esc(v.shiftStart)+'–'+esc(v.shiftEnd)+'</div>'+
+        '<div class="cr">'+(crew.length?crew.map(s=>esc(s.name)).join(", "):'<span class="muted">No crew rostered</span>')+'</div>'+
+        '<div class="st">'+vstat+" "+flags.join(" ")+'</div></div>'+
+      '<div class="btrack" data-drop="'+v.id+'" style="min-width:'+trackW+'px">'+gridlines+nowl+blocks.join("")+'</div>'+
+    '</div>';
+  }).join("");
+
+  return maydayBanner()+demoNote+
+  '<div class="grid g4" style="margin-bottom:11px">'+
+    stat(un.length,"Unallocated","Waiting for a vehicle",un.length?"stop":"")+
+    stat(D.filter(j=>LIVE.includes(j.status)).length,"In progress","Crews mobile or on board","live")+
+    stat(D.filter(j=>lateBy(j)>10).length,"Running late","Over 10 minutes past collection","warn")+
+    stat(S.vehicles.filter(v=>v.status==="Available"||v.status==="On job").length+" / "+S.vehicles.length,"Vehicles in service","Fit to be allocated","")+
+  '</div>'+
+
+  '<div class="card" style="margin-bottom:11px"><div class="h"><h2>Unallocated journeys</h2>'+
+    '<span class="muted">'+(can("allocate")?"Drag a card onto a vehicle row, or open it and use Allocate to":"Read-only for your role")+'</span>'+
+    '<div class="spacer"></div><span class="bdg '+(un.length?"b-stop":"b-ok")+'">'+un.length+'</span></div>'+
+    '<div class="b" style="padding:9px">'+
+    (un.length?'<div class="tray">'+un.sort((a,b)=>a.time.localeCompare(b.time)).map(j=>jobCard(j)).join("")+'</div>'
+      :'<div class="empty" style="padding:16px"><b>Everything is allocated</b>No journeys are waiting for a vehicle.</div>')+
+  '</div></div>'+
+
+  '<div class="board">'+timeAxis+rows+'</div>'+
+  '<p class="hint">Dashed blocks are return legs. A red outline marks an overlap. The red line is the current time. '+
+    'Journey durations are estimated from mileage at an average 22 mph — the routing service supplies real drive times in production.</p>';
+}
+function stat(v,k,x,cls){
+  return '<div class="card"><div class="b" style="padding:9px 11px">'+
+    '<div style="font:700 21px/1.1 var(--mono);'+(cls==="stop"?"color:var(--stop)":cls==="warn"?"color:var(--warn)":cls==="live"?"color:var(--live)":"")+'">'+v+'</div>'+
+    '<div style="font-size:11.5px;color:var(--ink-2);margin-top:2px">'+esc(k)+'</div>'+
+    '<div style="font-size:10.5px;color:var(--ink-3)">'+esc(x)+'</div></div></div>';
+}
+function jobCard(j){
+  const f=[];
+  if(j.mobility) f.push(j.mobility);
+  if(j.clinical&&j.clinical!=="None") f.push(j.clinical);
+  if(j.ipc&&j.ipc!=="None") f.push("IPC");
+  if(j.alerts.some(a=>a.indexOf("Safeguarding")===0)) f.push("Safeguarding");
+  return '<div class="job p-'+esc((j.priority||"").replace(/[^A-Za-z]/g,""))+(S.selected===j.id?" sel":"")+'" '+
+    'draggable="'+(can("allocate")?"true":"false")+'" data-drag="'+j.id+'" data-openjob="'+j.id+'" tabindex="0">'+
+    '<div class="r">'+esc(j.ref)+'</div>'+
+    '<div class="t">'+esc(j.time)+(j.returnTime?' <span style="font-size:11px;opacity:.7">ret '+esc(j.returnTime)+'</span>':'')+'</div>'+
+    '<div class="n">'+esc(j.patient)+'</div>'+
+    '<div class="m">'+esc((j.from||"").split(",")[0])+' → '+esc((j.to||"").split(",")[0])+'</div>'+
+    '<div class="f">'+f.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div></div>';
+}
+
+/* ---------- list ---------- */
+function viewList(){
+  const D=dayJobs().sort((a,b)=>a.time.localeCompare(b.time));
+  return maydayBanner()+demoNote+
+  '<div class="tw"><table><thead><tr><th>Job</th><th>Collect</th><th>Patient</th><th>Journey</th>'+
+    '<th>Requirements</th><th>Vehicle &amp; crew</th><th>Status</th><th>ETA</th></tr></thead><tbody>'+
+  D.map(j=>{
+    const v=j.vehicleId?veh(j.vehicleId):null;
+    const crew=j.crew?[stf(j.crew.driverId),stf(j.crew.attendantId)].filter(Boolean):[];
+    const late=lateBy(j);
+    return '<tr data-job="'+j.id+'" data-openjob="'+j.id+'">'+
+      '<td class="mono nowrap" style="color:var(--accent-2);font-weight:600">'+esc(j.ref)+
+        '<div class="muted">'+esc(j.priority)+'</div></td>'+
+      '<td class="num nowrap"><strong>'+esc(j.time)+'</strong>'+(j.returnTime?'<div class="muted">ret '+esc(j.returnTime)+'</div>':'')+'</td>'+
+      '<td><strong>'+esc(j.patient)+'</strong>'+
+        (j.alerts.length?'<div class="muted" style="font-size:11px">'+esc(j.alerts[0])+'</div>':'')+'</td>'+
+      '<td class="muted" style="min-width:180px">'+esc((j.from||"").split(",")[0])+'<div>→ '+esc((j.to||"").split(",")[0])+'</div></td>'+
+      '<td class="nowrap">'+esc(j.mobility||"—")+'<div class="muted">'+esc(j.crewGrade||"")+' ×'+j.staffCount+'</div></td>'+
+      '<td class="nowrap">'+(v?'<strong class="mono">'+esc(v.fleet)+'</strong><div class="muted">'+crew.map(s=>esc(s.name)).join(", ")+'</div>'
+        :'<span class="bdg b-stop">Unallocated</span>')+'</td>'+
+      '<td>'+statusBadge(j)+(late>10?'<div class="bdg b-warn" style="margin-top:2px">'+late+' min late</div>':'')+'</td>'+
+      '<td class="num nowrap">'+esc(etaText(j))+'</td></tr>';
+  }).join("")+'</tbody></table></div>';
+}
+function statusBadge(j){
+  const c=j.status==="Completed"?"b-ok":LIVE.includes(j.status)?"b-live":
+    j.status==="Unallocated"?"b-stop":j.status==="Cancelled"?"b-grey":"b-info";
+  return '<span class="bdg '+c+'">'+esc(j.status)+'</span>';
+}
+
+/* ---------- calendar ---------- */
+function viewCalendar(){
+  const base=new Date(S.day+"T00:00:00");
+  const first=new Date(base.getFullYear(),base.getMonth(),1);
+  const start=new Date(first); start.setDate(1-((first.getDay()+6)%7));
+  const cells=[];
+  for(let i=0;i<35;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    const iso=d.toISOString().slice(0,10);
+    const list=S.jobs.filter(j=>j.date===iso);
+    const un=list.filter(j=>j.status==="Unallocated").length;
+    cells.push('<button class="cd'+(iso===todayISO()?" today":"")+(d.getMonth()!==base.getMonth()?" other":"")+'" data-day="'+iso+'">'+
+      '<div class="dn">'+d.getDate()+'</div>'+
+      (list.length?'<div class="c">'+list.length+' journey'+(list.length>1?"s":"")+'</div>':'<div class="c muted">—</div>')+
+      (un?'<div class="u">'+un+' unallocated</div>':'')+'</button>');
+  }
+  return demoNote+
+  '<div class="card"><div class="h"><h2>'+base.toLocaleDateString("en-GB",{month:"long",year:"numeric"})+'</h2>'+
+    '<div class="spacer"></div><button class="btn xs" data-month="-1">← Previous</button>'+
+    '<button class="btn xs" data-month="1">Next →</button></div><div class="b">'+
+    '<div class="cal">'+["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>'<div class="dh">'+d+'</div>').join("")+
+    cells.join("")+'</div></div></div>'+
+    '<p class="hint">Select a day to load it onto the board. This build holds journeys for the current operating day only; '+
+    'in production the calendar reads the whole booking diary.</p>';
+}
+
+/* ---------- map ---------- */
+function viewMap(){
+  const sites=[["St Aldrich General Hospital",470,150],["Lindhurst Private Hospital",720,300],
+    ["Greenfell Hospice",250,340],["Hollow Lane Care Home",160,250],["Brackenfield Lodge",620,110],
+    ["Kingsway base",360,200],["Riverside base",200,420],["Eastfield base",700,430]];
+  const marks=S.vehicles.map(v=>{
+    const j=dayJobs().find(x=>x.vehicleId===v.id&&LIVE.includes(x.status));
+    const col=v.status==="Off road"?"var(--stop)":j?"var(--live)":"var(--ok)";
+    return '<g class="mk" data-openveh="'+v.id+'">'+
+      '<circle cx="'+v.x+'" cy="'+v.y+'" r="13" fill="'+col+'" opacity="0.92"></circle>'+
+      '<text x="'+v.x+'" y="'+(v.y+4)+'" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="ui-monospace,monospace">'+esc(v.fleet.replace("A",""))+'</text>'+
+      '<text x="'+v.x+'" y="'+(v.y+27)+'" text-anchor="middle" font-size="9.5" fill="currentColor">'+
+        esc(j?j.status:v.status)+'</text></g>';
+  }).join("");
+  return demoNote+
+  '<div class="mapwrap"><svg viewBox="0 0 820 500" role="img" aria-label="Schematic map of vehicle positions">'+
+    '<rect width="820" height="500" fill="var(--surface-2)"></rect>'+
+    '<path d="M60 260 H760 M400 40 V470 M120 120 L700 400 M700 120 L140 400" stroke="var(--line-2)" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.55"></path>'+
+    sites.map(([n,x,y])=>'<g><rect x="'+(x-5)+'" y="'+(y-5)+'" width="10" height="10" fill="var(--ink-3)"></rect>'+
+      '<text x="'+(x+9)+'" y="'+(y+4)+'" font-size="10.5" fill="var(--ink-2)">'+esc(n)+'</text></g>').join("")+
+    marks+
+  '</svg></div>'+
+  '<div class="grid g3" style="margin-top:11px">'+S.vehicles.map(v=>{
+    const j=dayJobs().find(x=>x.vehicleId===v.id&&LIVE.includes(x.status));
+    const crew=[stf(v.crew.driverId),stf(v.crew.attendantId)].filter(Boolean);
+    const last=j?j.statusLog.slice(-1)[0]:null;
+    return '<div class="res'+(v.status==="Off road"?" off":"")+'"><div class="top">'+
+      '<div><div class="fn">'+esc(v.fleet)+'</div><div class="reg">'+esc(v.reg)+'</div></div>'+
+      '<div class="spacer"></div>'+
+      (v.status==="Off road"?'<span class="bdg b-stop">Off road</span>':j?'<span class="bdg b-live">'+esc(j.status)+'</span>':'<span class="bdg b-ok">Available</span>')+
+      '</div>'+
+      '<div style="font-size:11.5px;margin-top:6px">'+(crew.length?crew.map(s=>esc(s.name)).join(", "):'<span class="muted">No crew</span>')+'</div>'+
+      (j?'<div style="font-size:11.5px;margin-top:5px"><strong class="mono">'+esc(j.ref)+'</strong> '+esc(j.patient)+
+        '<div class="muted">ETA '+esc(etaText(j))+(last?' · updated '+hhmm(new Date(last.at)):'')+'</div>'+
+        (last&&last.gps?'<div class="muted mono" style="font-size:10.5px">'+esc(last.gps.lat)+', '+esc(last.gps.lng)+'</div>':'')+'</div>'
+        :'<div class="muted" style="font-size:11.5px;margin-top:5px">No active journey</div>')+
+      '<div style="margin-top:8px;display:flex;gap:6px">'+
+        (j?'<button class="btn xs" data-openjob="'+j.id+'">Open journey</button>':'')+
+        (can("message")?'<button class="btn xs" data-msgveh="'+v.id+'">Message</button>':'')+'</div>'+
+    '</div>';}).join("")+'</div>'+
+  '<p class="hint">Schematic positions. In production this is a live map from the mapping service, with GPS pings from the crew app; '+
+    'every status update already stores its coordinates.</p>';
+}
+
+/* ---------- crew view ---------- */
+function viewCrew(){
+  const v=myVehicle(), me=stf(S.crewId);
+  const list=myJobs().sort((a,b)=>a.time.localeCompare(b.time));
+  return '<div class="ph" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:11px">'+
+    '<div><div class="micro">Signed in as crew</div><h1 style="font-size:17px">'+esc(me?me.name:"—")+'</h1></div>'+
+    '<div class="spacer"></div>'+
+    '<label class="micro" for="crewpick">Crew member</label>'+
+    '<select id="crewpick" style="width:auto;padding:5px 8px;border:1px solid var(--line-2);border-radius:6px">'+
+      S.staff.filter(s=>s.status==="On duty").map(s=>'<option value="'+s.id+'"'+(s.id===S.crewId?' selected':'')+'>'+esc(s.name)+' — '+esc(s.grade)+'</option>').join("")+
+    '</select></div>'+
+  (v?'<div class="card" style="margin-bottom:11px"><div class="b" style="padding:10px 12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">'+
+    '<div><div class="micro">Your vehicle</div><div class="mono" style="font-weight:700;font-size:15px">'+esc(v.fleet)+' · '+esc(v.reg)+'</div></div>'+
+    '<div><div class="micro">Shift</div><div class="num">'+esc(v.shiftStart)+'–'+esc(v.shiftEnd)+'</div></div>'+
+    '<div><div class="micro">Crewed with</div><div>'+[stf(v.crew.driverId),stf(v.crew.attendantId)].filter(Boolean)
+      .filter(s=>s.id!==S.crewId).map(s=>esc(s.name)).join(", ")+'</div></div>'+
+    '<div class="spacer"></div>'+
+    (can("message")?'<button class="btn xs" data-msgveh="'+v.id+'">Message control</button>':'')+
+    '</div></div>'
+    :'<div class="card"><div class="b empty"><b>You are not rostered to a vehicle today</b>Contact the control room.</div></div>')+
+  (list.length?'<div class="grid g2">'+list.map(j=>{
+    const late=lateBy(j);
+    return '<div class="card"><div class="b">'+
+      '<div style="display:flex;gap:8px;align-items:flex-start">'+
+        '<div><div class="mono" style="color:var(--accent-2);font-weight:700">'+esc(j.ref)+'</div>'+
+        '<div style="font:700 19px/1.2 var(--mono)">'+esc(j.time)+'</div></div>'+
+        '<div class="spacer"></div>'+statusBadge(j)+'</div>'+
+      '<div style="font-weight:650;margin-top:6px">'+esc(j.patient)+'</div>'+
+      '<div class="muted" style="font-size:12px">'+esc(j.from)+'<br>→ '+esc(j.to)+'</div>'+
+      (j.alerts.length?'<div style="margin-top:7px">'+j.alerts.map(a=>
+        '<div class="bdg '+(a.indexOf("Allergy")===0||a.indexOf("Safeguarding")===0?"b-stop":"b-warn")+'" style="margin:2px 2px 0 0">'+esc(a)+'</div>').join("")+'</div>':'')+
+      (late>10?'<div class="bdg b-warn" style="margin-top:6px">'+late+' minutes past collection time</div>':'')+
+      '<div style="margin-top:9px"><button class="btn xs p" data-openjob="'+j.id+'">Open and update</button></div>'+
+    '</div></div>';}).join("")+'</div>'
+    :'<div class="card"><div class="b empty"><b>No journeys allocated to you today</b>New allocations appear here as soon as the control room releases them.</div></div>');
+}
+
+/* ---------- resources ---------- */
+function viewResources(){
+  if(!can("resources")) return viewDenied();
+  return demoNote+
+  '<div class="card" style="margin-bottom:12px"><div class="h"><h2>Vehicles</h2>'+
+    '<span class="muted" style="margin-left:auto">A vehicle that fails any of these cannot be allocated</span></div>'+
+    '<div class="b"><div class="grid g3">'+S.vehicles.map(v=>{
+      const problems=[];
+      if(v.status==="Off road") problems.push("Off road — "+(v.offReason||""));
+      if(expired(v.mot)) problems.push("MOT expired "+ukd(v.mot));
+      if(expired(v.insurance)) problems.push("Insurance expired "+ukd(v.insurance));
+      if(expired(v.tax)) problems.push("Vehicle tax expired "+ukd(v.tax));
+      v.defects.filter(d=>d.open&&d.severity==="Safety-critical").forEach(d=>problems.push("Safety-critical defect: "+d.desc));
+      const advisories=v.defects.filter(d=>d.open&&d.severity!=="Safety-critical").map(d=>"Advisory: "+d.desc);
+      const crew=[stf(v.crew.driverId),stf(v.crew.attendantId)].filter(Boolean);
+      return '<div class="res'+(problems.length?" off":"")+'">'+
+        '<div class="top"><div><div class="fn">'+esc(v.fleet)+'</div><div class="reg">'+esc(v.reg)+' · '+esc(v.type)+'</div></div>'+
+        '<div class="spacer"></div>'+(problems.length?'<span class="bdg b-stop">Cannot allocate</span>':'<span class="bdg b-ok">Fit</span>')+'</div>'+
+        '<div style="font-size:11.5px;margin-top:6px;color:var(--ink-2)">'+esc(v.base)+' · '+esc(v.shiftStart)+'–'+esc(v.shiftEnd)+' · fuel '+v.fuel+'%</div>'+
+        '<div style="font-size:11.5px;margin-top:4px">'+(crew.length?crew.map(s=>esc(s.name)+' <span class="muted">('+esc(s.grade)+')</span>').join("<br>"):'<span class="muted">No crew rostered</span>')+'</div>'+
+        (problems.length||advisories.length?'<ul>'+problems.map(p=>'<li class="bad">'+esc(p)+'</li>').join("")+
+          advisories.map(a=>'<li>'+esc(a)+'</li>').join("")+'</ul>':'')+
+        '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+
+          (can("roster")?'<button class="btn xs" data-roster="'+v.id+'">Crew this vehicle</button>':'')+
+          (can("resources")&&can("roster")?'<button class="btn xs" data-defect="'+v.id+'">Log a defect</button>':'')+
+          (can("roster")&&v.status!=="Off road"?'<button class="btn xs danger" data-offroad="'+v.id+'">Take off road</button>'
+            :can("roster")?'<button class="btn xs" data-onroad="'+v.id+'">Return to service</button>':'')+
+        '</div></div>';}).join("")+'</div></div></div>'+
+
+  '<div class="card"><div class="h"><h2>Crew compliance</h2>'+
+    '<span class="muted" style="margin-left:auto">Anything in red blocks allocation</span></div>'+
+    '<div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)"><table><thead><tr>'+
+    '<th>Crew member</th><th>Grade</th><th>Status</th><th>DBS</th><th>Licence</th><th>Registration</th>'+
+    '<th>Manual handling</th><th>Safeguarding</th><th>Life support</th><th>Rostered</th></tr></thead><tbody>'+
+    S.staff.map(s=>{
+      const cell=d=>d?(expired(d)?'<span class="bdg b-stop">'+ukd(d)+'</span>':'<span class="num">'+ukd(d)+'</span>'):'<span class="muted">—</span>';
+      const v=S.vehicles.find(x=>x.crew.driverId===s.id||x.crew.attendantId===s.id);
+      return '<tr><td><strong>'+esc(s.name)+'</strong></td><td class="nowrap">'+esc(s.grade)+'</td>'+
+        '<td>'+(s.status==="On duty"?'<span class="bdg b-ok">On duty</span>':'<span class="bdg b-grey">'+esc(s.status)+'</span>')+'</td>'+
+        '<td>'+cell(s.dbs)+'</td><td>'+cell(s.licence)+'</td><td>'+cell(s.registration)+'</td>'+
+        '<td>'+cell(s.training["manual handling"])+'</td><td>'+cell(s.training["safeguarding"])+'</td>'+
+        '<td>'+cell(s.training["basic life support"])+'</td>'+
+        '<td class="mono">'+(v?esc(v.fleet):'<span class="muted">—</span>')+'</td></tr>';
+    }).join("")+'</tbody></table></div></div>'+
+  '<p class="hint">Compliance dates come from the Staff and Training modules. Dispatch reads them and refuses allocation — '+
+    'it does not let a dispatcher override an expiry.</p>';
+}
+
+/* ---------- messages ---------- */
+function viewMessages(){
+  if(!can("message")) return viewDenied();
+  const vlist=crewMode()?(myVehicle()?[myVehicle()]:[]):S.vehicles;
+  return demoNote+'<div class="grid g2">'+vlist.map(v=>{
+    const th=S.messages[v.id]||[];
+    return '<div class="card"><div class="h"><h2 class="mono">'+esc(v.fleet)+'</h2>'+
+      '<span class="muted">'+[stf(v.crew.driverId),stf(v.crew.attendantId)].filter(Boolean).map(s=>esc(s.name)).join(", ")+'</span></div>'+
+      '<div class="b">'+
+      (th.length?'<div class="chat">'+th.map(m=>
+        '<div class="bub '+(m.dir==="out"?"out":"in")+'">'+esc(m.text)+
+        '<div class="m">'+esc(m.by)+' · '+hhmm(new Date(m.at))+'</div></div>').join("")+'</div>'
+        :'<div class="empty" style="padding:18px"><b>No messages</b>Dispatch messages are kept with the vehicle for the shift.</div>')+
+      '<div class="row" style="margin-top:9px"><input type="text" id="msg-'+v.id+'" placeholder="Message '+esc(v.fleet)+'…" style="flex:2 1 200px">'+
+      '<button class="btn p xs" data-send="'+v.id+'">Send</button></div></div></div>';
+  }).join("")+'</div>'+
+  '<p class="hint">Messages are held against the vehicle and the operating day. They are part of the dispatch record and appear in the log.</p>';
+}
+
+/* ---------- dispatch log ---------- */
+function viewAudit(){
+  if(!can("audit")) return viewDenied();
+  const rows=S.log.slice().sort((a,b)=>b.at.localeCompare(a.at));
+  return demoNote+
+  '<div class="card"><div class="h"><h2>Dispatch log</h2><span class="muted" style="margin-left:auto">'+rows.length+' entries</span></div>'+
+  '<div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)"><table><thead><tr>'+
+    '<th>When</th><th>Job</th><th>Action</th><th>Detail</th><th>By</th></tr></thead><tbody>'+
+    rows.map(a=>'<tr><td class="mono muted nowrap">'+uks(a.at)+'</td>'+
+      '<td class="mono" style="color:var(--accent-2)">'+esc(a.ref||"—")+'</td>'+
+      '<td class="nowrap">'+esc(a.action)+'</td><td>'+esc(a.detail)+'</td>'+
+      '<td class="nowrap muted">'+esc(a.by)+'</td></tr>').join("")+
+  '</tbody></table></div></div>'+
+  '<p class="hint">Every allocation, release, status change and message is recorded with the operator and the time.</p>';
+}
+
+/* ============================================================
+   JOURNEY DRAWER
+   ============================================================ */
+function renderDrawer(){
+  const host=$("#drawerhost");
+  const j=job(S.selected);
+  if(!j){host.innerHTML="";return;}
+  const v=j.vehicleId?veh(j.vehicleId):null;
+  const crew=j.crew?[stf(j.crew.driverId),stf(j.crew.attendantId)].filter(Boolean):[];
+  const tabs=[["journey","Journey"],["allocate","Allocation"],["status","Status &amp; tracking"],
+    ["notes","Control notes"]];
+
+  host.innerHTML='<div class="scrim" data-close="1"></div>'+
+  '<aside class="drawer" role="dialog" aria-modal="true" aria-label="Journey '+esc(j.ref)+'">'+
+    '<div class="dh"><div style="display:flex;gap:10px;align-items:flex-start">'+
+      '<div><div class="mono" style="font-weight:700;color:var(--accent-2)">'+esc(j.ref)+'</div>'+
+        '<h2 style="font-size:16px;margin-top:2px">'+esc(j.patient)+'</h2>'+
+        '<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">'+statusBadge(j)+
+          '<span class="bdg b-grey">'+esc(j.priority)+'</span>'+
+          (v?'<span class="bdg b-info mono">'+esc(v.fleet)+'</span>':'<span class="bdg b-stop">No vehicle</span>')+
+          (lateBy(j)>10?'<span class="bdg b-warn">'+lateBy(j)+' min late</span>':'')+'</div></div>'+
+      '<div class="spacer"></div><button class="btn g xs" data-close="1" aria-label="Close">✕</button></div></div>'+
+    '<div class="tabs" role="tablist">'+tabs.map(([id,l])=>
+      '<button class="tab" role="tab" data-tab="'+id+'" aria-selected="'+(S.tab===id)+'">'+l+'</button>').join("")+'</div>'+
+    '<div class="db">'+drawerBody(j)+'</div>'+
+    '<div class="df">'+drawerFoot(j)+'</div>'+
+  '</aside>';
+}
+function drawerBody(j){
+  const v=j.vehicleId?veh(j.vehicleId):null;
+  const crew=j.crew?[stf(j.crew.driverId),stf(j.crew.attendantId)].filter(Boolean):[];
+
+  if(S.tab==="journey"){
+    return (j.alerts.length?'<div class="blockbox" style="border-color:var(--stop)"><b>Patient alerts</b><ul>'+
+      j.alerts.map(a=>'<li>'+esc(a)+'</li>').join("")+'</ul></div>':'')+
+      '<dl class="kv">'+
+      '<dt>Collection</dt><dd class="num"><strong>'+esc(j.time)+'</strong> · '+ukd(j.date)+'</dd>'+
+      '<dt>From</dt><dd>'+esc(j.from)+'</dd>'+
+      '<dt>To</dt><dd>'+esc(j.to)+'</dd>'+
+      (j.returnTime?'<dt>Return collection</dt><dd class="num">'+esc(j.returnTime)+'</dd>':'')+
+      '<dt>Estimated travel</dt><dd class="num">'+travelMins(j.mileage)+' minutes · '+(j.mileage||0)+' miles</dd>'+
+      '<dt>Estimated arrival</dt><dd class="num">'+esc(etaText(j))+'</dd>'+
+      '<dt>Booking type</dt><dd>'+esc(j.type||"—")+' · '+esc(j.shape)+'</dd>'+
+      '<dt>Customer</dt><dd>'+esc(j.customer||"—")+'</dd>'+
+      '<dt>Mobility</dt><dd><strong>'+esc(j.mobility||"—")+'</strong></dd>'+
+      '<dt>Clinical requirement</dt><dd>'+esc(j.clinical||"None")+'</dd>'+
+      '<dt>Infection control</dt><dd>'+(j.ipc&&j.ipc!=="None"?'<span class="bdg b-warn">'+esc(j.ipc)+'</span>':"None")+'</dd>'+
+      '<dt>Vehicle required</dt><dd>'+esc(j.vehicleType||"—")+'</dd>'+
+      '<dt>Crew required</dt><dd>'+esc(j.crewGrade||"—")+' × '+j.staffCount+'</dd>'+
+      '<dt>Waiting time booked</dt><dd class="num">'+(j.waiting||0)+' minutes</dd>'+
+      '</dl>';
+  }
+
+  if(S.tab==="allocate"){
+    if(!can("allocate")) return '<p class="muted">Your role can see allocations but not change them.</p>'+allocSummary(j);
+    const opts=S.vehicles.map(vv=>{
+      const c=allocationCheck(j,vv.id);
+      return '<option value="'+vv.id+'"'+(c.ok?"":" disabled")+(j.vehicleId===vv.id?" selected":"")+'>'+
+        esc(vv.fleet)+' — '+esc(vv.type)+(c.ok?"":" — "+esc(c.blocks[0]))+'</option>';
+    }).join("");
+    const current=j.vehicleId?allocationCheck(j,j.vehicleId):null;
+    return allocSummary(j)+
+      '<div class="inline"><div class="micro">Allocate or reallocate</div>'+
+      '<label class="f" style="margin-top:6px"><span>Vehicle</span><select id="al-veh">'+
+        '<option value="">Choose a vehicle…</option>'+opts+'</select>'+
+        '<div class="hint">Vehicles that cannot take this journey are greyed out with the reason.</div></label>'+
+      '<div id="al-check"></div>'+
+      '<button class="btn p xs" id="al-do">Allocate</button> '+
+      (j.vehicleId?'<button class="btn xs danger" id="al-release">Release back to the queue</button>':'')+
+      '</div>'+
+      '<div class="inline"><div class="micro">Additional escort</div>'+
+        '<div class="row" style="margin-top:6px"><select id="al-escort" style="flex:2 1 200px">'+
+          '<option value="">None</option>'+
+          S.staff.filter(s=>s.status==="On duty").map(s=>'<option'+(j.crew&&j.crew.escort===s.name?' selected':'')+'>'+esc(s.name)+' — '+esc(s.grade)+'</option>').join("")+
+        '</select><button class="btn xs" id="al-setescort">Set escort</button></div></div>'+
+      '<div class="inline"><div class="micro">Equipment to carry</div>'+
+        '<div class="row" style="margin-top:6px">'+EQUIPMENT.map(e=>
+          '<label class="chk" style="flex:0 0 auto"><input type="checkbox" class="eq" value="'+esc(e)+'"'+
+          (j.equipment.includes(e)?" checked":"")+'> '+esc(e)+'</label>').join("")+'</div>'+
+        '<button class="btn xs p" id="al-equip" style="margin-top:8px">Save equipment</button></div>';
+  }
+
+  if(S.tab==="status"){
+    const log=j.statusLog.slice().sort((a,b)=>b.at.localeCompare(a.at));
+    return '<dl class="kv">'+
+      '<dt>Current status</dt><dd>'+statusBadge(j)+'</dd>'+
+      '<dt>Vehicle</dt><dd>'+(v?'<span class="mono">'+esc(v.fleet)+'</span> · '+esc(v.reg):"—")+'</dd>'+
+      '<dt>Crew</dt><dd>'+(crew.length?crew.map(s=>esc(s.name)+' <span class="muted">('+esc(s.grade)+')</span>').join("<br>"):"—")+
+        (j.crew&&j.crew.escort?'<br>'+esc(j.crew.escort)+' <span class="muted">(escort)</span>':'')+'</dd>'+
+      '<dt>Crew telephone</dt><dd class="num">'+(crew[0]?esc(crew[0].phone):"—")+'</dd>'+
+      '<dt>Estimated arrival</dt><dd class="num">'+esc(etaText(j))+'</dd>'+
+      '<dt>Last update</dt><dd class="num">'+(log[0]?uks(log[0].at):"—")+'</dd>'+
+      '<dt>Last position</dt><dd class="mono">'+(log[0]&&log[0].gps?esc(log[0].gps.lat)+", "+esc(log[0].gps.lng):"—")+'</dd>'+
+      '</dl>'+
+      (can("status")||can("status.own")?'<div class="inline"><div class="micro">Crew status buttons</div>'+
+        '<div class="row" style="margin-top:7px">'+CREW_STATUSES.map(s=>
+          '<button class="btn xs'+(s==="Request Assistance"?" danger":"")+'" data-crewstatus="'+esc(s)+'" style="flex:0 0 auto">'+esc(s)+'</button>').join("")+'</div>'+
+        '<p class="hint">Each press stores the time, the person and the vehicle position. In production these are pressed in the crew app.</p></div>':'')+
+      '<h3 style="font-size:12.5px;margin:16px 0 7px">Status history</h3>'+
+      (log.length?'<ul class="feed">'+log.map(x=>
+        '<li><div class="m">'+uks(x.at)+' · '+esc(x.by)+'</div>'+
+        '<div class="s">'+esc(x.status)+'</div>'+
+        (x.detail?'<div class="d">'+esc(x.detail)+'</div>':'')+
+        (x.gps?'<div class="d mono" style="font-size:10.5px">'+esc(x.gps.lat)+', '+esc(x.gps.lng)+'</div>':'')+
+        '</li>').join("")+'</ul>'
+        :'<p class="muted">No status updates yet.</p>');
+  }
+
+  /* notes */
+  return (j.notes.length?'<ul class="feed">'+j.notes.slice().reverse().map(n=>
+    '<li><div class="m">'+uks(n.at)+' · '+esc(n.by)+'</div><div class="d">'+esc(n.text)+'</div></li>').join("")+'</ul>'
+    :'<div class="empty"><b>No control room notes</b>Record anything the next dispatcher needs to know.</div>')+
+    (can("notes")?'<div class="inline"><label class="f" style="margin:0"><span>Add a note</span>'+
+      '<textarea id="nt-text" placeholder="Ward rang, family called, access problem, delay reason…"></textarea>'+
+      '<div class="msg" id="m-nt">Write the note first.</div></label>'+
+      '<button class="btn p xs" id="nt-add" style="margin-top:8px">Add note</button></div>':'');
+}
+function allocSummary(j){
+  if(!j.vehicleId) return '<div class="blockbox"><b>Unallocated</b><ul><li>This journey has no vehicle. '+
+    'It will not appear on any crew\'s list until it is allocated.</li></ul></div>';
+  const c=allocationCheck(j,j.vehicleId);
+  const v=veh(j.vehicleId);
+  return (c.blocks.length?'<div class="blockbox"><b>Current allocation no longer passes checks</b><ul>'+
+      c.blocks.map(b=>'<li>'+esc(b)+'</li>').join("")+'</ul></div>':'')+
+    (c.warns.length?'<div class="warnbox"><b>Worth knowing</b><ul>'+c.warns.map(w=>'<li>'+esc(w)+'</li>').join("")+'</ul></div>':'')+
+    '<dl class="kv"><dt>Vehicle</dt><dd class="mono">'+esc(v.fleet)+' · '+esc(v.type)+'</dd>'+
+    '<dt>Crew</dt><dd>'+[stf(v.crew.driverId),stf(v.crew.attendantId)].filter(Boolean)
+      .map(s=>esc(s.name)+' <span class="muted">('+esc(s.grade)+')</span>').join("<br>")+'</dd>'+
+    '<dt>Equipment</dt><dd>'+(j.equipment.length?j.equipment.map(esc).join(", "):"None recorded")+'</dd></dl>';
+}
+function drawerFoot(j){
+  const out=[];
+  if(can("allocate")&&!j.vehicleId) out.push('<button class="btn p" data-tab="allocate">Allocate a vehicle</button>');
+  if(can("allocate")&&j.vehicleId&&j.status==="Allocated") out.push('<button class="btn p" data-crewstatus="Dispatched">Dispatch</button>');
+  if((can("status")||can("status.own"))&&LIVE.includes(j.status)) out.push('<button class="btn" data-tab="status">Update status</button>');
+  if(can("message")&&j.vehicleId) out.push('<button class="btn" data-msgveh="'+j.vehicleId+'">Message crew</button>');
+  out.push('<div class="spacer"></div>');
+  out.push('<button class="btn g" data-close="1">Close</button>');
+  return out.join("");
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function modal(title,body,foot){
+  $("#modalhost").innerHTML='<div class="scrim" style="z-index:69" data-mclose="1"></div>'+
+    '<div class="modal" role="dialog" aria-modal="true" aria-label="'+esc(title)+'">'+
+    '<div class="mh"><h2 style="font-size:14px">'+esc(title)+'</h2><div class="spacer"></div>'+
+    '<button class="btn g xs" data-mclose="1" aria-label="Close">✕</button></div>'+
+    '<div class="mb">'+body+'</div><div class="mf">'+foot+'</div></div>';
+}
+const closeModal=()=>{$("#modalhost").innerHTML="";};
+
+function modalBlocked(j,vehicleId,chk){
+  const v=veh(vehicleId);
+  modal("Cannot allocate "+j.ref+" to "+v.fleet,
+    '<div class="blockbox" style="margin:0"><b>Allocation refused</b><ul>'+
+      chk.blocks.map(b=>'<li>'+esc(b)+'</li>').join("")+'</ul></div>'+
+    '<p class="hint">These are hard rules. A journey may not be given to an unsuitable vehicle, or to a crew member whose '+
+    'checks have lapsed or who is already booked. Fix the underlying record, or choose another vehicle.</p>',
+    '<button class="btn g" data-mclose="1">Close</button>'+
+    '<button class="btn p" data-mclose="1" data-openjob="'+j.id+'">Open the journey</button>');
+}
+function modalRoster(v){
+  const opt=(sel)=>'<option value="">Nobody</option>'+S.staff.map(s=>{
+    const busy=S.vehicles.some(x=>x.id!==v.id&&(x.crew.driverId===s.id||x.crew.attendantId===s.id));
+    const prob=staffProblems(s,{}).length;
+    return '<option value="'+s.id+'"'+(sel===s.id?" selected":"")+(busy||s.status!=="On duty"?" disabled":"")+'>'+
+      esc(s.name)+' — '+esc(s.grade)+
+      (s.status!=="On duty"?" — "+esc(s.status):busy?" — already crewed elsewhere":prob?" — checks lapsed":"")+'</option>';
+  }).join("");
+  modal("Crew "+v.fleet,
+    '<label class="f"><span>Driver</span><select id="rs-driver">'+opt(v.crew.driverId)+'</select></label>'+
+    '<label class="f"><span>Attendant</span><select id="rs-att">'+opt(v.crew.attendantId)+'</select></label>'+
+    '<div class="row"><label class="f"><span>Shift start</span><input type="time" id="rs-start" value="'+esc(v.shiftStart)+'"></label>'+
+    '<label class="f"><span>Shift end</span><input type="time" id="rs-end" value="'+esc(v.shiftEnd)+'"></label></div>'+
+    '<p class="hint" style="margin:0">People already crewed on another vehicle, off duty, or with lapsed checks are greyed out. '+
+    'Crewing a vehicle does not re-check journeys already allocated to it — those are re-checked when you open them.</p>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="rs-save" data-veh="'+v.id+'">Save crewing</button>');
+}
+function modalDefect(v){
+  modal("Log a defect on "+v.fleet,
+    '<label class="f"><span>Defect</span><input type="text" id="df-desc" placeholder="What is wrong"><div class="msg" id="m-df">Describe the defect.</div></label>'+
+    '<label class="f" style="margin:0"><span>Severity</span><select id="df-sev">'+
+      '<option>Advisory</option><option>Safety-critical</option></select>'+
+      '<div class="hint">A safety-critical defect takes the vehicle off road immediately and blocks all allocation.</div></label>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="df-save" data-veh="'+v.id+'">Log defect</button>');
+}
+function modalAssistance(j){
+  modal("Assistance requested — "+j.ref,
+    '<label class="f" style="margin:0"><span>What is happening?</span>'+
+      '<select id="as-kind"><option>Patient has deteriorated</option><option>Crew safety concern</option>'+
+      '<option>Vehicle problem</option><option>Cannot gain access</option><option>Other — see note</option></select></label>'+
+    '<label class="f" style="margin-top:9px"><span>Detail</span><input type="text" id="as-note" placeholder="Short description for control"></label>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn danger" id="as-send" data-job="'+j.id+'">Send to control</button>');
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function go(v){S.view=v;S.selected=null;render();window.scrollTo(0,0);$("#side").classList.remove("open");}
+function openJob(id){
+  const j=job(id); if(!j) return;
+  if(crewMode()){ const v=myVehicle(); if(!v||j.vehicleId!==v.id){toast("That journey is not allocated to your vehicle.","bad");return;} }
+  S.selected=id;S.tab=crewMode()?"status":"journey";render();
+}
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():"";};
+function mark(id,mid,ok){const e=document.getElementById(id),m=document.getElementById(mid);
+  if(e)e.classList.toggle("bad",!ok);if(m)m.classList.toggle("on",!ok);return ok;}
+
+/* ---- drag and drop ---- */
+document.addEventListener("dragstart",e=>{
+  const c=e.target.closest("[data-drag]");
+  if(!c||!can("allocate")) return;
+  S.dragging=c.dataset.drag;
+  try{e.dataTransfer.setData("text/plain",S.dragging);e.dataTransfer.effectAllowed="move";}catch(_){}
+});
+document.addEventListener("dragend",()=>{S.dragging=null;$$(".btrack").forEach(t=>t.classList.remove("drop","deny"));});
+document.addEventListener("dragover",e=>{
+  const t=e.target.closest("[data-drop]");
+  if(!t||!S.dragging) return;
+  e.preventDefault();
+  const j=job(S.dragging);
+  if(!j) return;
+  const ok=allocationCheck(j,t.dataset.drop).ok;
+  $$(".btrack").forEach(x=>x.classList.remove("drop","deny"));
+  t.classList.add(ok?"drop":"deny");
+  e.dataTransfer.dropEffect=ok?"move":"none";
+});
+document.addEventListener("drop", async e=>{
+  const t=e.target.closest("[data-drop]");
+  if(!t||!S.dragging) return;
+  e.preventDefault();
+  $$(".btrack").forEach(x=>x.classList.remove("drop","deny"));
+  const j=job(S.dragging), vid=t.dataset.drop;
+  S.dragging=null;
+  if(!j) return;
+  const chk=allocate(j,vid);
+  if(!chk.ok){ modalBlocked(j,vid,chk); render(); return; }
+  await save();
+  toast(j.ref+" allocated to "+veh(vid).fleet+(chk.warns.length?" — check the warnings":""),chk.warns.length?"live":"ok");
+  render();
+});
+
+document.addEventListener("click", async e=>{
+  const t=e.target.closest("[data-go],[data-board],[data-tab],[data-openjob],[data-close],[data-mclose],[data-day],[data-month],"+
+    "[data-roster],[data-defect],[data-offroad],[data-onroad],[data-send],[data-msgveh],[data-crewstatus],[data-clearmayday],[data-openveh],button");
+  if(!t) return;
+  const j=job(S.selected);
+
+  if(t.dataset.mclose){closeModal(); if(t.dataset.openjob){openJob(t.dataset.openjob);} return;}
+  if(t.dataset.close){S.selected=null;render();return;}
+  if(t.dataset.go){const m=MENU.find(x=>x.id===t.dataset.go);
+    if(m&&!m.live){S.view=t.dataset.go;S.selected=null;render();$("#side").classList.remove("open");return;}
+    go(t.dataset.go);return;}
+  if(t.dataset.board){S.board=t.dataset.board;S.selected=null;render();return;}
+  if(t.dataset.tab){S.tab=t.dataset.tab;renderDrawer();return;}
+  if(t.dataset.openjob){openJob(t.dataset.openjob);return;}
+  if(t.dataset.openveh){const v=veh(t.dataset.openveh);
+    const aj=dayJobs().find(x=>x.vehicleId===v.id&&LIVE.includes(x.status));
+    if(aj) openJob(aj.id); else toast(v.fleet+" — "+v.status.toLowerCase()); return;}
+  if(t.dataset.day){S.day=t.dataset.day;S.board="board";S.selected=null;render();return;}
+  if(t.dataset.month){const d=new Date(S.day+"T00:00:00");d.setMonth(d.getMonth()+(+t.dataset.month));
+    S.day=d.toISOString().slice(0,10);render();return;}
+  if(t.dataset.clearmayday){const x=job(t.dataset.clearmayday);
+    if(x){x.assistance=false;dlog("Assistance acknowledged",x.ref+" — "+(x.assistanceNote||""),x.ref);await save();
+      toast("Assistance acknowledged","ok");render();}return;}
+  if(t.dataset.msgveh){S.view="messages";S.selected=null;render();
+    setTimeout(()=>{const el=document.getElementById("msg-"+t.dataset.msgveh);if(el)el.focus();},60);return;}
+  if(t.dataset.send){
+    const el=document.getElementById("msg-"+t.dataset.send);
+    if(!el||!el.value.trim()){toast("Write a message first.","bad");return;}
+    (S.messages[t.dataset.send]=S.messages[t.dataset.send]||[]).push(
+      {id:uid(),at:new Date().toISOString(),dir:crewMode()?"in":"out",by:crewMode()?(stf(S.crewId)||{}).name:"Control",text:el.value.trim()});
+    dlog("Dispatch message",veh(t.dataset.send).fleet+": "+el.value.trim().slice(0,60),"");
+    await save();render();return;
+  }
+  if(t.dataset.roster){if(!can("roster")){toast("Crewing needs an operations manager.","bad");return;}modalRoster(veh(t.dataset.roster));return;}
+  if(t.dataset.defect){modalDefect(veh(t.dataset.defect));return;}
+  if(t.dataset.offroad){
+    const v=veh(t.dataset.offroad);
+    v.status="Off road";v.offReason=v.offReason||"Taken off road by the control room";
+    const affected=dayJobs().filter(x=>x.vehicleId===v.id&&!["Completed","Cancelled"].includes(x.status));
+    affected.forEach(x=>release(x,"vehicle taken off road"));
+    dlog("Vehicle off road",v.fleet+" — "+affected.length+" journey(s) returned to the queue","");
+    await save();toast(v.fleet+" off road — "+affected.length+" journey(s) back in the queue","bad");render();return;
+  }
+  if(t.dataset.onroad){const v=veh(t.dataset.onroad);
+    if(v.defects.some(d=>d.open&&d.severity==="Safety-critical")){
+      toast("Close the safety-critical defect before returning "+v.fleet+" to service.","bad");return;}
+    v.status="Available";v.offReason="";dlog("Vehicle returned to service",v.fleet,"");
+    await save();toast(v.fleet+" back in service","ok");render();return;}
+
+  const id=t.id;
+  if(id==="theme"){const n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",n);
+    try{if(window.storage)window.storage.set("pts:theme",n);}catch(_){}return;}
+  if(id==="sidetoggle"){$("#side").classList.toggle("open");return;}
+
+  /* roster save */
+  if(id==="rs-save"){
+    const v=veh(t.dataset.veh);
+    const d=val("rs-driver"),a=val("rs-att");
+    if(d&&d===a){toast("The same person cannot be both crew members.","bad");return;}
+    v.crew={driverId:d,attendantId:a};
+    v.shiftStart=val("rs-start")||v.shiftStart;v.shiftEnd=val("rs-end")||v.shiftEnd;
+    /* keep allocated journeys' crew in step */
+    dayJobs().filter(x=>x.vehicleId===v.id).forEach(x=>{x.crew={driverId:d,attendantId:a,escort:x.crew?x.crew.escort:""};});
+    dlog("Vehicle crewed",v.fleet+" — "+[stf(d),stf(a)].filter(Boolean).map(s=>s.name).join(", ")||"nobody","");
+    await save();closeModal();toast("Crewing saved","ok");render();return;
+  }
+  if(id==="df-save"){
+    if(!mark("df-desc","m-df",!!val("df-desc"))) return;
+    const v=veh(t.dataset.veh);
+    const sev=val("df-sev");
+    v.defects.push({id:uid(),desc:val("df-desc"),severity:sev,open:true,raised:S.day});
+    let released=0;
+    if(sev==="Safety-critical"){
+      v.status="Off road";v.offReason=val("df-desc");
+      dayJobs().filter(x=>x.vehicleId===v.id&&!["Completed","Cancelled"].includes(x.status))
+        .forEach(x=>{release(x,"safety-critical defect on "+v.fleet);released++;});
+    }
+    dlog("Defect logged",v.fleet+" — "+sev+": "+val("df-desc")+(released?" · "+released+" journey(s) released":""),"");
+    await save();closeModal();
+    toast(sev==="Safety-critical"?v.fleet+" off road — "+released+" journey(s) back in the queue":"Advisory defect logged",
+      sev==="Safety-critical"?"bad":"ok");
+    render();return;
+  }
+
+  if(!j) return;
+
+  /* allocation */
+  if(id==="al-do"){
+    const vid=val("al-veh");
+    if(!vid){toast("Choose a vehicle.","bad");return;}
+    const chk=allocate(j,vid);
+    if(!chk.ok){modalBlocked(j,vid,chk);return;}
+    await save();toast(j.ref+" allocated to "+veh(vid).fleet,"ok");render();return;
+  }
+  if(id==="al-release"){release(j,"released by the control room");await save();toast(j.ref+" back in the queue");render();return;}
+  if(id==="al-setescort"){
+    const v=val("al-escort");
+    j.crew=j.crew||{driverId:"",attendantId:"",escort:""};
+    j.crew.escort=v;
+    dlog("Escort set",j.ref+" — "+(v||"none"),j.ref);
+    await save();toast(v?"Escort set":"Escort removed","ok");render();return;
+  }
+  if(id==="al-equip"){
+    j.equipment=$$(".eq:checked").map(x=>x.value);
+    dlog("Equipment recorded",j.ref+" — "+(j.equipment.join(", ")||"none"),j.ref);
+    await save();toast("Equipment saved","ok");render();return;
+  }
+  if(id==="nt-add"){
+    if(!mark("nt-text","m-nt",!!val("nt-text"))) return;
+    j.notes.push({id:uid(),at:new Date().toISOString(),by:role().name,text:val("nt-text")});
+    dlog("Control note added",j.ref+" — "+val("nt-text").slice(0,60),j.ref);
+    await save();toast("Note added","ok");render();return;
+  }
+  if(id==="as-send"){
+    const x=job(t.dataset.job);
+    x.assistance=true;x.assistanceNote=val("as-kind")+(val("as-note")?" — "+val("as-note"):"");
+    pushStatus(x,x.status,"assistance requested: "+x.assistanceNote);
+    dlog("ASSISTANCE REQUESTED",x.ref+" — "+x.assistanceNote,x.ref);
+    await save();closeModal();toast("Control room alerted","bad");render();return;
+  }
+
+  /* crew status buttons */
+  if(t.dataset.crewstatus){
+    const st=t.dataset.crewstatus;
+    if(!can("status")&&!can("status.own")){toast("Your role cannot change journey status.","bad");return;}
+    if(st==="Request Assistance"){modalAssistance(j);return;}
+    if(st==="Available"){
+      if(j.vehicleId) veh(j.vehicleId).status="Available";
+      dlog("Crew available",(j.vehicleId?veh(j.vehicleId).fleet:"")+" clear",j.ref);
+      await save();toast("Marked available","ok");render();return;
+    }
+    if(!j.vehicleId&&st!=="Stand Down"){toast("Allocate a vehicle before updating status.","bad");return;}
+    const mapped=STATUS_MAP[st];
+    if(!mapped){toast("No lifecycle change for that button.");return;}
+    if(st==="Stand Down"){release(j,"crew stood down");dlog("Crew stood down",j.ref,j.ref);await save();render();return;}
+    pushStatus(j,mapped,"crew pressed "+st);
+    if(j.vehicleId){
+      const v=veh(j.vehicleId);
+      v.status=mapped==="Completed"?"Available":"On job";
+      v.x=Math.max(40,Math.min(780,v.x+(Math.random()*70-35)));
+      v.y=Math.max(40,Math.min(460,v.y+(Math.random()*60-30)));
+    }
+    dlog("Status update",j.ref+" → "+mapped+" ("+st+")",j.ref);
+    await save();toast(j.ref+" — "+mapped,"live");render();return;
+  }
+});
+
+document.addEventListener("change", e=>{
+  const el=e.target;
+  if(el.id==="rolepick"){S.roleId=el.value;S.selected=null;
+    S.board=crewMode()?"crew":"board";
+    if(!can("view")&&!crewMode()&&anyAccess()) S.view=can("resources")?"resources":"audit";
+    else S.view="cad";
+    render();toast("Signed in as "+role().name);return;}
+  if(el.id==="crewpick"){S.crewId=el.value;S.selected=null;render();return;}
+  if(el.id==="daypick"){S.day=el.value;S.selected=null;render();return;}
+  if(el.id==="al-veh"){
+    const j=job(S.selected); if(!j) return;
+    const box=$("#al-check");
+    if(!el.value){box.innerHTML="";return;}
+    const c=allocationCheck(j,el.value);
+    box.innerHTML=(c.blocks.length?'<div class="blockbox" style="margin:9px 0 0"><b>Cannot allocate</b><ul>'+
+        c.blocks.map(b=>'<li>'+esc(b)+'</li>').join("")+'</ul></div>':'')+
+      (c.warns.length?'<div class="warnbox" style="margin:9px 0 0"><b>Worth knowing</b><ul>'+
+        c.warns.map(w=>'<li>'+esc(w)+'</li>').join("")+'</ul></div>':'')+
+      (c.ok&&!c.warns.length?'<div class="hint" style="margin-top:9px">All checks pass.</div>':'');
+    return;
+  }
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ if($("#modalhost").innerHTML){closeModal();return;} if(S.selected){S.selected=null;render();} }
+  if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.openjob){e.preventDefault();openJob(e.target.dataset.openjob);}
+});
+
+/* ---------- clock ---------- */
+function startClock(){
+  const upd=()=>{const d=new Date();$("#clock").textContent=hhmm(d)+":"+String(d.getSeconds()).padStart(2,"0");};
+  upd(); if(tick) clearInterval(tick);
+  tick=setInterval(()=>{upd(); if(S.view==="cad"&&S.board==="board"&&isToday()&&!S.selected&&!$("#modalhost").innerHTML) render();},30000);
+  setInterval(upd,1000);
+}
+
+/* ---------- boot ---------- */
+(async function(){
+  S.day=todayISO();
+  $("#rolepick").innerHTML=ROLES.map(r=>'<option value="'+r.id+'"'+(r.id===S.roleId?' selected':'')+'>'+esc(r.name)+'</option>').join("");
+  try{if(window.storage){const th=await window.storage.get("pts:theme");
+    if(th&&th.value)document.documentElement.setAttribute("data-theme",th.value);}}catch(_){}
+  const had=await load();
+  if(!had){
+    seed();                              /* crews, vehicles, messages, log */
+    S.bookingsLinked=await loadBookings();/* journeys from the Bookings module if it has been used here */
+    if(!S.bookingsLinked) seedJobs();
+    preAllocate();
+    await save();
+  }
+  render();startClock();
+  if(S.bookingsLinked) toast("Journeys loaded from the Bookings module","ok");
+  if(!storageOK) toast("Changes are held for this session only.","bad");
+})();
+
+})();
+</script>

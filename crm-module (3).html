@@ -1,0 +1,1309 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRM — Customers &amp; Organisations | Ambulance &amp; PTS Management System</title>
+<style>
+:root{
+  --bg:#EDF0F3;
+  --surface:#FFFFFF;
+  --surface-2:#F6F8FA;
+  --surface-3:#EEF1F5;
+  --line:#D6DCE3;
+  --line-2:#BAC4CF;
+  --ink:#111820;
+  --ink-2:#4B5763;
+  --ink-3:#78848F;
+
+  --nav:#1A222C;
+  --nav-2:#141B23;
+  --nav-ink:#B7C3CF;
+  --nav-ink-2:#7C8B99;
+
+  /* brand accent is deliberately NOT red/amber/green: those are reserved for status */
+  --accent:#0B6A66;
+  --accent-2:#0E837E;
+  --accent-soft:#DFEEED;
+
+  --ok:#166534;      --ok-soft:#E3F2E8;
+  --warn:#96560A;    --warn-soft:#FBEEDC;
+  --stop:#A81C24;    --stop-soft:#FAE7E8;
+  --info:#1E4E8C;    --info-soft:#E6EEF8;
+
+  --r:6px; --r2:10px;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --shadow:0 1px 2px rgba(17,24,32,.05),0 6px 18px rgba(17,24,32,.06);
+}
+html[data-theme="dark"]{
+  --bg:#0D1218; --surface:#151D26; --surface-2:#1B2530; --surface-3:#212C38;
+  --line:#2A3744; --line-2:#3B4C5C;
+  --ink:#E7EDF3; --ink-2:#AFBDC9; --ink-3:#8394A2;
+  --nav:#0A0F14; --nav-2:#070B0F; --nav-ink:#AEBDCA; --nav-ink-2:#6D7E8D;
+  --accent:#2FA39D; --accent-2:#3CB8B1; --accent-soft:#10312F;
+  --ok:#63C088; --ok-soft:#11301E; --warn:#DFA45C; --warn-soft:#33260F;
+  --stop:#EE868D; --stop-soft:#361619; --info:#7BAEEA; --info-soft:#12253C;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:13.5px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:640;letter-spacing:-.005em}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent-2)}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.micro{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.muted{color:var(--ink-3)}
+.nowrap{white-space:nowrap}
+.spacer{flex:1}
+
+/* ---------------- shell ---------------- */
+.shell{display:flex;min-height:100vh}
+.side{width:214px;flex:0 0 214px;background:var(--nav);color:var(--nav-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.logo{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:9px;align-items:center}
+.logo .sq{width:28px;height:28px;flex:0 0 28px;border-radius:5px;background:var(--accent-2);display:grid;place-items:center;color:#04211F;font-weight:800;font-size:11px}
+.logo b{display:block;color:#fff;font-size:12.5px;font-weight:640;line-height:1.25}
+.logo small{display:block;color:var(--nav-ink-2);font-size:10px}
+.menu{flex:1;overflow:auto;padding:6px 6px 14px}
+.menu .grp{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--nav-ink-2);padding:12px 8px 5px}
+.mi{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;color:var(--nav-ink);padding:6px 8px;border-radius:5px;cursor:pointer;font-size:12.5px}
+.mi:hover{background:rgba(255,255,255,.06);color:#fff}
+.mi[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+.mi .pill{margin-left:auto;font:600 10px/1 var(--mono);background:rgba(255,255,255,.13);padding:3px 5px;border-radius:9px}
+.mi.stub{color:var(--nav-ink-2)}
+.mi.stub:hover{color:var(--nav-ink)}
+.mi .planned{margin-left:auto;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--nav-ink-2)}
+.sfoot{padding:9px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:9.5px;color:var(--nav-ink-2);line-height:1.5}
+
+.body{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);padding:8px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar .search{position:relative;flex:1 1 320px;max-width:460px}
+.bar .search input{width:100%;padding:6px 10px 6px 28px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2)}
+.bar .search::before{content:"⌕";position:absolute;left:9px;top:4px;color:var(--ink-3);font-size:15px}
+.bell{position:relative;background:none;border:1px solid var(--line);border-radius:var(--r);padding:5px 9px;cursor:pointer;color:var(--ink-2)}
+.bell b{position:absolute;top:-6px;right:-6px;background:var(--stop);color:#fff;font:700 9.5px/1 var(--mono);padding:3px 4px;border-radius:8px}
+.role{display:flex;align-items:center;gap:6px}
+.role select{padding:5px 8px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2);max-width:230px}
+.page{padding:16px;max-width:1520px;width:100%}
+.ph{display:flex;align-items:flex-end;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.ph h1{font-size:18px}
+
+/* ---------------- primitives ---------------- */
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);padding:6px 11px;border-radius:var(--r);cursor:pointer;font-weight:550;font-size:12.5px}
+.btn:hover{border-color:var(--accent);color:var(--accent-2)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.p:hover{background:var(--accent-2);color:#fff}
+.btn.g{background:transparent}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+.btn.xs{padding:3px 8px;font-size:11.5px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.card>.h{padding:10px 13px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.card>.h h2{font-size:13px}
+.card>.b{padding:13px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1000px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+label.f{display:block;margin-bottom:10px}
+label.f>span{display:block;font-size:11px;font-weight:640;color:var(--ink-2);margin-bottom:3px}
+label.f .rq{color:var(--stop)}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],input[type=search],select,textarea{
+  width:100%;padding:6px 9px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface)}
+textarea{min-height:76px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--accent-2);outline:2px solid var(--accent-soft)}
+.bad{border-color:var(--stop)!important;background:var(--stop-soft)}
+.msg{display:none;color:var(--stop);font-size:11.5px;margin-top:3px}
+.msg.on{display:block}
+.hint{font-size:11px;color:var(--ink-3);margin-top:3px}
+
+.tw{overflow:auto;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);
+   font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;font-weight:700}
+th button{background:none;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+
+.bdg{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:2px 6px;border-radius:3px;border:1px solid;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.b-stop{background:var(--stop-soft);color:var(--stop);border-color:var(--stop)}
+.b-info{background:var(--info-soft);color:var(--info);border-color:var(--info)}
+.b-grey{background:var(--surface-3);color:var(--ink-2);border-color:var(--line-2)}
+
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;text-align:left;cursor:pointer;box-shadow:var(--shadow)}
+.stat:hover{border-color:var(--accent)}
+.stat .v{font:700 22px/1.1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat .k{font-size:11.5px;color:var(--ink-2);margin-top:3px}
+.stat .x{font-size:10.5px;color:var(--ink-3)}
+.stat.warn .v{color:var(--warn)} .stat.stop .v{color:var(--stop)} .stat.ok .v{color:var(--ok)}
+
+/* -------- SIGNATURE: the booking-clearance strip -------- */
+.clear{border:1px solid;border-left-width:5px;border-radius:var(--r2);padding:11px 14px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.clear.ok{background:var(--ok-soft);border-color:var(--ok)}
+.clear.warn{background:var(--warn-soft);border-color:var(--warn)}
+.clear.stop{background:var(--stop-soft);border-color:var(--stop)}
+.clear .verdict{font-weight:750;font-size:14.5px;letter-spacing:-.01em}
+.clear.ok .verdict{color:var(--ok)} .clear.warn .verdict{color:var(--warn)} .clear.stop .verdict{color:var(--stop)}
+.clear ul{margin:5px 0 0;padding-left:16px;font-size:12px}
+.clear li{margin-bottom:2px}
+.facts{display:flex;gap:0;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;background:var(--surface)}
+.facts>div{flex:1 1 130px;padding:9px 12px;border-right:1px solid var(--line)}
+.facts>div:last-child{border-right:0}
+.facts .k{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.facts .v{margin-top:3px;font-size:13px;font-weight:600}
+
+.tabs{display:flex;gap:1px;border-bottom:1px solid var(--line);overflow:auto;background:var(--surface);border-radius:var(--r2) var(--r2) 0 0;padding:0 6px}
+.tab{background:none;border:0;padding:9px 12px;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;font-weight:550;white-space:nowrap;font-size:12.5px}
+.tab[aria-selected="true"]{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+
+dl.kv{display:grid;grid-template-columns:158px 1fr;gap:6px 14px;margin:0}
+dl.kv dt{font-size:11px;color:var(--ink-3);font-weight:650}
+dl.kv dd{margin:0}
+@media(max-width:640px){dl.kv{grid-template-columns:1fr;gap:1px}dl.kv dd{margin-bottom:7px}}
+
+ul.feed{list-style:none;margin:0;padding:0}
+ul.feed li{padding:9px 0 9px 13px;border-left:2px solid var(--line-2);position:relative}
+ul.feed li::before{content:"";position:absolute;left:-4px;top:13px;width:6px;height:6px;border-radius:50%;background:var(--accent-2)}
+ul.feed .m{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+ul.feed .s{font-weight:600;margin-top:2px}
+ul.feed .d{margin-top:2px;white-space:pre-wrap;color:var(--ink-2)}
+
+.inline{background:var(--surface-2);border:1px dashed var(--line-2);border-radius:var(--r2);padding:11px;margin-top:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1 1 140px}
+.empty{padding:34px 16px;text-align:center;color:var(--ink-2)}
+.empty b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:6px;align-items:center}
+.toast{background:var(--nav);color:#fff;padding:8px 14px;border-radius:18px;font-size:12.5px;box-shadow:var(--shadow)}
+.toast.ok{background:var(--ok)} .toast.bad{background:var(--stop)}
+
+.scrim{position:fixed;inset:0;background:rgba(10,16,22,.55);z-index:60}
+.modal{position:fixed;z-index:61;top:50%;left:50%;transform:translate(-50%,-50%);width:min(560px,94vw);max-height:88vh;overflow:auto;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.modal .mh{padding:12px 15px;border-bottom:1px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:10px}
+.modal .mb{padding:15px}
+.modal .mf{padding:11px 15px;border-top:1px solid var(--line);background:var(--surface);display:flex;gap:8px;justify-content:flex-end}
+
+.demo{background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn);border-radius:var(--r);padding:6px 11px;font-size:11.5px;font-weight:650;margin-bottom:12px}
+.deny{max-width:560px;margin:60px auto;text-align:center}
+.deny .lock{font-size:30px}
+
+.sidetoggle{display:none}
+@media(max-width:920px){
+  .side{position:fixed;z-index:70;transform:translateX(-100%);transition:transform .16s}
+  .side.open{transform:none}
+  .sidetoggle{display:inline-flex}
+  .page{padding:12px}
+}
+@media print{.side,.bar,.mf{display:none}.page{padding:0}}
+</style>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Main navigation">
+    <div class="logo">
+      <div class="sq" aria-hidden="true">PT</div>
+      <div><b>Ambulance &amp; PTS</b><small>Management System</small></div>
+    </div>
+    <div class="menu" id="menu"></div>
+    <div class="sfoot">Demonstration build · CRM module<br>Branding is placeholder</div>
+  </nav>
+
+  <div class="body">
+    <header class="bar">
+      <button class="btn g sidetoggle" id="sidetoggle" aria-label="Show navigation">☰</button>
+      <div class="search"><label class="micro" for="gsearch" style="position:absolute;left:-9999px">Search customers</label>
+        <input id="gsearch" type="search" placeholder="Search customers, contacts, references…"></div>
+      <div class="spacer"></div>
+      <button class="bell" id="bell" aria-label="Notifications">🔔<b id="bellcount">0</b></button>
+      <div class="role">
+        <span class="micro">Role</span>
+        <select id="rolepick" aria-label="Signed-in role"></select>
+      </div>
+      <button class="btn g" id="theme" aria-label="Switch theme" title="Switch theme">◐</button>
+    </header>
+    <div class="page" id="page"></div>
+  </div>
+</div>
+
+<div id="modalhost"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CRM — Customers & Organisations
+   Module 1 of the Ambulance & Patient Transport Management System
+   ============================================================ */
+
+const KEY = "pts:crm:v1";
+
+/* ---------- reference data ---------- */
+const CUSTOMER_TYPES = ["NHS organisation","Hospital","Local authority","Care home","School",
+  "Event organiser","Private customer","Insurance company","Other healthcare provider"];
+
+const ACTIVITY_TYPES = ["Call","Email","Meeting","Enquiry","Complaint","Quotation","Note"];
+
+const PAYMENT_TERMS = ["7 days","14 days","30 days","45 days","60 days","Payment on booking","Pro forma"];
+
+const RATE_ITEMS = ["Base fare — wheelchair","Base fare — stretcher","Base fare — ambulance care",
+  "Bariatric surcharge","Per mile","Waiting time per hour","Out-of-hours uplift","Bank holiday uplift",
+  "Late cancellation","Aborted journey","Event crew day rate","Event ambulance day rate"];
+
+/* 15 roles from the brief, with the CRM permissions each one carries */
+const ROLES = [
+  {id:"super",    name:"Super Administrator",        p:["view","edit","create","rates.view","rates.edit","hold","activity","archive","audit"]},
+  {id:"director", name:"Company Director",           p:["view","edit","create","rates.view","rates.edit","hold","activity","audit"]},
+  {id:"ops",      name:"Operations Manager",         p:["view","edit","create","rates.view","activity","audit"]},
+  {id:"dispatch", name:"Control Room Dispatcher",    p:["view","activity"]},
+  {id:"clinical", name:"Clinical Lead",              p:["view"]},
+  {id:"para",     name:"Paramedic",                  p:[]},
+  {id:"emt",      name:"Emergency Medical Technician",p:[]},
+  {id:"aca",      name:"Ambulance Care Assistant",   p:[]},
+  {id:"driver",   name:"Driver",                     p:[]},
+  {id:"event",    name:"Event Medical Staff",        p:[]},
+  {id:"hr",       name:"HR & Compliance Officer",    p:["view"]},
+  {id:"fleet",    name:"Fleet Manager",              p:[]},
+  {id:"finance",  name:"Finance Officer",            p:["view","edit","rates.view","rates.edit","hold","activity","audit"]},
+  {id:"qa",       name:"Quality Assurance Officer",  p:["view","activity","audit"]},
+  {id:"portal",   name:"Commissioner / Customer Portal User", p:["view.own","activity.own"], ownCustomer:"CUS-0001"}
+];
+
+const MENU = [
+  {g:"Operations"},
+  {id:"overview", label:"Dashboard", stub:true},
+  {id:"crm",      label:"CRM", live:true},
+  {id:"customers",label:"Customers", live:true, indent:true},
+  {id:"patients", label:"Patients", stub:true},
+  {id:"bookings", label:"Bookings", stub:true},
+  {id:"cad",      label:"CAD and Dispatch", stub:true},
+  {id:"map",      label:"Live Map", stub:true},
+  {id:"epcr",     label:"ePCR", stub:true},
+  {id:"events",   label:"Events", stub:true},
+  {g:"Workforce"},
+  {id:"staff",    label:"Staff", stub:true},
+  {id:"rota",     label:"Rota", stub:true},
+  {id:"training", label:"Training", stub:true},
+  {g:"Assets"},
+  {id:"fleet",    label:"Fleet", stub:true},
+  {id:"equipment",label:"Equipment", stub:true},
+  {id:"stock",    label:"Stock and Medicines", stub:true},
+  {g:"Governance"},
+  {id:"incidents",label:"Incidents", stub:true},
+  {id:"safeg",    label:"Safeguarding", stub:true},
+  {id:"qa",       label:"Quality Assurance", stub:true},
+  {id:"policies", label:"Policies", stub:true},
+  {g:"Business"},
+  {id:"finance",  label:"Finance", stub:true},
+  {id:"reports",  label:"Reports", stub:true},
+  {id:"actions",  label:"Action Centre", live:true},
+  {id:"audit",    label:"Audit log", live:true},
+  {id:"settings", label:"Settings", stub:true}
+];
+
+/* ---------- state ---------- */
+let S = {
+  customers:[], seq:0,
+  view:"crm", roleId:"ops", selected:null, tab:"overview",
+  sort:{k:"name",d:"asc"},
+  f:{q:"",type:"",status:"active",owner:"",contract:"",clearance:""},
+  af:{owner:"",priority:"",status:"open"}
+};
+let storageOK = true;
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const role=()=>ROLES.find(r=>r.id===S.roleId)||ROLES[0];
+const can=p=>role().p.includes(p);
+const anyCRM=()=>role().p.length>0;
+const portalOnly=()=>role().p.includes("view.own");
+
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const shift=(n)=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
+function ukd(iso){ if(!iso) return "—"; const d=new Date(iso.length<=10?iso+"T00:00:00":iso); if(isNaN(d))return "—";
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear(); }
+function uks(iso){ if(!iso) return "—"; const d=new Date(iso); if(isNaN(d))return "—";
+  return ukd(iso)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function days(iso){ if(!iso) return null; return Math.round((new Date(iso+"T00:00:00")-new Date(todayISO()+"T00:00:00"))/864e5); }
+const gbp=n=>"£"+Number(n||0).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function toast(m,k){const t=document.createElement("div");t.className="toast"+(k?" "+k:"");t.textContent=m;
+  $("#toasts").appendChild(t);setTimeout(()=>{t.style.transition="opacity .3s";t.style.opacity=0;setTimeout(()=>t.remove(),320);},2800);}
+
+/* ---------- persistence ---------- */
+async function save(){
+  try{ if(window.storage&&storageOK) await window.storage.set(KEY, JSON.stringify({customers:S.customers,seq:S.seq})); }
+  catch(e){ if(storageOK){storageOK=false;toast("Changes are held for this session only — saved storage unavailable.","bad");} }
+}
+async function load(){
+  try{
+    if(!window.storage){storageOK=false;return false;}
+    const r=await window.storage.get(KEY);
+    if(r&&r.value){const d=JSON.parse(r.value);
+      if(d&&Array.isArray(d.customers)&&d.customers.length){S.customers=d.customers;S.seq=d.seq||d.customers.length;return true;}}
+  }catch(e){}
+  return false;
+}
+
+/* ---------- audit ---------- */
+function log(c,action,detail){
+  c.audit.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||""});
+  c.updatedAt=new Date().toISOString();
+}
+
+/* ============================================================
+   SIGNATURE LOGIC — booking clearance
+   Answers the question a coordinator actually asks before
+   accepting work: can we book for this customer right now?
+   ============================================================ */
+function clearance(c){
+  const stops=[], checks=[];
+  if(c.status==="Archived") stops.push("Account archived — no further work may be booked.");
+  if(c.status==="Inactive") stops.push("Account inactive — reactivate before booking.");
+  if(c.creditHold) stops.push("On credit hold by Finance. Booking blocked until released.");
+  const ce=days(c.contract.end);
+  if(c.contract.end && ce<0) stops.push("Contract expired on "+ukd(c.contract.end)+".");
+  else if(c.contract.end && ce<=30) checks.push("Contract ends in "+ce+" day"+(ce===1?"":"s")+" ("+ukd(c.contract.end)+").");
+  if(c.contract.poRequired && !c.contract.standingPO)
+    checks.push("Purchase order required on every booking — no standing PO held.");
+  if(c.balanceOverdue>0) checks.push(gbp(c.balanceOverdue)+" overdue on account.");
+  if(c.status==="Prospect") checks.push("Prospect account — no signed contract or agreed rates yet.");
+  if(!c.rates.length) checks.push("No rate card agreed — journeys cannot be priced automatically.");
+  if(c.contract.reviewDate && days(c.contract.reviewDate)<0) checks.push("Contract review overdue since "+ukd(c.contract.reviewDate)+".");
+  const level = stops.length?"stop":checks.length?"warn":"ok";
+  return {level, stops, checks,
+    verdict: level==="stop"?"Do not book":level==="warn"?"Book with checks":"Clear to book"};
+}
+function clearanceBadge(c){
+  const v=clearance(c);
+  return '<span class="bdg b-'+(v.level==="ok"?"ok":v.level==="warn"?"warn":"stop")+'">'+esc(v.verdict)+'</span>';
+}
+
+/* ---------- record creation ---------- */
+function nextRef(){ S.seq+=1; return "CUS-"+String(S.seq).padStart(4,"0"); }
+function newCustomer(d){
+  const now=new Date().toISOString();
+  const c={
+    id:uid(), ref:nextRef(), name:d.name, type:d.type,
+    status:d.status||"Prospect", creditHold:false,
+    phone:d.phone||"", email:d.email||"", website:d.website||"",
+    billing:d.billing||"", serviceAddr:d.serviceAddr||"",
+    owner:d.owner||"", notes:d.notes||"",
+    contract:{ref:d.contractRef||"", start:d.start||"", end:d.end||"", reviewDate:d.review||"",
+      notice:d.notice||"3 months", sla:d.sla||"", poRequired:!!d.poRequired, standingPO:d.standingPO||"",
+      terms:d.terms||"30 days", vat:d.vat||"Standard rate 20%"},
+    rates:[], contacts:[], activities:[], actions:[], documents:[], audit:[],
+    balanceOutstanding:0, balanceOverdue:0,
+    createdAt:now, updatedAt:now, demo:!!d.demo
+  };
+  c.audit.push({id:uid(),at:now,by:role().name,action:"Customer created",detail:c.name+" · "+c.type});
+  return c;
+}
+
+/* ---------- demo data ---------- */
+function seed(){
+  S.customers=[]; S.seq=0;
+  const OWNERS=["A. Petrides","R. Nwosu","C. Halvorsen","M. Devlin"];
+  const back=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString();};
+
+  const rows=[
+    // name, type, status, owner, poRequired, standingPO, terms, end, review, sla, outstanding, overdue, hold
+    ["Meadowvale Integrated Care Board","NHS organisation","Active",0,true,"PO-24/25-4471","45 days",shift(240),shift(-12),"95% collected within 30 minutes of ready time; 98% arrive before appointment",18420.50,0,false],
+    ["St Aldrich General Hospital","Hospital","Active",1,true,"","30 days",shift(96),shift(40),"Discharge collected within 60 minutes of booking; 4-hour transfer window",9310.00,2140.00,false],
+    ["Northshire County Council","Local authority","Active",0,true,"PO-NCC-8820","30 days",shift(410),shift(120),"Same-day response for adult social care transfers",4265.75,0,false],
+    ["Hollow Lane Care Home","Care home","Active",2,false,"","14 days",shift(150),shift(60),"Routine appointments booked 48 hours ahead",1180.00,0,false],
+    ["Brackenfield Nursing Group","Care home","Active",2,false,"","30 days",shift(-18),shift(-60),"",3420.00,3420.00,true],
+    ["Ridgeway Academy Trust","School","Active",3,true,"","30 days",shift(300),shift(150),"Cover confirmed 10 working days before each fixture",0,0,false],
+    ["Bram Showground Events Ltd","Event organiser","Active",3,false,"","14 days",shift(75),shift(30),"Medical plan agreed 21 days before each event",7600.00,0,false],
+    ["Caldermoor Festival Company","Event organiser","Prospect",3,false,"","Payment on booking","","","",0,0,false],
+    ["Mrs E. Fairweather","Private customer","Active",2,false,"","Payment on booking","","","",95.00,0,false],
+    ["Mr H. Callow","Private customer","Active",2,false,"","Payment on booking","","","",0,0,false],
+    ["Sentinel Health Insurance plc","Insurance company","Active",1,true,"PO-SEN-2261","60 days",shift(28),shift(14),"Authorisation reference required before every journey",22150.00,0,false],
+    ["Lindhurst Private Hospital","Hospital","Active",1,false,"","30 days",shift(190),shift(85),"Inter-hospital transfers within 90 minutes of request",5480.25,0,false],
+    ["Greenfell Hospice","Other healthcare provider","Active",0,false,"","30 days",shift(365),shift(200),"Palliative transfers prioritised; crew continuity requested",760.00,0,false],
+    ["Ashcombe Dialysis Partnership","Other healthcare provider","Inactive",1,true,"","30 days",shift(-140),shift(-140),"",0,0,false]
+  ];
+
+  rows.forEach((r,i)=>{
+    const [name,type,status,ownerIdx,poRequired,standingPO,terms,end,review,sla,outstanding,overdue,hold]=r;
+    const c=newCustomer({
+      name,type,status,owner:OWNERS[ownerIdx],poRequired,standingPO,terms,
+      end,review,sla,demo:true,
+      contractRef: end?("CON-"+(2024+(i%2))+"-"+String(100+i)):"",
+      start: end?shift(-365):"",
+      phone:"01632 96"+String(1000+i*7).slice(0,4),
+      email:"contact"+(i+1)+"@demo-customer.test",
+      billing: (i+3)+" Demonstration Way, Testford, TF"+(i+1)+" "+(2+i%7)+"AB",
+      serviceAddr: type==="Hospital"||type==="Care home" ? name+", Testford" : "",
+      notes: status==="Prospect" ? "Enquiry received through the website. Awaiting site visit and risk assessment before quoting." : ""
+    });
+    c.creditHold=hold;
+    c.balanceOutstanding=outstanding; c.balanceOverdue=overdue;
+    c.createdAt=back(400-i*9); c.audit[0].at=c.createdAt;
+
+    // contacts
+    const cn=[["Main contact","Operations"],["Finance contact","Accounts payable"],["Escalation contact","Duty manager"]];
+    cn.slice(0, type==="Private customer"?1:(i%2?3:2)).forEach((x,j)=>{
+      c.contacts.push({id:uid(), name: type==="Private customer"?name:["K. Osei","L. Marchetti","P. Nandi","B. Lomax","T. Bramhall","S. Rehman"][(i+j)%6],
+        jobTitle:x[1], phone:"07700 900"+String(100+i*3+j), email:(x[0]==="Finance contact"?"accounts":"ops")+(i+1)+"@demo-customer.test",
+        primary:j===0, notes:""});
+    });
+
+    // rate card
+    if(status!=="Prospect"){
+      const base = type==="Private customer"?1.25:1;
+      [["Base fare — wheelchair","per journey",46*base],["Base fare — stretcher","per journey",92*base],
+       ["Base fare — ambulance care","per journey",58*base],["Per mile","per mile",2.35*base],
+       ["Waiting time per hour","per hour",38*base],["Out-of-hours uplift","%",25],
+       ["Bank holiday uplift","%",50],["Late cancellation","per journey",30*base]
+      ].forEach(x=>c.rates.push({id:uid(),item:x[0],unit:x[1],amount:Math.round(x[2]*100)/100}));
+      if(type==="Event organiser"){
+        c.rates.push({id:uid(),item:"Event crew day rate",unit:"per person per day",amount:265});
+        c.rates.push({id:uid(),item:"Event ambulance day rate",unit:"per vehicle per day",amount:690});
+      }
+    }
+
+    // activity history
+    const acts=[
+      ["Call","Inbound","Quarterly contract call","Reviewed on-time collection figures. Commissioner satisfied with performance; asked for the aborted-journey breakdown by hospital."],
+      ["Email","Outbound","Rate review correspondence","Sent proposed uplift for the next contract year with supporting cost evidence."],
+      ["Meeting","Outbound","Service review meeting","Attended with the Operations Manager. Actions agreed on discharge lead times and crew continuity."],
+      ["Enquiry","Inbound","Additional capacity request","Asked whether we can cover two extra weekday vehicles from next month."],
+      ["Quotation","Outbound","Quotation issued","Quotation issued for the coming season. Valid for 30 days."],
+      ["Complaint","Inbound","Late collection reported","Complaint logged and passed to governance. Investigation opened."]
+    ];
+    acts.slice(0, 3 + (i%4)).forEach((a,j)=>{
+      c.activities.push({id:uid(), at:back(90-i*4-j*11), type:a[0], dir:a[1], by:c.owner,
+        subject:a[2], detail:a[3], contact:c.contacts[0]?c.contacts[0].name:""});
+    });
+
+    // follow-up actions
+    if(status==="Active"||status==="Prospect"){
+      const pool=[
+        ["Send Q1 performance pack",1,"Normal"],["Confirm PO number for next quarter",-3,"High"],
+        ["Arrange contract review meeting",9,"Normal"],["Chase signed rate schedule",-8,"High"],
+        ["Site visit and risk assessment",5,"Normal"],["Update service address on file",21,"Low"]
+      ];
+      pool.slice(i%3, (i%3)+2).forEach(p=>{
+        c.actions.push({id:uid(), title:p[0], owner:c.owner, due:shift(p[1]), priority:p[2],
+          status: p[1]<-5 ? "Open":"Open", createdAt:back(30), notes:""});
+      });
+      if(i%4===0) c.actions.push({id:uid(),title:"Issue welcome pack",owner:c.owner,due:shift(-40),priority:"Low",status:"Completed",createdAt:back(60),notes:""});
+    }
+
+    // documents
+    if(end){
+      c.documents.push({id:uid(),name:"signed-contract.pdf",category:"Contract",size:"842 KB",by:c.owner,at:back(360),expires:end});
+      c.documents.push({id:uid(),name:"agreed-rate-schedule.pdf",category:"Rate card",size:"210 KB",by:c.owner,at:back(355),expires:end});
+    }
+    if(type==="Event organiser") c.documents.push({id:uid(),name:"venue-risk-assessment.pdf",category:"Risk assessment",size:"1.4 MB",by:c.owner,at:back(40),expires:shift(120)});
+
+    // seed audit
+    c.audit.push({id:uid(),at:back(360-i),by:"A. Petrides",action:"Contract recorded",detail:c.contract.ref||"—"});
+    if(hold) c.audit.push({id:uid(),at:back(11),by:"Finance Officer",action:"Credit hold applied",detail:"Overdue balance "+gbp(overdue)});
+    c.updatedAt=c.audit[c.audit.length-1].at;
+    S.customers.push(c);
+  });
+}
+
+/* ---------- derived ---------- */
+function allActions(){
+  const out=[];
+  S.customers.forEach(c=>c.actions.forEach(a=>out.push({...a, cid:c.id, cref:c.ref, cname:c.name})));
+  return out;
+}
+function overdueActionCount(){
+  return allActions().filter(a=>a.status==="Open" && days(a.due)<0).length;
+}
+function visibleCustomers(){
+  let list=S.customers.slice();
+  if(portalOnly()) list=list.filter(c=>c.ref===role().ownCustomer);
+  const f=S.f, q=f.q.trim().toLowerCase();
+  list=list.filter(c=>{
+    if(f.type && c.type!==f.type) return false;
+    if(f.owner && c.owner!==f.owner) return false;
+    if(f.status==="active" && c.status!=="Active") return false;
+    else if(f.status && f.status!=="active" && c.status!==f.status) return false;
+    if(f.contract==="expiring"){ const d=days(c.contract.end); if(!(c.contract.end&&d>=0&&d<=60)) return false; }
+    else if(f.contract==="expired"){ const d=days(c.contract.end); if(!(c.contract.end&&d<0)) return false; }
+    else if(f.contract==="none" && c.contract.end) return false;
+    if(f.clearance && clearance(c).level!==f.clearance) return false;
+    if(q){
+      const hay=[c.ref,c.name,c.type,c.owner,c.contract.ref,c.email,c.phone,
+        c.contacts.map(x=>x.name+" "+x.email).join(" ")].join(" ").toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const k=S.sort.k, d=S.sort.d==="asc"?1:-1;
+  list.sort((a,b)=>{
+    let x,y;
+    if(k==="balance"){x=a.balanceOutstanding;y=b.balanceOutstanding;}
+    else if(k==="end"){x=a.contract.end||"9999";y=b.contract.end||"9999";}
+    else if(k==="lastContact"){x=lastContact(a)||"";y=lastContact(b)||"";}
+    else {x=String(a[k]||"").toLowerCase();y=String(b[k]||"").toLowerCase();}
+    return x<y?-d:x>y?d:0;
+  });
+  return list;
+}
+function lastContact(c){ return c.activities.length ? c.activities.map(a=>a.at).sort().slice(-1)[0] : ""; }
+function ownersList(){ return Array.from(new Set(S.customers.map(c=>c.owner).filter(Boolean))).sort(); }
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderMenu(){
+  $("#menu").innerHTML = MENU.map(m=>{
+    if(m.g) return '<div class="grp">'+esc(m.g)+'</div>';
+    const live=!!m.live, cur=(S.view===m.id)||(m.id==="crm"&&S.view==="customer");
+    const badge = m.id==="actions" ? '<span class="pill">'+overdueActionCount()+'</span>'
+                : live ? "" : '<span class="planned">planned</span>';
+    return '<button class="mi'+(live?"":" stub")+'" data-go="'+m.id+'"'+(cur?' aria-current="page"':'')+
+      (m.indent?' style="padding-left:22px"':'')+'>'+esc(m.label)+badge+'</button>';
+  }).join("");
+}
+
+function render(){
+  renderMenu();
+  $("#bellcount").textContent = overdueActionCount();
+  const p=$("#page");
+
+  if(!anyCRM()){ p.innerHTML=viewDenied(); return; }
+
+  if(S.view==="customer" && S.selected) p.innerHTML=viewCustomer();
+  else if(S.view==="crm") p.innerHTML=viewCRM();
+  else if(S.view==="customers") p.innerHTML=viewList();
+  else if(S.view==="actions") p.innerHTML=viewActions();
+  else if(S.view==="audit") p.innerHTML=viewAudit();
+  else p.innerHTML=viewStub();
+}
+
+function viewDenied(){
+  return '<div class="deny"><div class="lock" aria-hidden="true">🔒</div>'+
+    '<h1 style="margin:8px 0">No access to CRM</h1>'+
+    '<p class="muted">The <strong>'+esc(role().name)+'</strong> role does not include customer or organisation records. '+
+    'Operational roles reach customer detail through the booking they are working on, not through the CRM.</p>'+
+    '<p class="hint">Change the role in the top bar to see how access differs.</p></div>';
+}
+function viewStub(){
+  const m=MENU.find(x=>x.id===S.view)||{label:"Module"};
+  return '<div class="card"><div class="b empty"><b>'+esc(m.label)+' is not in this build</b>'+
+    'This delivery covers the CRM module — customers, organisations, contracts, rates, communication history and follow-up actions. '+
+    'The navigation shows the full menu from the specification so the structure is visible.</div></div>';
+}
+
+const demoNote='<div class="demo">Demonstration build — all customer records below are fictional test data.</div>';
+
+/* ---------- CRM overview ---------- */
+function viewCRM(){
+  const list = portalOnly()? S.customers.filter(c=>c.ref===role().ownCustomer) : S.customers;
+  const active=list.filter(c=>c.status==="Active");
+  const expiring=list.filter(c=>{const d=days(c.contract.end);return c.contract.end&&d>=0&&d<=60;});
+  const expired=list.filter(c=>{const d=days(c.contract.end);return c.contract.end&&d<0;});
+  const stopped=list.filter(c=>clearance(c).level==="stop");
+  const checks=list.filter(c=>clearance(c).level==="warn");
+  const overdueBal=list.reduce((s,c)=>s+c.balanceOverdue,0);
+  const outstanding=list.reduce((s,c)=>s+c.balanceOutstanding,0);
+  const acts=allActions().filter(a=>a.status==="Open");
+  const openComplaints=list.reduce((s,c)=>s+c.activities.filter(a=>a.type==="Complaint").length,0);
+  const noContact=active.filter(c=>{const l=lastContact(c);return !l || days(l.slice(0,10))<-60;});
+
+  const stats=[
+    {v:active.length,k:"Active customers",x:"Of "+list.length+" accounts",f:{status:"active"}},
+    {v:stopped.length,k:"Blocked from booking",x:"Hold, expiry or archive",cls:"stop",f:{status:"",clearance:"stop"}},
+    {v:checks.length,k:"Book with checks",x:"PO, rates or balance",cls:"warn",f:{status:"",clearance:"warn"}},
+    {v:expiring.length,k:"Contracts ending ≤60 days",x:"Renewal window",cls:"warn",f:{status:"",contract:"expiring"}},
+    {v:expired.length,k:"Contracts expired",x:"Not renewed",cls:"stop",f:{status:"",contract:"expired"}},
+    {v:acts.length,k:"Open follow-up actions",x:overdueActionCount()+" overdue",cls:overdueActionCount()?"warn":"",go:"actions"},
+    {v:noContact.length,k:"No contact in 60 days",x:"Active accounts",f:{status:"active"}},
+    {v:openComplaints,k:"Complaints logged",x:"Across all accounts",cls:"stop",f:{status:""}}
+  ];
+
+  const byType=CUSTOMER_TYPES.map(t=>({t,n:list.filter(c=>c.type===t).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n);
+  const max=Math.max(1,...byType.map(x=>x.n));
+
+  const recent=[];
+  list.forEach(c=>c.activities.forEach(a=>recent.push({...a,cid:c.id,cname:c.name,cref:c.ref})));
+  recent.sort((a,b)=>b.at.localeCompare(a.at));
+
+  return demoNote+
+  '<div class="ph"><h1>CRM overview</h1><span class="muted">Customers, organisations and commercial position</span>'+
+    '<div class="spacer"></div>'+
+    (can("create")?'<button class="btn p" id="new-customer">Add customer</button>':'')+
+  '</div>'+
+  '<div class="grid g4">'+stats.map((s,i)=>
+    '<button class="stat '+(s.cls||"")+'" data-stat="'+i+'"><div class="v">'+s.v+'</div>'+
+    '<div class="k">'+esc(s.k)+'</div><div class="x">'+esc(s.x)+'</div></button>').join("")+'</div>'+
+
+  '<div class="grid g2" style="margin-top:12px;align-items:start">'+
+    '<div class="card"><div class="h"><h2>Accounts by customer type</h2></div><div class="b">'+
+      byType.map(x=>'<div style="display:flex;align-items:center;gap:9px;margin-bottom:7px">'+
+        '<div style="flex:0 0 168px;font-size:12px">'+esc(x.t)+'</div>'+
+        '<div style="flex:1;height:14px;background:var(--surface-3);border-radius:3px;overflow:hidden">'+
+        '<div style="height:100%;width:'+Math.round(x.n/max*100)+'%;background:var(--accent)"></div></div>'+
+        '<div class="num" style="flex:0 0 22px;text-align:right;font-weight:700">'+x.n+'</div></div>').join("")+
+    '</div></div>'+
+
+    '<div class="card"><div class="h"><h2>Ledger position</h2>'+
+      (can("rates.view")?'':'<span class="bdg b-grey" style="margin-left:auto">Hidden for this role</span>')+'</div><div class="b">'+
+      (can("rates.view")?
+        '<div class="facts">'+
+          '<div><div class="k">Outstanding</div><div class="v num">'+gbp(outstanding)+'</div></div>'+
+          '<div><div class="k">Overdue</div><div class="v num" style="color:'+(overdueBal?"var(--stop)":"inherit")+'">'+gbp(overdueBal)+'</div></div>'+
+          '<div><div class="k">On credit hold</div><div class="v num">'+list.filter(c=>c.creditHold).length+'</div></div>'+
+        '</div>'+
+        '<div class="tw" style="margin-top:11px;border:0"><table><tbody>'+
+          list.filter(c=>c.balanceOutstanding>0).sort((a,b)=>b.balanceOutstanding-a.balanceOutstanding).slice(0,6)
+          .map(c=>'<tr tabindex="0" data-open="'+c.id+'"><td>'+esc(c.name)+'</td>'+
+            '<td class="r num">'+gbp(c.balanceOutstanding)+'</td>'+
+            '<td class="r num" style="color:'+(c.balanceOverdue?"var(--stop)":"var(--ink-3)")+'">'+
+              (c.balanceOverdue?gbp(c.balanceOverdue)+" overdue":"—")+'</td></tr>').join("")+
+        '</tbody></table></div>'
+        : '<p class="muted" style="margin:0">Financial figures are restricted to Finance, Director and Administrator roles. '+
+          'Your role can see customer and contract detail but not balances or rates.</p>')+
+    '</div></div>'+
+  '</div>'+
+
+  '<div class="card" style="margin-top:12px"><div class="h"><h2>Recent communication</h2>'+
+    '<span class="muted" style="margin-left:auto">Last 8 entries</span></div>'+
+    '<div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)"><table><tbody>'+
+      recent.slice(0,8).map(a=>'<tr tabindex="0" data-open="'+a.cid+'">'+
+        '<td class="mono muted nowrap">'+uks(a.at)+'</td>'+
+        '<td><span class="bdg b-'+(a.type==="Complaint"?"stop":a.type==="Quotation"?"info":"grey")+'">'+esc(a.type)+'</span></td>'+
+        '<td>'+esc(a.subject)+'<div class="muted">'+esc(a.cname)+'</div></td>'+
+        '<td class="nowrap muted">'+esc(a.dir)+'</td><td class="nowrap muted">'+esc(a.by)+'</td></tr>').join("")+
+    '</tbody></table></div></div>';
+}
+
+/* ---------- customer list ---------- */
+function viewList(){
+  const rows=visibleCustomers(), f=S.f;
+  const opt=(arr,sel,blank)=>'<option value="">'+blank+'</option>'+arr.map(a=>'<option'+(sel===a?' selected':'')+'>'+esc(a)+'</option>').join("");
+  const th=(k,l,cls)=>'<th'+(cls?' class="'+cls+'"':'')+'><button data-sort="'+k+'">'+l+(S.sort.k===k?(S.sort.d==="asc"?" ▲":" ▼"):"")+'</button></th>';
+
+  return demoNote+
+  '<div class="ph"><h1>Customers &amp; organisations</h1>'+
+    '<span class="muted">'+rows.length+' of '+(portalOnly()?1:S.customers.length)+' records</span>'+
+    '<div class="spacer"></div>'+
+    '<button class="btn" id="export">Export CSV</button>'+
+    '<button class="btn" id="printlist">Print</button>'+
+    (can("create")?'<button class="btn p" id="new-customer">Add customer</button>':'')+
+  '</div>'+
+
+  '<div class="card" style="margin-bottom:12px"><div class="b">'+
+    '<div class="row" style="align-items:flex-end">'+
+      '<label class="f" style="flex:2 1 240px;margin:0"><span>Search</span>'+
+        '<input type="search" id="f-q" value="'+esc(f.q)+'" placeholder="Name, reference, contract, contact"></label>'+
+      '<label class="f" style="margin:0"><span>Customer type</span><select id="f-type">'+opt(CUSTOMER_TYPES,f.type,"All types")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Account status</span><select id="f-status">'+
+        '<option value="">All statuses</option>'+
+        ['active','Active','Prospect','Inactive','Archived'].map(s=>
+          '<option value="'+s+'"'+(f.status===s?' selected':'')+'>'+(s==='active'?'Active only':s)+'</option>').join("")+
+        '</select></label>'+
+      '<label class="f" style="margin:0"><span>Contract</span><select id="f-contract">'+
+        '<option value="">Any</option>'+
+        '<option value="expiring"'+(f.contract==="expiring"?" selected":"")+'>Ending in 60 days</option>'+
+        '<option value="expired"'+(f.contract==="expired"?" selected":"")+'>Expired</option>'+
+        '<option value="none"'+(f.contract==="none"?" selected":"")+'>No contract held</option></select></label>'+
+      '<label class="f" style="margin:0"><span>Booking clearance</span><select id="f-clearance">'+
+        '<option value="">Any</option>'+
+        '<option value="ok"'+(f.clearance==="ok"?" selected":"")+'>Clear to book</option>'+
+        '<option value="warn"'+(f.clearance==="warn"?" selected":"")+'>Book with checks</option>'+
+        '<option value="stop"'+(f.clearance==="stop"?" selected":"")+'>Do not book</option></select></label>'+
+      '<label class="f" style="margin:0"><span>Account manager</span><select id="f-owner">'+opt(ownersList(),f.owner,"All managers")+'</select></label>'+
+      '<button class="btn g" id="f-clear">Clear</button>'+
+    '</div></div></div>'+
+
+  (rows.length?
+  '<div class="tw"><table><thead><tr>'+
+    th("ref","Ref")+th("name","Organisation")+th("type","Type")+
+    '<th>Clearance</th>'+th("end","Contract ends")+'<th>PO</th>'+'<th>Terms</th>'+
+    (can("rates.view")?th("balance","Outstanding","r"):"")+
+    th("lastContact","Last contact")+th("owner","Manager")+'<th>Status</th>'+
+  '</tr></thead><tbody>'+
+  rows.map(c=>{
+    const d=days(c.contract.end);
+    return '<tr tabindex="0" data-open="'+c.id+'">'+
+      '<td class="mono nowrap" style="color:var(--accent-2);font-weight:600">'+esc(c.ref)+'</td>'+
+      '<td><strong style="font-weight:640">'+esc(c.name)+'</strong>'+
+        (c.creditHold?' <span class="bdg b-stop">Credit hold</span>':'')+
+        '<div class="muted">'+esc(c.contacts[0]?c.contacts[0].name:"No contact recorded")+'</div></td>'+
+      '<td class="nowrap">'+esc(c.type)+'</td>'+
+      '<td>'+clearanceBadge(c)+'</td>'+
+      '<td class="nowrap">'+(c.contract.end?
+          (d<0?'<span class="bdg b-stop">'+ukd(c.contract.end)+'</span>':
+           d<=60?'<span class="bdg b-warn">'+ukd(c.contract.end)+'</span>':
+           '<span class="num">'+ukd(c.contract.end)+'</span>')
+          :'<span class="muted">None</span>')+'</td>'+
+      '<td>'+(c.contract.poRequired?(c.contract.standingPO?'<span class="bdg b-ok">Standing</span>':'<span class="bdg b-warn">Per booking</span>'):'<span class="muted">Not required</span>')+'</td>'+
+      '<td class="nowrap muted">'+esc(c.contract.terms)+'</td>'+
+      (can("rates.view")?'<td class="r num">'+(c.balanceOutstanding?gbp(c.balanceOutstanding):"—")+
+        (c.balanceOverdue?'<div class="bdg b-stop" style="margin-top:2px">'+gbp(c.balanceOverdue)+' overdue</div>':'')+'</td>':"")+
+      '<td class="nowrap muted">'+(lastContact(c)?ukd(lastContact(c).slice(0,10)):"—")+'</td>'+
+      '<td class="nowrap">'+esc(c.owner||"—")+'</td>'+
+      '<td><span class="bdg b-'+(c.status==="Active"?"ok":c.status==="Prospect"?"info":"grey")+'">'+esc(c.status)+'</span></td>'+
+    '</tr>';
+  }).join("")+'</tbody></table></div>'
+  :'<div class="card"><div class="b empty"><b>No customers match these filters</b>Clear the filters, or add a customer account.</div></div>');
+}
+
+/* ---------- customer record ---------- */
+function viewCustomer(){
+  const c=S.customers.find(x=>x.id===S.selected);
+  if(!c) return viewList();
+  const v=clearance(c);
+  const tabs=[["overview","Overview"],["contacts","Contacts ("+c.contacts.length+")"],
+    ["contract","Contract & rates"],["activity","Activity ("+c.activities.length+")"],
+    ["actions","Actions ("+c.actions.filter(a=>a.status==="Open").length+")"],
+    ["documents","Documents ("+c.documents.length+")"],["audit","Audit ("+c.audit.length+")"]];
+
+  return '<div class="ph">'+
+    '<button class="btn g" data-go="customers">← All customers</button>'+
+    '<div><div class="micro">'+esc(c.ref)+' · '+esc(c.type)+'</div><h1>'+esc(c.name)+'</h1></div>'+
+    '<span class="bdg b-'+(c.status==="Active"?"ok":c.status==="Prospect"?"info":"grey")+'">'+esc(c.status)+'</span>'+
+    (c.creditHold?'<span class="bdg b-stop">Credit hold</span>':'')+
+    '<div class="spacer"></div>'+
+    (can("hold")?'<button class="btn" id="togglehold">'+(c.creditHold?"Release credit hold":"Apply credit hold")+'</button>':'')+
+    (can("activity")||can("activity.own")?'<button class="btn p" id="log-activity">Log activity</button>':'')+
+  '</div>'+
+
+  '<div class="clear '+v.level+'" style="margin-bottom:12px">'+
+    '<div style="flex:0 0 150px"><div class="micro">Booking clearance</div><div class="verdict">'+esc(v.verdict)+'</div></div>'+
+    '<div style="flex:1 1 300px">'+
+      (v.stops.length?'<ul>'+v.stops.map(s=>'<li><strong>'+esc(s)+'</strong></li>').join("")+'</ul>':'')+
+      (v.checks.length?'<ul>'+v.checks.map(s=>'<li>'+esc(s)+'</li>').join("")+'</ul>':'')+
+      (!v.stops.length&&!v.checks.length?'<div style="font-size:12px">Contract live, rates agreed, no purchase-order or ledger blocks. Dispatch may accept work for this account.</div>':'')+
+    '</div></div>'+
+
+  '<div class="facts" style="margin-bottom:12px">'+
+    '<div><div class="k">Account manager</div><div class="v">'+esc(c.owner||"Unassigned")+'</div></div>'+
+    '<div><div class="k">Contract ends</div><div class="v num">'+(c.contract.end?ukd(c.contract.end):"—")+'</div></div>'+
+    '<div><div class="k">Payment terms</div><div class="v">'+esc(c.contract.terms)+'</div></div>'+
+    '<div><div class="k">Purchase order</div><div class="v">'+(c.contract.poRequired?(c.contract.standingPO?esc(c.contract.standingPO):"Required per booking"):"Not required")+'</div></div>'+
+    (can("rates.view")?'<div><div class="k">Outstanding</div><div class="v num">'+gbp(c.balanceOutstanding)+'</div></div>':'')+
+    '<div><div class="k">Last contact</div><div class="v num">'+(lastContact(c)?ukd(lastContact(c).slice(0,10)):"—")+'</div></div>'+
+  '</div>'+
+
+  '<div class="tabs" role="tablist">'+tabs.map(([id,l])=>
+    '<button class="tab" role="tab" data-tab="'+id+'" aria-selected="'+(S.tab===id)+'">'+esc(l)+'</button>').join("")+'</div>'+
+  '<div class="card" style="border-radius:0 0 var(--r2) var(--r2);border-top:0"><div class="b">'+tabBody(c)+'</div></div>';
+}
+
+function tabBody(c){
+  if(S.tab==="overview"){
+    return '<div class="grid g2">'+
+      '<div><dl class="kv">'+
+        '<dt>Customer type</dt><dd>'+esc(c.type)+'</dd>'+
+        '<dt>Account status</dt><dd>'+esc(c.status)+'</dd>'+
+        '<dt>Telephone</dt><dd class="num">'+esc(c.phone||"—")+'</dd>'+
+        '<dt>Email</dt><dd>'+(c.email?'<a href="mailto:'+esc(c.email)+'">'+esc(c.email)+'</a>':"—")+'</dd>'+
+        '<dt>Billing address</dt><dd>'+esc(c.billing||"—")+'</dd>'+
+        '<dt>Service address</dt><dd>'+esc(c.serviceAddr||"As billing address")+'</dd>'+
+        '<dt>Account opened</dt><dd class="num">'+ukd(c.createdAt.slice(0,10))+'</dd>'+
+        '<dt>Last updated</dt><dd class="num">'+uks(c.updatedAt)+'</dd>'+
+      '</dl></div>'+
+      '<div><div class="micro">Service level agreement</div>'+
+        '<p style="margin:4px 0 14px">'+esc(c.contract.sla||"No service level agreement recorded.")+'</p>'+
+        '<div class="micro">Notes</div>'+
+        '<p style="margin:4px 0;white-space:pre-wrap">'+esc(c.notes||"No notes recorded.")+'</p>'+
+      '</div></div>'+
+      (can("edit")?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0"><span>Account status</span><select id="e-status">'+
+          ["Active","Prospect","Inactive","Archived"].map(s=>'<option'+(c.status===s?' selected':'')+'>'+s+'</option>').join("")+'</select></label>'+
+        '<label class="f" style="margin:0"><span>Account manager</span><select id="e-owner">'+
+          '<option value="">Unassigned</option>'+ownersList().map(o=>'<option'+(c.owner===o?' selected':'')+'>'+esc(o)+'</option>').join("")+'</select></label>'+
+        '<label class="f" style="margin:0"><span>Telephone</span><input type="tel" id="e-phone" value="'+esc(c.phone)+'"></label>'+
+        '<label class="f" style="margin:0"><span>Email</span><input type="email" id="e-email" value="'+esc(c.email)+'"><div class="msg" id="m-email">Enter a valid email address.</div></label>'+
+        '</div>'+
+        '<label class="f" style="margin-top:8px"><span>Notes</span><textarea id="e-notes">'+esc(c.notes)+'</textarea></label>'+
+        '<button class="btn p xs" id="save-overview">Save changes</button></div>'
+        :'<p class="hint" style="margin-top:14px">Your role has read-only access to this record.</p>');
+  }
+
+  if(S.tab==="contacts"){
+    return (c.contacts.length?
+      '<div class="tw" style="border:0"><table><thead><tr><th>Name</th><th>Role</th><th>Telephone</th><th>Email</th><th>Primary</th>'+
+      (can("edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      c.contacts.map(x=>'<tr><td>'+esc(x.name)+'</td><td class="muted">'+esc(x.jobTitle)+'</td>'+
+        '<td class="num nowrap">'+esc(x.phone)+'</td><td><a href="mailto:'+esc(x.email)+'">'+esc(x.email)+'</a></td>'+
+        '<td>'+(x.primary?'<span class="bdg b-ok">Primary</span>':'')+'</td>'+
+        (can("edit")?'<td class="r"><button class="btn xs g" data-rmcontact="'+x.id+'">Remove</button></td>':'')+
+        '</tr>').join("")+'</tbody></table></div>'
+      :'<div class="empty"><b>No contacts recorded</b>Add at least a main contact so bookings can be confirmed.</div>')+
+      (can("edit")?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0"><span>Name<span class="rq">*</span></span><input type="text" id="ct-name"><div class="msg" id="m-ct-name">Enter a name.</div></label>'+
+        '<label class="f" style="margin:0"><span>Role or department</span><input type="text" id="ct-role"></label>'+
+        '<label class="f" style="margin:0"><span>Telephone</span><input type="tel" id="ct-phone"></label>'+
+        '<label class="f" style="margin:0"><span>Email</span><input type="email" id="ct-email"><div class="msg" id="m-ct-email">Enter a valid email address.</div></label>'+
+        '</div><button class="btn p xs" id="add-contact" style="margin-top:9px">Add contact</button></div>':"");
+  }
+
+  if(S.tab==="contract"){
+    const d=days(c.contract.end);
+    const contractBlock='<dl class="kv">'+
+      '<dt>Contract reference</dt><dd class="num">'+esc(c.contract.ref||"—")+'</dd>'+
+      '<dt>Start date</dt><dd class="num">'+ukd(c.contract.start)+'</dd>'+
+      '<dt>End date</dt><dd class="num">'+ukd(c.contract.end)+
+        (c.contract.end?(d<0?' <span class="bdg b-stop">Expired</span>':d<=60?' <span class="bdg b-warn">'+d+' days left</span>':''):'')+'</dd>'+
+      '<dt>Review date</dt><dd class="num">'+ukd(c.contract.reviewDate)+
+        (c.contract.reviewDate&&days(c.contract.reviewDate)<0?' <span class="bdg b-warn">Overdue</span>':'')+'</dd>'+
+      '<dt>Notice period</dt><dd>'+esc(c.contract.notice)+'</dd>'+
+      '<dt>Payment terms</dt><dd>'+esc(c.contract.terms)+'</dd>'+
+      '<dt>VAT treatment</dt><dd>'+esc(c.contract.vat)+'</dd>'+
+      '<dt>Purchase order</dt><dd>'+(c.contract.poRequired?
+          (c.contract.standingPO?'Required — standing PO <span class="num">'+esc(c.contract.standingPO)+'</span>':'<span class="bdg b-warn">Required on every booking</span>')
+          :'Not required')+'</dd>'+
+      '<dt>Service level</dt><dd>'+esc(c.contract.sla||"—")+'</dd>'+
+    '</dl>';
+
+    if(!can("rates.view"))
+      return contractBlock+'<div class="inline" style="border-style:solid"><b>Agreed rates are hidden for your role.</b>'+
+        '<p class="hint" style="margin:4px 0 0">Rate cards are visible to Finance Officer, Company Director, Operations Manager and Administrator roles.</p></div>';
+
+    return contractBlock+
+      '<h3 style="font-size:12.5px;margin:16px 0 7px">Agreed rate card</h3>'+
+      (c.rates.length?
+        '<div class="tw" style="border:0"><table><thead><tr><th>Charge</th><th>Unit</th><th class="r">Rate</th>'+
+        (can("rates.edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+        c.rates.map(r=>'<tr><td>'+esc(r.item)+'</td><td class="muted">'+esc(r.unit)+'</td>'+
+          '<td class="r num">'+(r.unit==="%"?r.amount+"%":gbp(r.amount))+'</td>'+
+          (can("rates.edit")?'<td class="r"><button class="btn xs g" data-rmrate="'+r.id+'">Remove</button></td>':'')+
+          '</tr>').join("")+'</tbody></table></div>'
+        :'<div class="empty"><b>No rates agreed</b>Journeys for this account cannot be priced automatically.</div>')+
+      (can("rates.edit")?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0;flex:2 1 200px"><span>Charge</span><select id="rt-item">'+
+          RATE_ITEMS.map(i=>'<option>'+esc(i)+'</option>').join("")+'</select></label>'+
+        '<label class="f" style="margin:0"><span>Unit</span><select id="rt-unit">'+
+          ["per journey","per mile","per hour","per person per day","per vehicle per day","%"].map(u=>'<option>'+u+'</option>').join("")+'</select></label>'+
+        '<label class="f" style="margin:0"><span>Amount</span><input type="number" id="rt-amt" step="0.01" min="0" value="0.00"><div class="msg" id="m-rt-amt">Enter an amount above zero.</div></label>'+
+        '</div><button class="btn p xs" id="add-rate" style="margin-top:9px">Add rate line</button>'+
+        '<p class="hint">Rate changes are written to the audit log with the role that made them.</p></div>':"");
+  }
+
+  if(S.tab==="activity"){
+    const list=c.activities.slice().sort((a,b)=>b.at.localeCompare(a.at));
+    return (list.length?'<ul class="feed">'+list.map(a=>
+      '<li><div class="m">'+uks(a.at)+' · '+esc(a.dir)+' · '+esc(a.by)+(a.contact?' · '+esc(a.contact):'')+'</div>'+
+      '<div class="s"><span class="bdg b-'+(a.type==="Complaint"?"stop":a.type==="Quotation"?"info":"grey")+'">'+esc(a.type)+'</span> '+esc(a.subject)+'</div>'+
+      '<div class="d">'+esc(a.detail)+'</div></li>').join("")+'</ul>'
+      :'<div class="empty"><b>No communication logged</b>Every call, email, meeting, enquiry, complaint and quotation is recorded here.</div>')+
+      ((can("activity")||can("activity.own"))?'<button class="btn p xs" id="log-activity" style="margin-top:12px">Log activity</button>':'');
+  }
+
+  if(S.tab==="actions"){
+    const list=c.actions.slice().sort((a,b)=>(a.status==="Open"?0:1)-(b.status==="Open"?0:1)||a.due.localeCompare(b.due));
+    return (list.length?
+      '<div class="tw" style="border:0"><table><thead><tr><th>Action</th><th>Owner</th><th>Due</th><th>Priority</th><th>Status</th>'+
+      (can("edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      list.map(a=>{
+        const od=a.status==="Open"&&days(a.due)<0;
+        return '<tr><td>'+esc(a.title)+'</td><td class="muted nowrap">'+esc(a.owner)+'</td>'+
+        '<td class="nowrap">'+(od?'<span class="bdg b-stop">'+ukd(a.due)+'</span>':'<span class="num">'+ukd(a.due)+'</span>')+'</td>'+
+        '<td><span class="bdg b-'+(a.priority==="High"?"warn":"grey")+'">'+esc(a.priority)+'</span></td>'+
+        '<td><span class="bdg b-'+(a.status==="Open"?"info":"ok")+'">'+esc(a.status)+'</span></td>'+
+        (can("edit")?'<td class="r">'+(a.status==="Open"?'<button class="btn xs" data-done="'+a.id+'">Mark complete</button>':'')+'</td>':'')+
+        '</tr>';}).join("")+'</tbody></table></div>'
+      :'<div class="empty"><b>No follow-up actions</b>Actions raised here appear in the Action Centre.</div>')+
+      (can("edit")?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0;flex:2 1 220px"><span>Action<span class="rq">*</span></span><input type="text" id="ac-title" placeholder="What needs doing"><div class="msg" id="m-ac-title">Describe the action.</div></label>'+
+        '<label class="f" style="margin:0"><span>Owner</span><select id="ac-owner">'+ownersList().map(o=>'<option'+(c.owner===o?' selected':'')+'>'+esc(o)+'</option>').join("")+'</select></label>'+
+        '<label class="f" style="margin:0"><span>Due</span><input type="date" id="ac-due" value="'+shift(7)+'"></label>'+
+        '<label class="f" style="margin:0"><span>Priority</span><select id="ac-pri"><option>Low</option><option selected>Normal</option><option>High</option></select></label>'+
+        '</div><button class="btn p xs" id="add-action" style="margin-top:9px">Add action</button></div>':"");
+  }
+
+  if(S.tab==="documents"){
+    return (c.documents.length?
+      '<div class="tw" style="border:0"><table><thead><tr><th>Document</th><th>Category</th><th>Size</th><th>Uploaded</th><th>Expires</th>'+
+      (can("edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      c.documents.map(d=>{const ex=d.expires&&days(d.expires)<0;
+        return '<tr><td>'+esc(d.name)+'</td><td class="muted">'+esc(d.category)+'</td>'+
+        '<td class="num muted">'+esc(d.size)+'</td><td class="num muted nowrap">'+ukd(d.at.slice(0,10))+'<div class="muted">'+esc(d.by)+'</div></td>'+
+        '<td class="nowrap">'+(d.expires?(ex?'<span class="bdg b-stop">'+ukd(d.expires)+'</span>':'<span class="num">'+ukd(d.expires)+'</span>'):'<span class="muted">—</span>')+'</td>'+
+        (can("edit")?'<td class="r"><button class="btn xs g" data-rmdoc="'+d.id+'">Remove</button></td>':'')+'</tr>';}).join("")+
+      '</tbody></table></div>'
+      :'<div class="empty"><b>No documents</b>Contracts, rate schedules and risk assessments are stored against the account.</div>')+
+      (can("edit")?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0;flex:2 1 200px"><span>File</span><input type="file" id="dc-file" style="padding:4px"></label>'+
+        '<label class="f" style="margin:0"><span>Category</span><select id="dc-cat">'+
+          ["Contract","Rate card","Risk assessment","Insurance","Correspondence","Purchase order","Other"].map(x=>'<option>'+x+'</option>').join("")+'</select></label>'+
+        '<label class="f" style="margin:0"><span>Expiry (optional)</span><input type="date" id="dc-exp"></label>'+
+        '</div><button class="btn p xs" id="add-doc" style="margin-top:9px">Upload</button>'+
+        '<p class="hint">In this build only the file name, size and metadata are stored. In production, files go to encrypted cloud storage with virus scanning and per-role access.</p></div>':"");
+  }
+
+  return '<ul class="feed">'+c.audit.slice().sort((a,b)=>b.at.localeCompare(a.at)).map(a=>
+    '<li><div class="m">'+uks(a.at)+' · '+esc(a.by)+'</div>'+
+    '<div class="s">'+esc(a.action)+'</div>'+(a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</li>').join("")+'</ul>'+
+    '<p class="hint">Audit entries are immutable — they cannot be edited or removed.</p>';
+}
+
+/* ---------- action centre ---------- */
+function viewActions(){
+  const f=S.af;
+  let list=allActions();
+  if(portalOnly()) list=list.filter(a=>a.cref===role().ownCustomer);
+  list=list.filter(a=>{
+    if(f.owner&&a.owner!==f.owner) return false;
+    if(f.priority&&a.priority!==f.priority) return false;
+    if(f.status==="open"&&a.status!=="Open") return false;
+    if(f.status==="overdue"&&!(a.status==="Open"&&days(a.due)<0)) return false;
+    if(f.status==="done"&&a.status!=="Completed") return false;
+    return true;
+  }).sort((a,b)=>a.due.localeCompare(b.due));
+
+  return demoNote+
+  '<div class="ph"><h1>Action Centre</h1><span class="muted">CRM follow-up actions · '+list.length+' shown</span></div>'+
+  '<div class="card" style="margin-bottom:12px"><div class="b"><div class="row" style="align-items:flex-end">'+
+    '<label class="f" style="margin:0"><span>Owner</span><select id="af-owner"><option value="">All owners</option>'+
+      ownersList().map(o=>'<option'+(f.owner===o?' selected':'')+'>'+esc(o)+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Priority</span><select id="af-priority"><option value="">All priorities</option>'+
+      ["High","Normal","Low"].map(p=>'<option'+(f.priority===p?' selected':'')+'>'+p+'</option>').join("")+'</select></label>'+
+    '<label class="f" style="margin:0"><span>Status</span><select id="af-status">'+
+      '<option value="">All</option>'+
+      '<option value="open"'+(f.status==="open"?" selected":"")+'>Open</option>'+
+      '<option value="overdue"'+(f.status==="overdue"?" selected":"")+'>Overdue</option>'+
+      '<option value="done"'+(f.status==="done"?" selected":"")+'>Completed</option></select></label>'+
+    '<div class="spacer"></div></div></div></div>'+
+  (list.length?
+  '<div class="tw"><table><thead><tr><th>Due</th><th>Action</th><th>Customer</th><th>Owner</th><th>Priority</th><th>Status</th>'+
+    (can("edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+  list.map(a=>{const od=a.status==="Open"&&days(a.due)<0;
+    return '<tr tabindex="0" data-open="'+a.cid+'">'+
+    '<td class="nowrap">'+(od?'<span class="bdg b-stop">'+ukd(a.due)+'</span>':'<span class="num">'+ukd(a.due)+'</span>')+'</td>'+
+    '<td>'+esc(a.title)+'</td>'+
+    '<td>'+esc(a.cname)+'<div class="mono muted">'+esc(a.cref)+'</div></td>'+
+    '<td class="nowrap muted">'+esc(a.owner)+'</td>'+
+    '<td><span class="bdg b-'+(a.priority==="High"?"warn":"grey")+'">'+esc(a.priority)+'</span></td>'+
+    '<td><span class="bdg b-'+(a.status==="Open"?"info":"ok")+'">'+esc(a.status)+'</span></td>'+
+    (can("edit")?'<td class="r">'+(a.status==="Open"?'<button class="btn xs" data-done="'+a.id+'" data-cid="'+a.cid+'">Complete</button>':'')+'</td>':'')+
+    '</tr>';}).join("")+'</tbody></table></div>'
+  :'<div class="card"><div class="b empty"><b>Nothing outstanding</b>No actions match these filters.</div></div>');
+}
+
+/* ---------- audit ---------- */
+function viewAudit(){
+  const all=[];
+  S.customers.forEach(c=>c.audit.forEach(a=>all.push({...a,cref:c.ref,cname:c.name,cid:c.id})));
+  all.sort((a,b)=>b.at.localeCompare(a.at));
+  const rows=all.slice(0,200);
+  return demoNote+
+  '<div class="ph"><h1>Audit log</h1><span class="muted">'+all.length+' entries · showing most recent '+rows.length+'</span></div>'+
+  '<div class="tw"><table><thead><tr><th>When</th><th>Customer</th><th>Action</th><th>Detail</th><th>By</th></tr></thead><tbody>'+
+  rows.map(a=>'<tr tabindex="0" data-open="'+a.cid+'"><td class="mono muted nowrap">'+uks(a.at)+'</td>'+
+    '<td>'+esc(a.cname)+'<div class="mono muted">'+esc(a.cref)+'</div></td>'+
+    '<td class="nowrap">'+esc(a.action)+'</td><td>'+esc(a.detail||"—")+'</td>'+
+    '<td class="nowrap muted">'+esc(a.by)+'</td></tr>').join("")+
+  '</tbody></table></div>';
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function modal(title, bodyHTML, footHTML){
+  $("#modalhost").innerHTML='<div class="scrim" data-mclose="1"></div>'+
+    '<div class="modal" role="dialog" aria-modal="true" aria-label="'+esc(title)+'">'+
+      '<div class="mh"><h2 style="font-size:14px">'+esc(title)+'</h2><div class="spacer"></div>'+
+      '<button class="btn g xs" data-mclose="1" aria-label="Close">✕</button></div>'+
+      '<div class="mb">'+bodyHTML+'</div><div class="mf">'+footHTML+'</div></div>';
+}
+function closeModal(){ $("#modalhost").innerHTML=""; }
+
+function modalNewCustomer(){
+  modal("Add customer account",
+    '<label class="f"><span>Organisation or customer name<span class="rq">*</span></span><input type="text" id="nc-name">'+
+      '<div class="msg" id="m-nc-name">Enter the name as it should appear on invoices.</div></label>'+
+    '<div class="row">'+
+      '<label class="f"><span>Customer type<span class="rq">*</span></span><select id="nc-type"><option value="">Select…</option>'+
+        CUSTOMER_TYPES.map(t=>'<option>'+esc(t)+'</option>').join("")+'</select>'+
+        '<div class="msg" id="m-nc-type">Select a customer type.</div></label>'+
+      '<label class="f"><span>Account status</span><select id="nc-status"><option>Prospect</option><option>Active</option></select></label>'+
+      '<label class="f"><span>Account manager</span><select id="nc-owner"><option value="">Unassigned</option>'+
+        ownersList().map(o=>'<option>'+esc(o)+'</option>').join("")+'</select></label>'+
+    '</div>'+
+    '<div class="row">'+
+      '<label class="f"><span>Telephone</span><input type="tel" id="nc-phone"></label>'+
+      '<label class="f"><span>Email</span><input type="email" id="nc-email"><div class="msg" id="m-nc-email">Enter a valid email address.</div></label>'+
+    '</div>'+
+    '<label class="f"><span>Billing address<span class="rq">*</span></span><input type="text" id="nc-billing">'+
+      '<div class="msg" id="m-nc-billing">A billing address is required before invoices can be raised.</div></label>'+
+    '<div class="row">'+
+      '<label class="f"><span>Payment terms</span><select id="nc-terms">'+PAYMENT_TERMS.map(t=>'<option'+(t==="30 days"?' selected':'')+'>'+t+'</option>').join("")+'</select></label>'+
+      '<label class="f"><span>Contract end</span><input type="date" id="nc-end"></label>'+
+      '<label class="f"><span>Purchase order</span><select id="nc-po"><option value="">Not required</option><option value="1">Required on every booking</option></select></label>'+
+    '</div>'+
+    '<label class="f" style="margin:0"><span>Notes</span><textarea id="nc-notes" placeholder="How the enquiry arrived, what has been agreed so far."></textarea></label>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="nc-save">Create account</button>');
+}
+
+function modalLogActivity(){
+  const c=S.customers.find(x=>x.id===S.selected); if(!c) return;
+  modal("Log activity — "+c.name,
+    '<div class="row">'+
+      '<label class="f"><span>Type<span class="rq">*</span></span><select id="la-type">'+ACTIVITY_TYPES.map(t=>'<option>'+t+'</option>').join("")+'</select></label>'+
+      '<label class="f"><span>Direction</span><select id="la-dir"><option>Inbound</option><option>Outbound</option></select></label>'+
+      '<label class="f"><span>Contact</span><select id="la-contact"><option value="">Not recorded</option>'+
+        c.contacts.map(x=>'<option>'+esc(x.name)+'</option>').join("")+'</select></label>'+
+    '</div>'+
+    '<label class="f"><span>Subject<span class="rq">*</span></span><input type="text" id="la-subject" placeholder="Short summary of the contact">'+
+      '<div class="msg" id="m-la-subject">Enter a subject.</div></label>'+
+    '<label class="f"><span>Detail<span class="rq">*</span></span><textarea id="la-detail" placeholder="What was discussed, agreed or requested."></textarea>'+
+      '<div class="msg" id="m-la-detail">Record what happened — at least 10 characters.</div></label>'+
+    '<label class="f" style="margin:0"><span style="display:flex;gap:6px;align-items:center">'+
+      '<input type="checkbox" id="la-follow" style="width:auto"> Raise a follow-up action</span></label>'+
+    '<div id="la-followbox" style="display:none" class="inline"><div class="row">'+
+      '<label class="f" style="margin:0"><span>Action</span><input type="text" id="la-actitle"></label>'+
+      '<label class="f" style="margin:0"><span>Due</span><input type="date" id="la-acdue" value="'+shift(7)+'"></label>'+
+      '<label class="f" style="margin:0"><span>Priority</span><select id="la-acpri"><option>Low</option><option selected>Normal</option><option>High</option></select></label>'+
+    '</div></div>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn p" id="la-save">Save activity</button>');
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function go(v){ S.view=v; S.selected=null; render(); window.scrollTo(0,0); $("#side").classList.remove("open"); }
+function openCustomer(id){
+  if(portalOnly()){ const c=S.customers.find(x=>x.id===id); if(!c||c.ref!==role().ownCustomer){ toast("Your portal account can only view its own record.","bad"); return; } }
+  S.selected=id; S.view="customer"; S.tab="overview"; render(); window.scrollTo(0,0);
+}
+function mark(id,msgId,ok){ const e=document.getElementById(id),m=document.getElementById(msgId);
+  if(e)e.classList.toggle("bad",!ok); if(m)m.classList.toggle("on",!ok); return ok; }
+const emailOK=v=>!v||/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():"";};
+
+document.addEventListener("click", async e=>{
+  const t=e.target.closest("[data-go],[data-open],[data-tab],[data-sort],[data-stat],[data-mclose],[data-done],[data-rmcontact],[data-rmrate],[data-rmdoc],button");
+  if(!t) return;
+  const c=S.customers.find(x=>x.id===S.selected);
+
+  if(t.dataset.mclose){ closeModal(); return; }
+  if(t.dataset.go){
+    const m=MENU.find(x=>x.id===t.dataset.go);
+    if(m && !m.live){ S.view=t.dataset.go; S.selected=null; render(); $("#side").classList.remove("open"); return; }
+    go(t.dataset.go); return;
+  }
+  if(t.dataset.open){ openCustomer(t.dataset.open); return; }
+  if(t.dataset.tab){ S.tab=t.dataset.tab; render(); return; }
+  if(t.dataset.sort){ const k=t.dataset.sort;
+    S.sort = S.sort.k===k ? {k,d:S.sort.d==="asc"?"desc":"asc"} : {k,d:"asc"}; render(); return; }
+  if(t.dataset.stat!==undefined && t.classList.contains("stat")){
+    const presets=[{status:"active"},{status:"",clearance:"stop"},{status:"",clearance:"warn"},
+      {status:"",contract:"expiring"},{status:"",contract:"expired"},null,{status:"active"},{status:""}];
+    if(+t.dataset.stat===5){ go("actions"); return; }
+    S.f=Object.assign({q:"",type:"",status:"",owner:"",contract:"",clearance:""},presets[+t.dataset.stat]);
+    go("customers"); return;
+  }
+
+  const id=t.id;
+  if(id==="theme"){ const n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",n);
+    try{ if(window.storage) window.storage.set("pts:crm:theme",n);}catch(_){} return; }
+  if(id==="sidetoggle"){ $("#side").classList.toggle("open"); return; }
+  if(id==="bell"){ S.af={owner:"",priority:"",status:"overdue"}; go("actions"); return; }
+  if(id==="f-clear"){ S.f={q:"",type:"",status:"active",owner:"",contract:"",clearance:""}; render(); return; }
+  if(id==="printlist"){ window.print(); return; }
+  if(id==="export"){ exportCSV(); return; }
+  if(id==="new-customer"){ modalNewCustomer(); return; }
+  if(id==="log-activity"){ modalLogActivity(); return; }
+
+  /* create customer */
+  if(id==="nc-save"){
+    let ok=true;
+    ok=mark("nc-name","m-nc-name",!!val("nc-name"))&&ok;
+    ok=mark("nc-type","m-nc-type",!!val("nc-type"))&&ok;
+    ok=mark("nc-billing","m-nc-billing",!!val("nc-billing"))&&ok;
+    ok=mark("nc-email","m-nc-email",emailOK(val("nc-email")))&&ok;
+    if(!ok){ toast("Check the highlighted fields.","bad"); return; }
+    if(S.customers.some(x=>x.name.toLowerCase()===val("nc-name").toLowerCase())){
+      toast("A customer with that name already exists.","bad"); return; }
+    const rec=newCustomer({name:val("nc-name"),type:val("nc-type"),status:val("nc-status"),
+      owner:val("nc-owner"),phone:val("nc-phone"),email:val("nc-email"),billing:val("nc-billing"),
+      terms:val("nc-terms"),end:val("nc-end"),poRequired:!!val("nc-po"),notes:val("nc-notes")});
+    S.customers.unshift(rec); await save(); closeModal();
+    toast("Created "+rec.ref,"ok"); openCustomer(rec.id); return;
+  }
+
+  if(!c) return;
+
+  /* overview edit */
+  if(id==="save-overview"){
+    if(!mark("e-email","m-email",emailOK(val("e-email")))) return;
+    const ch=[];
+    const st=val("e-status"), ow=$("#e-owner").value, ph=val("e-phone"), em=val("e-email"), nt=$("#e-notes").value;
+    if(st!==c.status){ch.push("status "+c.status+" → "+st);c.status=st;}
+    if(ow!==c.owner){ch.push("manager "+(c.owner||"unassigned")+" → "+(ow||"unassigned"));c.owner=ow;}
+    if(ph!==c.phone){ch.push("telephone updated");c.phone=ph;}
+    if(em!==c.email){ch.push("email updated");c.email=em;}
+    if(nt!==c.notes){ch.push("notes updated");c.notes=nt;}
+    if(!ch.length){toast("Nothing to save.");return;}
+    log(c,"Customer updated",ch.join("; ")); await save(); toast("Changes saved","ok"); render(); return;
+  }
+  if(id==="togglehold"){
+    if(!can("hold")){toast("Only Finance, Director or Administrator roles may change credit hold.","bad");return;}
+    c.creditHold=!c.creditHold;
+    log(c, c.creditHold?"Credit hold applied":"Credit hold released", c.creditHold?("Overdue "+gbp(c.balanceOverdue)):"Released by "+role().name);
+    await save(); toast(c.creditHold?"Credit hold applied — booking blocked":"Credit hold released", c.creditHold?"bad":"ok"); render(); return;
+  }
+
+  /* contacts */
+  if(id==="add-contact"){
+    let ok=true;
+    ok=mark("ct-name","m-ct-name",!!val("ct-name"))&&ok;
+    ok=mark("ct-email","m-ct-email",emailOK(val("ct-email")))&&ok;
+    if(!ok) return;
+    c.contacts.push({id:uid(),name:val("ct-name"),jobTitle:val("ct-role"),phone:val("ct-phone"),
+      email:val("ct-email"),primary:c.contacts.length===0,notes:""});
+    log(c,"Contact added",val("ct-name")); await save(); toast("Contact added","ok"); render(); return;
+  }
+  if(t.dataset.rmcontact){
+    const x=c.contacts.find(y=>y.id===t.dataset.rmcontact);
+    c.contacts=c.contacts.filter(y=>y.id!==t.dataset.rmcontact);
+    log(c,"Contact removed",x?x.name:""); await save(); render(); return;
+  }
+
+  /* rates */
+  if(id==="add-rate"){
+    const amt=parseFloat(val("rt-amt"));
+    if(!mark("rt-amt","m-rt-amt",amt>0)) return;
+    c.rates.push({id:uid(),item:val("rt-item"),unit:val("rt-unit"),amount:Math.round(amt*100)/100});
+    log(c,"Rate added",val("rt-item")+" — "+(val("rt-unit")==="%"?amt+"%":gbp(amt))+" "+val("rt-unit"));
+    await save(); toast("Rate line added","ok"); render(); return;
+  }
+  if(t.dataset.rmrate){
+    const r=c.rates.find(y=>y.id===t.dataset.rmrate);
+    c.rates=c.rates.filter(y=>y.id!==t.dataset.rmrate);
+    log(c,"Rate removed",r?r.item:""); await save(); render(); return;
+  }
+
+  /* actions */
+  if(id==="add-action"){
+    if(!mark("ac-title","m-ac-title",!!val("ac-title"))) return;
+    c.actions.push({id:uid(),title:val("ac-title"),owner:val("ac-owner"),due:val("ac-due"),
+      priority:val("ac-pri"),status:"Open",createdAt:new Date().toISOString(),notes:""});
+    log(c,"Action raised",val("ac-title")); await save(); toast("Action added","ok"); render(); return;
+  }
+  if(t.dataset.done){
+    const cust = t.dataset.cid ? S.customers.find(x=>x.id===t.dataset.cid) : c;
+    if(!cust) return;
+    const a=cust.actions.find(y=>y.id===t.dataset.done); if(!a) return;
+    a.status="Completed"; log(cust,"Action completed",a.title);
+    await save(); toast("Action completed","ok"); render(); return;
+  }
+
+  /* documents */
+  if(id==="add-doc"){
+    const f=$("#dc-file").files[0];
+    if(!f){toast("Choose a file first.","bad");return;}
+    c.documents.push({id:uid(),name:f.name,category:val("dc-cat"),size:(f.size/1024).toFixed(0)+" KB",
+      by:role().name,at:new Date().toISOString(),expires:val("dc-exp")});
+    log(c,"Document uploaded",f.name+" ("+val("dc-cat")+")"); await save(); toast("Uploaded "+f.name,"ok"); render(); return;
+  }
+  if(t.dataset.rmdoc){
+    const d=c.documents.find(y=>y.id===t.dataset.rmdoc);
+    c.documents=c.documents.filter(y=>y.id!==t.dataset.rmdoc);
+    log(c,"Document removed",d?d.name:""); await save(); render(); return;
+  }
+
+  /* log activity */
+  if(id==="la-save"){
+    let ok=true;
+    ok=mark("la-subject","m-la-subject",!!val("la-subject"))&&ok;
+    ok=mark("la-detail","m-la-detail",val("la-detail").length>=10)&&ok;
+    if(!ok) return;
+    const type=val("la-type");
+    c.activities.push({id:uid(),at:new Date().toISOString(),type,dir:val("la-dir"),
+      by:role().name,subject:val("la-subject"),detail:val("la-detail"),contact:val("la-contact")});
+    log(c,type+" logged",val("la-subject"));
+    if($("#la-follow").checked && val("la-actitle")){
+      c.actions.push({id:uid(),title:val("la-actitle"),owner:c.owner||role().name,due:val("la-acdue"),
+        priority:val("la-acpri"),status:"Open",createdAt:new Date().toISOString(),notes:""});
+      log(c,"Action raised",val("la-actitle"));
+    }
+    if(type==="Complaint") log(c,"Complaint flagged","Referred to the governance module for investigation");
+    await save(); closeModal(); toast(type+" logged","ok"); S.tab="activity"; render(); return;
+  }
+});
+
+document.addEventListener("change", e=>{
+  const el=e.target;
+  if(el.id==="rolepick"){ S.roleId=el.value; S.selected=null;
+    if(!anyCRM()) S.view="crm";
+    if(portalOnly()){ S.view="crm"; }
+    render(); toast("Signed in as "+role().name); return; }
+  if(el.id==="la-follow"){ $("#la-followbox").style.display=el.checked?"block":"none"; return; }
+  const map={"f-type":"type","f-status":"status","f-owner":"owner","f-contract":"contract","f-clearance":"clearance"};
+  if(map[el.id]){ S.f[map[el.id]]=el.value; render(); return; }
+  const amap={"af-owner":"owner","af-priority":"priority","af-status":"status"};
+  if(amap[el.id]){ S.af[amap[el.id]]=el.value; render(); return; }
+});
+
+let tm;
+document.addEventListener("input", e=>{
+  if(e.target.id!=="f-q" && e.target.id!=="gsearch") return;
+  const global = e.target.id==="gsearch";
+  S.f.q=e.target.value;
+  clearTimeout(tm);
+  tm=setTimeout(()=>{
+    const pos=e.target.selectionStart;
+    if(global){ if(S.view!=="customers"){ S.f.status=""; go("customers"); } else render();
+      const g=$("#gsearch"); if(g){g.focus();try{g.setSelectionRange(pos,pos);}catch(_){}} }
+    else { render(); const el=$("#f-q"); if(el){el.focus();try{el.setSelectionRange(pos,pos);}catch(_){}} }
+  },220);
+});
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){ if($("#modalhost").innerHTML){closeModal();return;} }
+  if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.open){ e.preventDefault(); openCustomer(e.target.dataset.open); }
+});
+
+/* ---------- export ---------- */
+function exportCSV(){
+  const rows=visibleCustomers();
+  if(!rows.length){ toast("Nothing to export with these filters.","bad"); return; }
+  const head=["Reference","Organisation","Type","Status","Credit hold","Booking clearance","Account manager",
+    "Telephone","Email","Billing address","Contract ref","Contract start","Contract end","Review date",
+    "Payment terms","PO required","Standing PO","SLA","Last contact"];
+  if(can("rates.view")) head.push("Outstanding","Overdue");
+  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const body=rows.map(c=>{
+    const line=[c.ref,c.name,c.type,c.status,c.creditHold?"Yes":"No",clearance(c).verdict,c.owner,
+      c.phone,c.email,c.billing,c.contract.ref,ukd(c.contract.start),ukd(c.contract.end),ukd(c.contract.reviewDate),
+      c.contract.terms,c.contract.poRequired?"Yes":"No",c.contract.standingPO,c.contract.sla,
+      lastContact(c)?ukd(lastContact(c).slice(0,10)):""];
+    if(can("rates.view")) line.push(c.balanceOutstanding.toFixed(2),c.balanceOverdue.toFixed(2));
+    return line.map(q).join(",");
+  }).join("\r\n");
+  const csv="\ufeff"+head.map(q).join(",")+"\r\n"+body;
+  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a"); a.href=url; a.download="crm-customers-"+todayISO()+".csv";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),800);
+  toast("Exported "+rows.length+" records","ok");
+}
+
+/* ---------- boot ---------- */
+(async function(){
+  $("#rolepick").innerHTML=ROLES.map(r=>'<option value="'+r.id+'"'+(r.id===S.roleId?' selected':'')+'>'+esc(r.name)+'</option>').join("");
+  try{ if(window.storage){ const th=await window.storage.get("pts:crm:theme");
+    if(th&&th.value) document.documentElement.setAttribute("data-theme",th.value); } }catch(_){}
+  const ok=await load();
+  if(!ok){ seed(); await save(); }
+  render();
+  if(!storageOK) toast("Changes are held for this session only.","bad");
+})();
+
+})();
+</script>

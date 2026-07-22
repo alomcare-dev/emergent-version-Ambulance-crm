@@ -1,0 +1,1742 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bookings | Ambulance &amp; PTS Management System</title>
+<style>
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface-2:#F6F8FA; --surface-3:#EEF1F5;
+  --line:#D6DCE3; --line-2:#BAC4CF;
+  --ink:#111820; --ink-2:#4B5763; --ink-3:#78848F;
+  --nav:#1A222C; --nav-ink:#B7C3CF; --nav-ink-2:#7C8B99;
+  --accent:#0B6A66; --accent-2:#0E837E; --accent-soft:#DFEEED;
+  --ok:#166534; --ok-soft:#E3F2E8;
+  --warn:#96560A; --warn-soft:#FBEEDC;
+  --stop:#A81C24; --stop-soft:#FAE7E8;
+  --info:#1E4E8C; --info-soft:#E6EEF8;
+  --live:#5B21A8; --live-soft:#EFE6FA;
+  --r:6px; --r2:10px;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --shadow:0 1px 2px rgba(17,24,32,.05),0 6px 18px rgba(17,24,32,.06);
+}
+html[data-theme="dark"]{
+  --bg:#0D1218; --surface:#151D26; --surface-2:#1B2530; --surface-3:#212C38;
+  --line:#2A3744; --line-2:#3B4C5C;
+  --ink:#E7EDF3; --ink-2:#AFBDC9; --ink-3:#8394A2;
+  --nav:#0A0F14; --nav-ink:#AEBDCA; --nav-ink-2:#6D7E8D;
+  --accent:#2FA39D; --accent-2:#3CB8B1; --accent-soft:#10312F;
+  --ok:#63C088; --ok-soft:#11301E; --warn:#DFA45C; --warn-soft:#33260F;
+  --stop:#EE868D; --stop-soft:#361619; --info:#7BAEEA; --info-soft:#12253C;
+  --live:#B79BE8; --live-soft:#241636;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:13.5px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:640;letter-spacing:-.005em}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent-2)}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.micro{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.muted{color:var(--ink-3)} .nowrap{white-space:nowrap} .spacer{flex:1}
+
+.shell{display:flex;min-height:100vh}
+.side{width:214px;flex:0 0 214px;background:var(--nav);color:var(--nav-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.logo{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:9px;align-items:center}
+.logo .sq{width:28px;height:28px;flex:0 0 28px;border-radius:5px;background:var(--accent-2);display:grid;place-items:center;color:#04211F;font-weight:800;font-size:11px}
+.logo b{display:block;color:#fff;font-size:12.5px;line-height:1.25}
+.logo small{display:block;color:var(--nav-ink-2);font-size:10px}
+.menu{flex:1;overflow:auto;padding:6px}
+.menu .grp{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--nav-ink-2);padding:12px 8px 5px}
+.mi{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;color:var(--nav-ink);padding:6px 8px;border-radius:5px;cursor:pointer;font-size:12.5px}
+.mi:hover{background:rgba(255,255,255,.06);color:#fff}
+.mi[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+.mi.stub{color:var(--nav-ink-2)}
+.mi .pill{margin-left:auto;font:600 10px/1 var(--mono);background:rgba(255,255,255,.13);padding:3px 5px;border-radius:9px}
+.mi .planned{margin-left:auto;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--nav-ink-2)}
+.sfoot{padding:9px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:9.5px;color:var(--nav-ink-2);line-height:1.5}
+
+.body{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);padding:8px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar .search{position:relative;flex:1 1 300px;max-width:440px}
+.bar .search input{width:100%;padding:6px 10px 6px 28px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2)}
+.bar .search::before{content:"⌕";position:absolute;left:9px;top:4px;color:var(--ink-3);font-size:15px}
+.bell{position:relative;background:none;border:1px solid var(--line);border-radius:var(--r);padding:5px 9px;cursor:pointer;color:var(--ink-2)}
+.bell b{position:absolute;top:-6px;right:-6px;background:var(--stop);color:#fff;font:700 9.5px/1 var(--mono);padding:3px 4px;border-radius:8px}
+.role select{padding:5px 8px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface-2);max-width:230px}
+.page{padding:16px;max-width:1520px;width:100%}
+.ph{display:flex;align-items:flex-end;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.ph h1{font-size:18px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);padding:6px 11px;border-radius:var(--r);cursor:pointer;font-weight:550;font-size:12.5px}
+.btn:hover{border-color:var(--accent);color:var(--accent-2)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.p:hover{background:var(--accent-2);color:#fff}
+.btn.danger{border-color:var(--stop);color:var(--stop)}
+.btn.danger:hover{background:var(--stop-soft)}
+.btn.g{background:transparent}
+.btn.xs{padding:3px 8px;font-size:11.5px}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.card>.h{padding:10px 13px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.card>.h h2{font-size:13px}
+.card>.b{padding:13px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1000px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+label.f{display:block;margin-bottom:10px}
+label.f>span{display:block;font-size:11px;font-weight:640;color:var(--ink-2);margin-bottom:3px}
+label.f .rq{color:var(--stop)}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=number],input[type=search],select,textarea{
+  width:100%;padding:6px 9px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface)}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--accent-2);outline:2px solid var(--accent-soft)}
+.bad{border-color:var(--stop)!important;background:var(--stop-soft)}
+.msg{display:none;color:var(--stop);font-size:11.5px;margin-top:3px}
+.msg.on{display:block}
+.hint{font-size:11px;color:var(--ink-3);margin-top:3px}
+.chk{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:3px 0}
+.chk input{width:auto}
+
+.tw{overflow:auto;border:1px solid var(--line);border-radius:var(--r2);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);
+   font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;font-weight:700}
+th button{background:none;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+tr.daybreak td{background:var(--surface-3);font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);cursor:default}
+tr.daybreak:hover td{background:var(--surface-3)}
+
+.bdg{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:3px;border:1px solid;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.b-stop{background:var(--stop-soft);color:var(--stop);border-color:var(--stop)}
+.b-info{background:var(--info-soft);color:var(--info);border-color:var(--info)}
+.b-live{background:var(--live-soft);color:var(--live);border-color:var(--live)}
+.b-grey{background:var(--surface-3);color:var(--ink-2);border-color:var(--line-2)}
+
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:10px 12px;text-align:left;cursor:pointer;box-shadow:var(--shadow)}
+.stat:hover{border-color:var(--accent)}
+.stat .v{font:700 22px/1.1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat .k{font-size:11.5px;color:var(--ink-2);margin-top:3px}
+.stat .x{font-size:10.5px;color:var(--ink-3)}
+.stat.warn .v{color:var(--warn)} .stat.stop .v{color:var(--stop)} .stat.ok .v{color:var(--ok)} .stat.live .v{color:var(--live)}
+
+/* ---- SIGNATURE: dispatch readiness ---- */
+.ready{border:1px solid;border-left-width:5px;border-radius:var(--r2);padding:11px 14px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.ready.ok{background:var(--ok-soft);border-color:var(--ok)}
+.ready.warn{background:var(--warn-soft);border-color:var(--warn)}
+.ready.stop{background:var(--stop-soft);border-color:var(--stop)}
+.ready .verdict{font-weight:750;font-size:14.5px}
+.ready.ok .verdict{color:var(--ok)} .ready.warn .verdict{color:var(--warn)} .ready.stop .verdict{color:var(--stop)}
+.ready ul{margin:5px 0 0;padding-left:16px;font-size:12px}
+.ready li{margin-bottom:2px}
+
+.facts{display:flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;background:var(--surface)}
+.facts>div{flex:1 1 130px;padding:9px 12px;border-right:1px solid var(--line)}
+.facts>div:last-child{border-right:0}
+.facts .k{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.facts .v{margin-top:3px;font-size:13px;font-weight:600}
+
+/* journey leg */
+.leg{display:flex;gap:12px;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:13px}
+.leg .pt{flex:1 1 220px;min-width:0}
+.leg .pt .k{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.leg .pt .t{font:700 17px/1.2 var(--mono);margin-top:3px}
+.leg .pt .a{font-size:12.5px;color:var(--ink-2);margin-top:3px}
+.leg .arrow{flex:0 0 60px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink-3)}
+.leg .arrow .d{font:600 11px var(--mono)}
+.leg .arrow .line{width:100%;height:1px;background:var(--line-2);margin:5px 0;position:relative}
+.leg .arrow .line::after{content:"";position:absolute;right:0;top:-3px;border-left:6px solid var(--line-2);border-top:3.5px solid transparent;border-bottom:3.5px solid transparent}
+
+/* status rail */
+.rail{display:flex;gap:2px;flex-wrap:wrap;margin-top:10px}
+.rail .s{flex:1 1 0;min-width:76px;background:var(--surface-2);border:1px solid var(--line);border-radius:3px;padding:5px 7px}
+.rail .s.done{background:var(--accent-soft);border-color:var(--accent)}
+.rail .s.now{background:var(--accent);border-color:var(--accent)}
+.rail .s.now .n,.rail .s.now .t{color:#fff}
+.rail .s.dead{background:var(--stop-soft);border-color:var(--stop)}
+.rail .s.dead .n{color:var(--stop)}
+.rail .n{font-size:10px;font-weight:700;line-height:1.25}
+.rail .t{font:10px var(--mono);color:var(--ink-3)}
+
+/* requirement flags */
+.flags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.flag{font-size:11px;font-weight:650;padding:3px 7px;border-radius:3px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink-2)}
+.flag.on{background:var(--info-soft);color:var(--info);border-color:var(--info)}
+.flag.alert{background:var(--stop-soft);color:var(--stop);border-color:var(--stop)}
+
+.alertbox{border:1px solid var(--stop);background:var(--stop-soft);color:var(--stop);border-radius:var(--r2);padding:10px 13px;margin-bottom:12px}
+.alertbox b{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.alertbox ul{margin:0;padding-left:16px;font-size:12.5px}
+
+.tabs{display:flex;gap:1px;border-bottom:1px solid var(--line);overflow:auto;background:var(--surface);border-radius:var(--r2) var(--r2) 0 0;padding:0 6px}
+.tab{background:none;border:0;padding:9px 12px;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;font-weight:550;white-space:nowrap;font-size:12.5px}
+.tab[aria-selected="true"]{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+
+dl.kv{display:grid;grid-template-columns:172px 1fr;gap:6px 14px;margin:0}
+dl.kv dt{font-size:11px;color:var(--ink-3);font-weight:650}
+dl.kv dd{margin:0}
+@media(max-width:640px){dl.kv{grid-template-columns:1fr;gap:1px}dl.kv dd{margin-bottom:7px}}
+
+ul.feed{list-style:none;margin:0;padding:0}
+ul.feed li{padding:8px 0 8px 13px;border-left:2px solid var(--line-2);position:relative}
+ul.feed li::before{content:"";position:absolute;left:-4px;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent-2)}
+ul.feed .m{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+ul.feed .s{font-weight:600;margin-top:2px}
+ul.feed .d{margin-top:2px;white-space:pre-wrap;color:var(--ink-2)}
+
+.inline{background:var(--surface-2);border:1px dashed var(--line-2);border-radius:var(--r2);padding:11px;margin-top:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1 1 140px}
+.empty{padding:34px 16px;text-align:center;color:var(--ink-2)}
+.empty b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+
+/* wizard */
+.steps{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;background:var(--surface);margin-bottom:12px}
+.steps .st{flex:1;padding:9px 12px;border-right:1px solid var(--line);font-size:11.5px;color:var(--ink-3);display:flex;gap:8px;align-items:center}
+.steps .st:last-child{border-right:0}
+.steps .st .n{width:20px;height:20px;flex:0 0 20px;border-radius:50%;background:var(--surface-3);color:var(--ink-2);display:grid;place-items:center;font:700 10.5px var(--mono)}
+.steps .st.done{color:var(--ink-2)}
+.steps .st.done .n{background:var(--ok);color:#fff}
+.steps .st.now{color:var(--ink);font-weight:650;background:var(--accent-soft)}
+.steps .st.now .n{background:var(--accent);color:#fff}
+
+.quote{border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.quote table{font-size:12.5px}
+.quote tfoot td{font-weight:700;background:var(--surface-2);border-top:2px solid var(--line-2)}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:6px;align-items:center}
+.toast{background:var(--nav);color:#fff;padding:8px 14px;border-radius:18px;font-size:12.5px;box-shadow:var(--shadow)}
+.toast.ok{background:var(--ok)} .toast.bad{background:var(--stop)}
+
+.scrim{position:fixed;inset:0;background:rgba(10,16,22,.55);z-index:60}
+.modal{position:fixed;z-index:61;top:50%;left:50%;transform:translate(-50%,-50%);width:min(580px,94vw);max-height:88vh;overflow:auto;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--shadow)}
+.modal .mh{padding:12px 15px;border-bottom:1px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:10px}
+.modal .mb{padding:15px}
+.modal .mf{padding:11px 15px;border-top:1px solid var(--line);background:var(--surface);display:flex;gap:8px;justify-content:flex-end}
+
+.demo{background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn);border-radius:var(--r);padding:6px 11px;font-size:11.5px;font-weight:650;margin-bottom:12px}
+.deny{max-width:560px;margin:60px auto;text-align:center}
+
+.sidetoggle{display:none}
+@media(max-width:920px){
+  .side{position:fixed;z-index:70;transform:translateX(-100%);transition:transform .16s}
+  .side.open{transform:none}
+  .sidetoggle{display:inline-flex}
+  .page{padding:12px}
+  .steps{display:none}
+}
+@media print{.side,.bar,.mf,.inline{display:none}.page{padding:0}}
+</style>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Main navigation">
+    <div class="logo"><div class="sq" aria-hidden="true">PT</div>
+      <div><b>Ambulance &amp; PTS</b><small>Management System</small></div></div>
+    <div class="menu" id="menu"></div>
+    <div class="sfoot">Demonstration build · Bookings module<br>Branding is placeholder</div>
+  </nav>
+  <div class="body">
+    <header class="bar">
+      <button class="btn g sidetoggle" id="sidetoggle" aria-label="Show navigation">☰</button>
+      <div class="search"><input id="gsearch" type="search" placeholder="Search bookings, patients, references…" aria-label="Search bookings"></div>
+      <div class="spacer"></div>
+      <button class="bell" id="bell" aria-label="Bookings needing attention">🔔<b id="bellcount">0</b></button>
+      <div class="role"><span class="micro">Role</span> <select id="rolepick" aria-label="Signed-in role"></select></div>
+      <button class="btn g" id="theme" aria-label="Switch theme" title="Switch theme">◐</button>
+    </header>
+    <div class="page" id="page"></div>
+  </div>
+</div>
+<div id="modalhost"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   BOOKINGS — journey booking, pricing and lifecycle
+   Ambulance & Patient Transport Management System
+   Consumes: customer accounts + rate cards from the CRM module
+   Hands off to: CAD and Dispatch
+   ============================================================ */
+
+const KEY="pts:bookings:v1", CRM_KEY="pts:crm:v1";
+
+/* ---------- reference data ---------- */
+const BOOKING_TYPES=["Non-emergency patient transport","Hospital appointment","Hospital discharge",
+  "Inter-hospital transfer","Care-home transfer","Planned ambulance transport","Bariatric transport",
+  "Wheelchair transport","Stretcher transport","Event medical cover","Private ambulance booking"];
+
+const JOURNEY_SHAPES=["One-way","Return","Multi-destination"];
+const PRIORITIES=["Routine","Standard","Urgent","Time-critical"];
+const VEHICLE_TYPES=["PTS car","Wheelchair-accessible vehicle","Stretcher ambulance","A&E-equipped ambulance","Bariatric ambulance","Event response vehicle"];
+const CREW_GRADES=["Driver only","Ambulance Care Assistant","Emergency Medical Technician","Paramedic","Nurse escort"];
+const MOBILITY=["Walking, unaided","Walking, needs assistance","Walking frame","Own wheelchair","Our wheelchair","Carry chair","Stretcher","Bariatric stretcher"];
+const CLINICAL_NEEDS=["None","Oxygen","Suction","Observation monitoring","Paramedic escort","Nurse escort","Syringe driver","Catheter or drain"];
+const IPC=["None","Contact precautions","Droplet precautions","Airborne precautions","MRSA","C. difficile","Deep clean required after journey"];
+
+const FLOW=["Draft","Awaiting Approval","Confirmed","Unallocated","Allocated","Dispatched","Crew Mobile",
+  "At Collection","Patient On Board","At Destination","Handover in Progress","Completed"];
+const OUTCOMES=["Cancelled","Aborted","No Access","Patient Not Ready","Patient Refused Transport"];
+
+const CANCEL_REASONS=["Patient cancelled","Customer cancelled","Hospital cancelled the appointment",
+  "Transport no longer required","Patient admitted","Patient deceased","Duplicate booking","Booked in error",
+  "No capacity — unable to cover","Vehicle breakdown","Adverse weather or major incident"];
+const ABORT_REASONS=["Patient not fit to travel","Clinical escalation — 999 called","Patient unsafe to transport",
+  "Equipment failure","Crew unable to gain access","Receiving unit refused handover","Patient declined at the door"];
+
+const ROLES=[
+  {id:"super",   name:"Super Administrator",         p:["view","create","edit","approve","price","cancel","status","audit"]},
+  {id:"director",name:"Company Director",            p:["view","create","edit","approve","price","cancel","status","audit"]},
+  {id:"ops",     name:"Operations Manager",          p:["view","create","edit","approve","price","cancel","status","audit"]},
+  {id:"dispatch",name:"Control Room Dispatcher",     p:["view","create","edit","cancel","status"]},
+  {id:"clinical",name:"Clinical Lead",               p:["view","audit"]},
+  {id:"para",    name:"Paramedic",                   p:["view.today"]},
+  {id:"emt",     name:"Emergency Medical Technician",p:["view.today"]},
+  {id:"aca",     name:"Ambulance Care Assistant",    p:["view.today"]},
+  {id:"driver",  name:"Driver",                      p:["view.today"]},
+  {id:"event",   name:"Event Medical Staff",         p:["view.today"]},
+  {id:"hr",      name:"HR & Compliance Officer",     p:[]},
+  {id:"fleet",   name:"Fleet Manager",               p:[]},
+  {id:"finance", name:"Finance Officer",             p:["view","price","audit"]},
+  {id:"qa",      name:"Quality Assurance Officer",   p:["view","audit"]},
+  {id:"portal",  name:"Commissioner / Customer Portal User", p:["view.own","request"], ownCustomer:"CUS-0001"}
+];
+
+const MENU=[
+  {g:"Operations"},
+  {id:"dashboard",label:"Dashboard",stub:1},
+  {id:"crm",label:"CRM",stub:1},
+  {id:"patients",label:"Patients",live:1},
+  {id:"bookings",label:"Bookings",live:1},
+  {id:"newbooking",label:"New booking",live:1,indent:1},
+  {id:"recurring",label:"Recurring & bulk",live:1,indent:1},
+  {id:"cad",label:"CAD and Dispatch",stub:1},
+  {id:"map",label:"Live Map",stub:1},
+  {id:"epcr",label:"ePCR",stub:1},
+  {id:"events",label:"Events",stub:1},
+  {g:"Workforce"},
+  {id:"staff",label:"Staff",stub:1},{id:"rota",label:"Rota",stub:1},{id:"training",label:"Training",stub:1},
+  {g:"Assets"},
+  {id:"fleet",label:"Fleet",stub:1},{id:"equipment",label:"Equipment",stub:1},{id:"stock",label:"Stock and Medicines",stub:1},
+  {g:"Governance"},
+  {id:"incidents",label:"Incidents",stub:1},{id:"safeg",label:"Safeguarding",stub:1},
+  {id:"qa",label:"Quality Assurance",stub:1},{id:"policies",label:"Policies",stub:1},
+  {g:"Business"},
+  {id:"finance",label:"Finance",stub:1},{id:"reports",label:"Reports",stub:1},
+  {id:"actions",label:"Action Centre",live:1},{id:"audit",label:"Audit log",live:1},{id:"settings",label:"Settings",stub:1}
+];
+
+/* ---------- state ---------- */
+let S={
+  bookings:[], patients:[], customers:[], seq:0,
+  view:"bookings", roleId:"ops", selected:null, tab:"journey",
+  sort:{k:"collect",d:"asc"},
+  f:{q:"",from:"",to:"",status:"live",type:"",customer:"",priority:"",ready:""},
+  draft:null, step:1, crmLinked:false
+};
+let storageOK=true;
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const role=()=>ROLES.find(r=>r.id===S.roleId)||ROLES[0];
+const can=p=>role().p.includes(p);
+const anyAccess=()=>role().p.length>0;
+const crewOnly=()=>can("view.today")&&!can("view");
+const portalOnly=()=>can("view.own");
+
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const shift=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
+function ukd(iso){if(!iso)return "—";const d=new Date(iso.length<=10?iso+"T00:00:00":iso);if(isNaN(d))return "—";
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();}
+function uks(iso){if(!iso)return "—";const d=new Date(iso);if(isNaN(d))return "—";
+  return ukd(iso)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+const dayName=iso=>["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date(iso+"T00:00:00").getDay()];
+function days(iso){if(!iso)return null;return Math.round((new Date(iso+"T00:00:00")-new Date(todayISO()+"T00:00:00"))/864e5);}
+const gbp=n=>"£"+Number(n||0).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2});
+const when=b=>b.collectDate+"T"+(b.collectTime||"00:00");
+const isLive=b=>FLOW.includes(b.status)&&b.status!=="Completed";
+const isClosed=b=>b.status==="Completed"||OUTCOMES.includes(b.status);
+const inProgress=b=>["Dispatched","Crew Mobile","At Collection","Patient On Board","At Destination","Handover in Progress"].includes(b.status);
+
+function toast(m,k){const t=document.createElement("div");t.className="toast"+(k?" "+k:"");t.textContent=m;
+  $("#toasts").appendChild(t);setTimeout(()=>{t.style.transition="opacity .3s";t.style.opacity=0;setTimeout(()=>t.remove(),320);},2800);}
+
+/* ---------- persistence ---------- */
+async function save(){
+  try{ if(window.storage&&storageOK) await window.storage.set(KEY,JSON.stringify({bookings:S.bookings,patients:S.patients,customers:S.customers,seq:S.seq})); }
+  catch(e){ if(storageOK){storageOK=false;toast("Changes are held for this session only.","bad");} }
+}
+async function load(){
+  try{ if(!window.storage){storageOK=false;return false;}
+    const r=await window.storage.get(KEY);
+    if(r&&r.value){const d=JSON.parse(r.value);
+      if(d&&Array.isArray(d.bookings)&&d.bookings.length){
+        S.bookings=d.bookings;S.patients=d.patients||[];S.customers=d.customers||[];S.seq=d.seq||d.bookings.length;return true;}}
+  }catch(e){}
+  return false;
+}
+/* try to pick up live customer accounts written by the CRM module */
+async function loadCRM(){
+  try{
+    if(!window.storage) return false;
+    const r=await window.storage.get(CRM_KEY);
+    if(r&&r.value){
+      const d=JSON.parse(r.value);
+      if(d&&Array.isArray(d.customers)&&d.customers.length){
+        S.customers=d.customers.map(c=>({ref:c.ref,name:c.name,type:c.type,status:c.status,
+          creditHold:!!c.creditHold,rates:c.rates||[],contract:c.contract||{},
+          balanceOverdue:c.balanceOverdue||0}));
+        return true;
+      }
+    }
+  }catch(e){}
+  return false;
+}
+
+/* ---------- audit ---------- */
+function log(b,action,detail){
+  b.audit.push({id:uid(),at:new Date().toISOString(),by:role().name,action,detail:detail||""});
+  b.updatedAt=new Date().toISOString();
+}
+const cust=ref=>S.customers.find(c=>c.ref===ref);
+const pat=id=>S.patients.find(p=>p.id===id);
+
+/* ============================================================
+   PRICING — reads the agreed rate card from the CRM account
+   ============================================================ */
+function rate(c,item){ const r=(c&&c.rates||[]).find(x=>x.item===item); return r?r.amount:null; }
+
+function baseFareItem(b){
+  const m=b.mobility||"";
+  if(m.indexOf("Stretcher")===0||m==="Bariatric stretcher") return "Base fare — stretcher";
+  if(m.indexOf("wheelchair")>-1||m==="Carry chair") return "Base fare — wheelchair";
+  return "Base fare — ambulance care";
+}
+function isOutOfHours(b){
+  if(!b.collectDate||!b.collectTime) return false;
+  const h=parseInt(b.collectTime.slice(0,2),10);
+  const d=new Date(b.collectDate+"T00:00:00").getDay();
+  return h<7||h>=19||d===0||d===6;
+}
+function price(b){
+  const c=cust(b.customerRef);
+  const lines=[], notes=[];
+  if(!c) return {lines,total:0,notes:["No customer account linked — journey cannot be priced."],priceable:false};
+  if(!c.rates||!c.rates.length) return {lines,total:0,notes:["No agreed rate card on the customer account."],priceable:false};
+
+  const item=baseFareItem(b);
+  const base=rate(c,item);
+  if(base!=null) lines.push({label:item,detail:"1 journey",amount:base});
+  else notes.push("No agreed base fare for "+item.toLowerCase()+".");
+
+  const perMile=rate(c,"Per mile");
+  if(perMile!=null&&b.mileage>0) lines.push({label:"Mileage",detail:b.mileage+" miles @ "+gbp(perMile),amount:perMile*b.mileage});
+  else if(b.mileage>0) notes.push("No agreed mileage rate.");
+
+  const waitH=(b.waitingMins||0)/60;
+  const perHour=rate(c,"Waiting time per hour");
+  if(perHour!=null&&waitH>0) lines.push({label:"Waiting time",detail:b.waitingMins+" minutes @ "+gbp(perHour)+"/hr",amount:perHour*waitH});
+
+  if(b.mobility==="Bariatric stretcher"||b.type==="Bariatric transport"){
+    const bar=rate(c,"Bariatric surcharge");
+    if(bar!=null) lines.push({label:"Bariatric surcharge",detail:"Additional crew and equipment",amount:bar});
+  }
+  if(b.shape==="Return"){
+    const rl=lines.filter(l=>l.label!=="Waiting time").reduce((s,l)=>s+l.amount,0);
+    lines.push({label:"Return leg",detail:"Second journey at the same rates",amount:rl});
+  }
+
+  let sub=lines.reduce((s,l)=>s+l.amount,0);
+  const ooh=rate(c,"Out-of-hours uplift");
+  if(isOutOfHours(b)&&ooh!=null){ lines.push({label:"Out-of-hours uplift",detail:ooh+"% — collection outside 07:00–19:00 or at a weekend",amount:sub*ooh/100}); }
+  const bh=rate(c,"Bank holiday uplift");
+  if(b.bankHoliday&&bh!=null){ lines.push({label:"Bank holiday uplift",detail:bh+"%",amount:sub*bh/100}); }
+
+  if(b.status==="Cancelled"&&b.lateCancel){
+    const lc=rate(c,"Late cancellation");
+    if(lc!=null) return {lines:[{label:"Late cancellation charge",detail:"Cancelled inside 24 hours of collection",amount:lc}],
+      total:lc,notes:["Journey charges withdrawn; cancellation charge applied under the agreed rate card."],priceable:true};
+  }
+  const total=lines.reduce((s,l)=>s+l.amount,0);
+  return {lines,total:Math.round(total*100)/100,notes,priceable:lines.length>0};
+}
+
+/* ============================================================
+   SIGNATURE — dispatch readiness
+   Can this booking safely be handed to the control room?
+   ============================================================ */
+function readiness(b){
+  const blocks=[],checks=[];
+  const c=cust(b.customerRef), p=pat(b.patientId);
+
+  if(c){
+    if(c.creditHold) blocks.push("Customer is on credit hold in the CRM — booking may not be released.");
+    if(c.status==="Archived"||c.status==="Inactive") blocks.push("Customer account is "+c.status.toLowerCase()+".");
+    if(c.contract&&c.contract.end&&days(c.contract.end)<0) blocks.push("Customer contract expired on "+ukd(c.contract.end)+".");
+    if(c.contract&&c.contract.poRequired&&!b.poNumber&&!(c.contract.standingPO))
+      blocks.push("Purchase order required by this customer — none recorded on the booking.");
+  } else blocks.push("No customer account linked.");
+
+  if(!b.patientId&&b.type!=="Event medical cover") blocks.push("No patient linked to the journey.");
+  if(!b.fromAddr||!b.toAddr) blocks.push("Collection or destination address is incomplete.");
+  if(!b.collectDate||!b.collectTime) blocks.push("Collection date and time not set.");
+  if(!b.vehicleType) blocks.push("Required vehicle type not specified.");
+  if(!b.crewGrade) blocks.push("Required crew grade not specified.");
+  const q=price(b);
+  if(!q.priceable) blocks.push("Journey cannot be priced — check the customer rate card.");
+
+  if(b.collectDate&&b.collectTime&&new Date(when(b))<new Date()&&["Draft","Awaiting Approval","Confirmed"].includes(b.status))
+    checks.push("Collection time is in the past.");
+  if(p){
+    if(p.alerts.some(a=>a.k==="Safeguarding")&&!b.riskAssessed) checks.push("Patient carries a safeguarding alert and no risk assessment is recorded.");
+    if(p.alerts.some(a=>a.k==="Behavioural")&&!b.riskAssessed) checks.push("Patient carries a behavioural alert and no risk assessment is recorded.");
+    if(p.alerts.some(a=>a.k==="Infection")&&(!b.ipc||b.ipc==="None")) checks.push("Patient has an infection-control alert but no precautions recorded on the booking.");
+    if(p.mobility&&b.mobility&&p.mobility!==b.mobility) checks.push("Booked mobility ("+b.mobility+") differs from the patient record ("+p.mobility+").");
+  }
+  const need=b.clinical||"None";
+  const gi=CREW_GRADES.indexOf(b.crewGrade||"");
+  if((need==="Paramedic escort")&&gi<CREW_GRADES.indexOf("Paramedic")) blocks.push("Journey needs a paramedic escort — booked crew grade is lower.");
+  if((need==="Nurse escort")&&b.crewGrade!=="Nurse escort") blocks.push("Journey needs a nurse escort — booked crew grade does not match.");
+  if((need==="Oxygen"||need==="Suction"||need==="Observation monitoring")&&gi<CREW_GRADES.indexOf("Ambulance Care Assistant"))
+    blocks.push("Clinical need of "+need.toLowerCase()+" requires at least an Ambulance Care Assistant.");
+  if(b.mobility==="Stretcher"&&["PTS car","Wheelchair-accessible vehicle"].includes(b.vehicleType))
+    blocks.push("Stretcher patient booked onto a vehicle that cannot carry a stretcher.");
+  if(b.mobility==="Bariatric stretcher"&&b.vehicleType!=="Bariatric ambulance")
+    blocks.push("Bariatric patient must be booked onto a bariatric ambulance.");
+
+  if(b.shape==="Return"&&!b.returnTime) checks.push("Return journey has no return time — dispatch cannot plan the second leg.");
+  if(!b.mileage) checks.push("No mileage recorded — the price may be understated.");
+  if(b.type==="Bariatric transport"&&!b.instructions) checks.push("Bariatric journey with no access or handling instructions.");
+  if(b.staffCount<2&&(b.mobility==="Stretcher"||b.mobility==="Bariatric stretcher")) checks.push("Stretcher journeys normally need at least two crew.");
+
+  const level=blocks.length?"stop":checks.length?"warn":"ok";
+  return {level,blocks,checks,
+    verdict:level==="stop"?"Not ready for dispatch":level==="warn"?"Ready with checks":"Ready for dispatch"};
+}
+const readyBadge=b=>{const r=readiness(b);
+  return '<span class="bdg b-'+(r.level==="ok"?"ok":r.level==="warn"?"warn":"stop")+'">'+esc(r.verdict)+'</span>';};
+
+/* ---------- creation ---------- */
+function nextRef(){S.seq+=1;return "JOB-"+String(S.seq).padStart(5,"0");}
+function blank(){
+  return {id:uid(),ref:"",customerRef:"",patientId:"",type:"Non-emergency patient transport",shape:"One-way",
+    priority:"Standard",fromAddr:"",fromNotes:"",toAddr:"",toNotes:"",
+    collectDate:shift(1),collectTime:"09:00",appointmentTime:"",returnTime:"",readyTime:"",
+    vehicleType:"",crewGrade:"",staffCount:2,mobility:"",clinical:"None",escort:"",ipc:"None",
+    riskAssessed:false,riskNotes:"",poNumber:"",mileage:0,waitingMins:0,bankHoliday:false,
+    priceOverride:null,instructions:"",internalNotes:"",stops:[],attachments:[],
+    status:"Draft",statusHistory:{},cancelReason:"",lateCancel:false,outcomeNotes:"",
+    recurringId:"",audit:[],createdAt:"",updatedAt:""};
+}
+function commit(d){
+  const b=Object.assign(blank(),d);
+  const now=new Date().toISOString();
+  b.id=uid(); b.ref=nextRef(); b.createdAt=now; b.updatedAt=now;
+  b.statusHistory={}; b.statusHistory[b.status]=now;
+  b.audit=[{id:uid(),at:now,by:role().name,action:"Booking created",
+    detail:b.type+" · "+ukd(b.collectDate)+" "+b.collectTime}];
+  return b;
+}
+function setStatus(b,st,detail){
+  if(b.status===st) return;
+  const from=b.status; b.status=st; b.statusHistory[st]=new Date().toISOString();
+  log(b,"Status changed",from+" → "+st+(detail?" · "+detail:""));
+}
+
+/* ============================================================
+   DEMO DATA
+   ============================================================ */
+const FALLBACK_CUSTOMERS=[
+  ["CUS-0001","Meadowvale Integrated Care Board","NHS organisation","Active",false,true,"PO-24/25-4471",240,0],
+  ["CUS-0002","St Aldrich General Hospital","Hospital","Active",false,true,"",96,2140],
+  ["CUS-0003","Northshire County Council","Local authority","Active",false,true,"PO-NCC-8820",410,0],
+  ["CUS-0004","Hollow Lane Care Home","Care home","Active",false,false,"",150,0],
+  ["CUS-0005","Brackenfield Nursing Group","Care home","Active",true,false,"",-18,3420],
+  ["CUS-0007","Bram Showground Events Ltd","Event organiser","Active",false,false,"",75,0],
+  ["CUS-0009","Mrs E. Fairweather","Private customer","Active",false,false,"",0,0],
+  ["CUS-0011","Sentinel Health Insurance plc","Insurance company","Active",false,true,"PO-SEN-2261",28,0],
+  ["CUS-0012","Lindhurst Private Hospital","Hospital","Active",false,false,"",190,0]
+];
+function seedCustomers(){
+  S.customers=FALLBACK_CUSTOMERS.map(r=>{
+    const [ref,name,type,status,hold,poReq,standing,endOff,overdue]=r;
+    const mult=type==="Private customer"?1.25:1;
+    const rates=[
+      {item:"Base fare — wheelchair",unit:"per journey",amount:Math.round(46*mult*100)/100},
+      {item:"Base fare — stretcher",unit:"per journey",amount:Math.round(92*mult*100)/100},
+      {item:"Base fare — ambulance care",unit:"per journey",amount:Math.round(58*mult*100)/100},
+      {item:"Per mile",unit:"per mile",amount:Math.round(2.35*mult*100)/100},
+      {item:"Waiting time per hour",unit:"per hour",amount:Math.round(38*mult*100)/100},
+      {item:"Out-of-hours uplift",unit:"%",amount:25},
+      {item:"Bank holiday uplift",unit:"%",amount:50},
+      {item:"Late cancellation",unit:"per journey",amount:Math.round(30*mult*100)/100},
+      {item:"Bariatric surcharge",unit:"per journey",amount:120}
+    ];
+    return {ref,name,type,status,creditHold:hold,rates,balanceOverdue:overdue,
+      contract:{end:endOff?shift(endOff):"",poRequired:poReq,standingPO:standing,terms:"30 days"}};
+  });
+}
+function seedPatients(){
+  const rows=[
+    ["Fairweather","Elsie","1938-04-12","NHS 431 557 9012","14 Larkspur Close, Testford TF2 6RJ","07700 900431",
+      "Own wheelchair",[["Mobility","Uses own wheelchair; cannot self-transfer"],["Allergy","Penicillin"]],"Renal unit, St Aldrich"],
+    ["Callow","Harold","1946-11-02","NHS 522 118 4471","3 Beckett Row, Testford TF1 4NN","07700 900812",
+      "Walking, needs assistance",[["Clinical","Dialysis three times weekly — collect promptly after treatment"]],"Renal unit, St Aldrich"],
+    ["Duku","Amara","1955-02-27","NHS 610 445 2280","Flat 9, Hollow Lane Care Home, Testford TF3 8QP","01632 960771",
+      "Stretcher",[["Clinical","Palliative — oxygen in situ"],["Mobility","Full hoist transfer"]],"Greenfell Hospice"],
+    ["Nkemelu","Joseph","1962-07-19","NHS 700 231 8846","22 Rowan Avenue, Testford TF5 2AA","07700 900204",
+      "Bariatric stretcher",[["Mobility","Bariatric — 214 kg, four-person transfer"],["Access","Ground floor, narrow doorway"]],"Lindhurst Private Hospital"],
+    ["Whitcombe","Doris","1933-09-08","NHS 388 902 1147","Brackenfield Lodge, Testford TF4 7BB","01632 960512",
+      "Carry chair",[["Behavioural","Becomes distressed in confined spaces — allow extra time"],["Clinical","Living with dementia"]],"Memory clinic"],
+    ["Ferris","Malcolm","1971-01-30","NHS 245 667 3390","8 Quarry Bank, Testford TF6 1HD","07700 900118",
+      "Walking, unaided",[["Infection","MRSA colonised — contact precautions"]],"Orthopaedic outpatients"],
+    ["Sandhu","Priya","1988-06-14","NHS 902 334 5518","51 Millgate, Testford TF2 3LP","07700 900977",
+      "Own wheelchair",[["Communication","Requires Punjabi interpreter"]],"Antenatal clinic"],
+    ["Okonjo","Grace","1949-12-01","NHS 155 780 2264","17 Chandler Street, Testford TF1 9WE","07700 900303",
+      "Walking frame",[["Safeguarding","Adult safeguarding alert — do not leave unattended at home"]],"Cardiology"],
+    ["Traynor","Bill","1940-03-22","NHS 447 019 6631","2 Foundry Mews, Testford TF7 5GG","07700 900556",
+      "Stretcher",[["Clinical","Oxygen 2 L/min via nasal cannula"],["Allergy","Latex"]],"Respiratory ward"],
+    ["Ashworth","Nina","1994-08-05","NHS 833 226 4109","Room 4, Ridgeway House, Testford TF3 2XX","07700 900640",
+      "Walking, needs assistance",[["Behavioural","May decline transport — capacity assessment on file"]],"Community mental health"]
+  ];
+  S.patients=rows.map(r=>({id:uid(),surname:r[0],forename:r[1],dob:r[2],nhs:r[3],address:r[4],phone:r[5],
+    mobility:r[6],alerts:r[7].map(a=>({k:a[0],t:a[1]})),usualDestination:r[8]}));
+}
+function seedBookings(){
+  S.bookings=[];S.seq=0;
+  const P=S.patients;
+  const rows=[
+    // custRef, patientIdx, type, shape, date, time, from, to, vehicle, crew, mobility, clinical, ipc, mileage, wait, status, priority, po
+    ["CUS-0002",0,"Hospital appointment","Return",shift(0),"08:15","14 Larkspur Close, Testford TF2 6RJ","Renal Unit, St Aldrich General Hospital","Wheelchair-accessible vehicle","Ambulance Care Assistant","Own wheelchair","None","None",9,45,"Patient On Board","Standard",""],
+    ["CUS-0002",1,"Hospital appointment","Return",shift(0),"07:30","3 Beckett Row, Testford TF1 4NN","Renal Unit, St Aldrich General Hospital","PTS car","Driver only","Walking, needs assistance","None","None",6,0,"Completed","Standard",""],
+    ["CUS-0001",2,"Inter-hospital transfer","One-way",shift(0),"11:00","Hollow Lane Care Home, Testford TF3 8QP","Greenfell Hospice, Testford","Stretcher ambulance","Emergency Medical Technician","Stretcher","Oxygen","None",14,0,"Allocated","Urgent","PO-24/25-4471"],
+    ["CUS-0012",3,"Bariatric transport","One-way",shift(0),"14:00","22 Rowan Avenue, Testford TF5 2AA","Lindhurst Private Hospital","Bariatric ambulance","Emergency Medical Technician","Bariatric stretcher","None","None",11,0,"Confirmed","Standard",""],
+    ["CUS-0005",4,"Care-home transfer","Return",shift(1),"09:45","Brackenfield Lodge, Testford TF4 7BB","Memory Clinic, St Aldrich","Wheelchair-accessible vehicle","Ambulance Care Assistant","Carry chair","None","None",7,30,"Draft","Routine",""],
+    ["CUS-0002",5,"Hospital appointment","Return",shift(1),"13:20","8 Quarry Bank, Testford TF6 1HD","Orthopaedic Outpatients, St Aldrich","PTS car","Ambulance Care Assistant","Walking, unaided","None","Contact precautions",5,20,"Unallocated","Standard",""],
+    ["CUS-0001",6,"Non-emergency patient transport","Return",shift(1),"10:00","51 Millgate, Testford TF2 3LP","Antenatal Clinic, St Aldrich","Wheelchair-accessible vehicle","Ambulance Care Assistant","Own wheelchair","None","None",8,25,"Confirmed","Standard","PO-24/25-4471"],
+    ["CUS-0003",7,"Hospital discharge","One-way",shift(2),"16:30","Cardiology Ward 12, St Aldrich","17 Chandler Street, Testford TF1 9WE","Wheelchair-accessible vehicle","Ambulance Care Assistant","Walking frame","None","None",6,0,"Confirmed","Standard","PO-NCC-8820"],
+    ["CUS-0011",8,"Planned ambulance transport","One-way",shift(2),"06:40","2 Foundry Mews, Testford TF7 5GG","Respiratory Ward, Lindhurst Private Hospital","Stretcher ambulance","Paramedic","Stretcher","Paramedic escort","None",22,0,"Awaiting Approval","Urgent",""],
+    ["CUS-0003",9,"Non-emergency patient transport","Return",shift(3),"11:15","Ridgeway House, Testford TF3 2XX","Community Mental Health Team, Testford","PTS car","Ambulance Care Assistant","Walking, needs assistance","None","None",4,40,"Confirmed","Routine","PO-NCC-8820"],
+    ["CUS-0009",0,"Private ambulance booking","Return",shift(4),"09:00","14 Larkspur Close, Testford TF2 6RJ","Lindhurst Private Hospital","Wheelchair-accessible vehicle","Ambulance Care Assistant","Own wheelchair","None","None",12,60,"Confirmed","Routine",""],
+    ["CUS-0002",4,"Hospital appointment","Return",shift(-1),"10:30","Brackenfield Lodge, Testford TF4 7BB","Memory Clinic, St Aldrich","Wheelchair-accessible vehicle","Ambulance Care Assistant","Carry chair","None","None",7,0,"Patient Not Ready","Standard",""],
+    ["CUS-0002",5,"Hospital appointment","One-way",shift(-2),"08:00","8 Quarry Bank, Testford TF6 1HD","Orthopaedic Outpatients, St Aldrich","PTS car","Driver only","Walking, unaided","None","None",5,0,"Cancelled","Routine",""],
+    ["CUS-0001",1,"Hospital appointment","Return",shift(-2),"07:30","3 Beckett Row, Testford TF1 4NN","Renal Unit, St Aldrich General Hospital","PTS car","Driver only","Walking, needs assistance","None","None",6,15,"Completed","Standard","PO-24/25-4471"],
+    ["CUS-0007",null,"Event medical cover","One-way",shift(9),"07:00","Bram Showground, Testford TF8 4EE","On-site medical post","Event response vehicle","Paramedic","Walking, unaided","None","None",18,0,"Confirmed","Standard",""]
+  ];
+  rows.forEach(r=>{
+    const [cref,pi,type,shape,date,time,from,to,veh,crew,mob,clin,ipc,mi,wait,status,pri,po]=r;
+    const b=commit({customerRef:cref,patientId:pi===null?"":P[pi].id,type,shape,collectDate:date,collectTime:time,
+      fromAddr:from,toAddr:to,vehicleType:veh,crewGrade:crew,mobility:mob,clinical:clin,ipc,mileage:mi,waitingMins:wait,
+      priority:pri,poNumber:po,staffCount:mob==="Stretcher"||mob==="Bariatric stretcher"?2:1,
+      appointmentTime:shape==="Return"?"":"",riskAssessed:["Stretcher","Bariatric stretcher","Carry chair"].includes(mob),
+      returnTime:shape==="Return"?"14:00":"",
+      instructions:mob==="Bariatric stretcher"?"Ground floor flat, narrow doorway. Four-person transfer agreed with the family.":"",
+      internalNotes:""});
+    // walk the status history forward so timestamps look real
+    const target=status;
+    const path=OUTCOMES.includes(target)?FLOW.slice(0,FLOW.indexOf("Confirmed")+1):FLOW.slice(0,FLOW.indexOf(target)+1);
+    const base=new Date(date+"T"+time+":00").getTime()-36e5*20;
+    path.forEach((st,i)=>{ b.status=st; b.statusHistory[st]=new Date(base+i*22*6e4).toISOString(); });
+    if(OUTCOMES.includes(target)){
+      b.status=target; b.statusHistory[target]=new Date(new Date(date+"T"+time+":00").getTime()-18e5).toISOString();
+      b.cancelReason=target==="Cancelled"?"Hospital cancelled the appointment":"Patient not ready on arrival — 15 minute wait exceeded";
+      b.lateCancel=target==="Cancelled";
+      b.outcomeNotes=target==="Cancelled"?"Ward telephoned at 16:40 the previous day.":"Crew waited 15 minutes and stood down after speaking to the home.";
+    }
+    b.audit.push({id:uid(),at:b.statusHistory[b.status],by:"System",action:"Status changed",detail:"→ "+b.status});
+    b.updatedAt=b.statusHistory[b.status];
+    S.bookings.push(b);
+  });
+}
+
+/* ---------- filters ---------- */
+function visible(){
+  let list=S.bookings.slice();
+  if(portalOnly()) list=list.filter(b=>b.customerRef===role().ownCustomer);
+  if(crewOnly()) list=list.filter(b=>b.collectDate===todayISO()&&!["Draft","Awaiting Approval"].includes(b.status));
+  const f=S.f,q=f.q.trim().toLowerCase();
+  list=list.filter(b=>{
+    if(f.from&&b.collectDate<f.from) return false;
+    if(f.to&&b.collectDate>f.to) return false;
+    if(f.type&&b.type!==f.type) return false;
+    if(f.customer&&b.customerRef!==f.customer) return false;
+    if(f.priority&&b.priority!==f.priority) return false;
+    if(f.status==="live"&&isClosed(b)) return false;
+    else if(f.status==="progress"&&!inProgress(b)) return false;
+    else if(f.status==="unallocated"&&b.status!=="Unallocated") return false;
+    else if(f.status==="closed"&&!isClosed(b)) return false;
+    else if(f.status&&!["live","progress","unallocated","closed",""].includes(f.status)&&b.status!==f.status) return false;
+    if(f.ready&&readiness(b).level!==f.ready) return false;
+    if(q){
+      const p=pat(b.patientId), c=cust(b.customerRef);
+      const hay=[b.ref,b.type,b.fromAddr,b.toAddr,b.poNumber,c?c.name:"",p?p.forename+" "+p.surname+" "+p.nhs:""].join(" ").toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const k=S.sort.k,d=S.sort.d==="asc"?1:-1;
+  list.sort((a,b)=>{
+    let x,y;
+    if(k==="collect"){x=when(a);y=when(b);}
+    else if(k==="price"){x=price(a).total;y=price(b).total;}
+    else if(k==="customer"){x=(cust(a.customerRef)||{}).name||"";y=(cust(b.customerRef)||{}).name||"";}
+    else if(k==="patient"){const pa=pat(a.patientId),pb=pat(b.patientId);x=pa?pa.surname:"";y=pb?pb.surname:"";}
+    else {x=String(a[k]||"").toLowerCase();y=String(b[k]||"").toLowerCase();}
+    return x<y?-d:x>y?d:0;
+  });
+  return list;
+}
+function attention(){ return S.bookings.filter(b=>!isClosed(b)&&readiness(b).level==="stop").length; }
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderMenu(){
+  $("#menu").innerHTML=MENU.map(m=>{
+    if(m.g) return '<div class="grp">'+esc(m.g)+'</div>';
+    const cur=S.view===m.id||(m.id==="bookings"&&S.view==="booking");
+    const badge=m.id==="bookings"?'<span class="pill">'+S.bookings.filter(b=>!isClosed(b)).length+'</span>'
+      :m.live?"":'<span class="planned">planned</span>';
+    return '<button class="mi'+(m.live?"":" stub")+'" data-go="'+m.id+'"'+(cur?' aria-current="page"':'')+
+      (m.indent?' style="padding-left:22px"':'')+'>'+esc(m.label)+badge+'</button>';
+  }).join("");
+}
+function render(){
+  renderMenu();
+  $("#bellcount").textContent=attention();
+  const p=$("#page");
+  if(!anyAccess()){ p.innerHTML=viewDenied(); return; }
+  if(S.view==="booking"&&S.selected) p.innerHTML=viewBooking();
+  else if(S.view==="bookings") p.innerHTML=viewList();
+  else if(S.view==="newbooking") p.innerHTML=viewWizard();
+  else if(S.view==="recurring") p.innerHTML=viewRecurring();
+  else if(S.view==="patients") p.innerHTML=viewPatients();
+  else if(S.view==="actions") p.innerHTML=viewActions();
+  else if(S.view==="audit") p.innerHTML=viewAudit();
+  else p.innerHTML=viewStub();
+}
+function viewDenied(){
+  return '<div class="deny"><div style="font-size:30px">🔒</div><h1 style="margin:8px 0">No access to Bookings</h1>'+
+    '<p class="muted">The <strong>'+esc(role().name)+'</strong> role does not include journey bookings. '+
+    'Change the role in the top bar to see how access differs.</p></div>';
+}
+function viewStub(){
+  const m=MENU.find(x=>x.id===S.view)||{label:"Module"};
+  return '<div class="card"><div class="b empty"><b>'+esc(m.label)+' is not in this build</b>'+
+    'This delivery covers the Bookings module. Customer accounts and rate cards come from the CRM build; '+
+    'crew and vehicle allocation belongs to CAD and Dispatch.</div></div>';
+}
+const demoNote='<div class="demo">Demonstration build — fictional patients, customers and journeys. '+
+  (S.crmLinked?'Customer accounts loaded live from the CRM module.':'Customer accounts and rate cards mirrored from the CRM module.')+'</div>';
+
+/* ---------- list ---------- */
+function viewList(){
+  const rows=visible(),f=S.f;
+  const th=(k,l,cls)=>'<th'+(cls?' class="'+cls+'"':'')+'><button data-sort="'+k+'">'+l+(S.sort.k===k?(S.sort.d==="asc"?" ▲":" ▼"):"")+'</button></th>';
+  const today=S.bookings.filter(b=>b.collectDate===todayISO());
+  const stats=[
+    {v:today.length,k:"Journeys today",x:ukd(todayISO()),f:{from:todayISO(),to:todayISO(),status:""}},
+    {v:S.bookings.filter(b=>b.status==="Unallocated").length,k:"Unallocated",x:"Waiting for dispatch",cls:"warn",f:{status:"unallocated"}},
+    {v:S.bookings.filter(inProgress).length,k:"In progress",x:"Crew mobile or on board",cls:"live",f:{status:"progress"}},
+    {v:S.bookings.filter(b=>!isClosed(b)&&readiness(b).level==="stop").length,k:"Not ready for dispatch",x:"Blocked",cls:"stop",f:{status:"live",ready:"stop"}},
+    {v:S.bookings.filter(b=>b.status==="Awaiting Approval").length,k:"Awaiting approval",x:"Needs a manager",cls:"warn",f:{status:"Awaiting Approval"}},
+    {v:S.bookings.filter(b=>OUTCOMES.includes(b.status)).length,k:"Cancelled or aborted",x:"All dates",cls:"stop",f:{status:"closed"}}
+  ];
+
+  let lastDay="";
+  const body=rows.map(b=>{
+    const p=pat(b.patientId),c=cust(b.customerRef),q=price(b);
+    let head="";
+    if(b.collectDate!==lastDay&&S.sort.k==="collect"){
+      lastDay=b.collectDate;
+      const rel=days(b.collectDate);
+      head='<tr class="daybreak"><td colspan="'+(can("price")?9:8)+'">'+dayName(b.collectDate)+' '+ukd(b.collectDate)+
+        (rel===0?' · today':rel===1?' · tomorrow':rel===-1?' · yesterday':'')+'</td></tr>';
+    }
+    return head+'<tr tabindex="0" data-open="'+b.id+'">'+
+      '<td class="mono nowrap" style="color:var(--accent-2);font-weight:600">'+esc(b.ref)+
+        '<div class="muted">'+esc(b.priority)+'</div></td>'+
+      '<td class="num nowrap"><strong>'+esc(b.collectTime)+'</strong><div class="muted">'+ukd(b.collectDate)+'</div></td>'+
+      '<td>'+(p?'<strong style="font-weight:640">'+esc(p.forename+" "+p.surname)+'</strong>'+
+        '<div class="muted">'+esc(p.mobility)+'</div>':'<span class="muted">No patient (event cover)</span>')+
+        (p&&p.alerts.length?'<div class="flags">'+p.alerts.slice(0,2).map(a=>'<span class="flag alert">'+esc(a.k)+'</span>').join("")+'</div>':'')+'</td>'+
+      '<td style="min-width:200px">'+esc(b.fromAddr.split(",")[0])+
+        '<div class="muted">→ '+esc(b.toAddr.split(",")[0])+'</div></td>'+
+      '<td class="nowrap">'+esc(b.type)+'<div class="muted">'+esc(b.shape)+' · '+esc(b.vehicleType||"—")+'</div></td>'+
+      '<td class="nowrap">'+esc(c?c.name:"—")+(b.poNumber?'<div class="mono muted">'+esc(b.poNumber)+'</div>':'')+'</td>'+
+      '<td>'+statusBadge(b)+'</td>'+
+      '<td>'+(isClosed(b)?'<span class="muted">—</span>':readyBadge(b))+'</td>'+
+      (can("price")?'<td class="r num">'+(q.priceable?gbp(b.priceOverride!=null?b.priceOverride:q.total):'<span class="muted">—</span>')+'</td>':'')+
+    '</tr>';
+  }).join("");
+
+  return demoNote+
+  '<div class="ph"><h1>'+(crewOnly()?"Today's journeys":"Bookings")+'</h1>'+
+    '<span class="muted">'+rows.length+' shown</span><div class="spacer"></div>'+
+    (can("view")?'<button class="btn" id="export">Export CSV</button><button class="btn" id="printlist">Print run sheet</button>':'')+
+    (can("create")||can("request")?'<button class="btn p" data-go="newbooking">'+(can("request")?"Request transport":"New booking")+'</button>':'')+
+  '</div>'+
+  (crewOnly()?'<div class="card" style="margin-bottom:12px"><div class="b"><p class="hint" style="margin:0">'+
+    'Crew roles see today\'s confirmed journeys only, without commercial detail. Job acceptance and status updates happen in the crew mobile app.</p></div></div>'
+   :'<div class="grid g3" style="margin-bottom:12px">'+stats.map((s,i)=>
+      '<button class="stat '+(s.cls||"")+'" data-stat="'+i+'"><div class="v">'+s.v+'</div><div class="k">'+esc(s.k)+'</div>'+
+      '<div class="x">'+esc(s.x)+'</div></button>').join("")+'</div>')+
+
+  (crewOnly()?'':'<div class="card" style="margin-bottom:12px"><div class="b"><div class="row" style="align-items:flex-end">'+
+    '<label class="f" style="flex:2 1 200px;margin:0"><span>Search</span><input type="search" id="f-q" value="'+esc(f.q)+'" placeholder="Reference, patient, NHS number, address, PO"></label>'+
+    '<label class="f" style="margin:0"><span>From</span><input type="date" id="f-from" value="'+esc(f.from)+'"></label>'+
+    '<label class="f" style="margin:0"><span>To</span><input type="date" id="f-to" value="'+esc(f.to)+'"></label>'+
+    '<label class="f" style="margin:0"><span>Status</span><select id="f-status">'+
+      '<option value="">All</option>'+
+      '<option value="live"'+(f.status==="live"?" selected":"")+'>Live journeys</option>'+
+      '<option value="unallocated"'+(f.status==="unallocated"?" selected":"")+'>Unallocated</option>'+
+      '<option value="progress"'+(f.status==="progress"?" selected":"")+'>In progress</option>'+
+      '<option value="closed"'+(f.status==="closed"?" selected":"")+'>Completed or ended</option>'+
+      FLOW.concat(OUTCOMES).map(s=>'<option value="'+esc(s)+'"'+(f.status===s?" selected":"")+'>'+esc(s)+'</option>').join("")+
+    '</select></label>'+
+    '<label class="f" style="margin:0"><span>Booking type</span><select id="f-type"><option value="">All types</option>'+
+      BOOKING_TYPES.map(t=>'<option'+(f.type===t?' selected':'')+'>'+esc(t)+'</option>').join("")+'</select></label>'+
+      (portalOnly()?'':'<label class="f" style="margin:0"><span>Customer</span><select id="f-customer"><option value="">All customers</option>'+
+      S.customers.map(c=>'<option value="'+esc(c.ref)+'"'+(f.customer===c.ref?' selected':'')+'>'+esc(c.name)+'</option>').join("")+'</select></label>')+
+    '<label class="f" style="margin:0"><span>Dispatch readiness</span><select id="f-ready"><option value="">Any</option>'+
+      '<option value="ok"'+(f.ready==="ok"?" selected":"")+'>Ready</option>'+
+      '<option value="warn"'+(f.ready==="warn"?" selected":"")+'>Ready with checks</option>'+
+      '<option value="stop"'+(f.ready==="stop"?" selected":"")+'>Not ready</option></select></label>'+
+    '<button class="btn g" id="f-clear">Clear</button>'+
+  '</div></div></div>')+
+
+  (rows.length?'<div class="tw"><table><thead><tr>'+
+    th("ref","Job")+th("collect","Collection")+th("patient","Patient")+'<th>Journey</th>'+
+    th("type","Type")+th("customer","Customer")+th("status","Status")+'<th>Dispatch</th>'+
+    (can("price")?th("price","Price","r"):"")+
+  '</tr></thead><tbody>'+body+'</tbody></table></div>'
+  :'<div class="card"><div class="b empty"><b>No journeys match these filters</b>Widen the date range or clear the filters.</div></div>');
+}
+function statusBadge(b){
+  const cls=b.status==="Completed"?"b-ok":OUTCOMES.includes(b.status)?"b-stop":
+    inProgress(b)?"b-live":b.status==="Unallocated"?"b-warn":
+    b.status==="Draft"||b.status==="Awaiting Approval"?"b-grey":"b-info";
+  return '<span class="bdg '+cls+'">'+esc(b.status)+'</span>';
+}
+
+/* ---------- booking record ---------- */
+function viewBooking(){
+  const b=S.bookings.find(x=>x.id===S.selected);
+  if(!b) return viewList();
+  const p=pat(b.patientId),c=cust(b.customerRef),q=price(b),r=readiness(b);
+  const shown=b.priceOverride!=null?b.priceOverride:q.total;
+
+  const railStates=["Confirmed","Unallocated","Allocated","Dispatched","Crew Mobile","At Collection","Patient On Board","At Destination","Handover in Progress","Completed"];
+  const idx=railStates.indexOf(b.status);
+  const rail=railStates.map((st,i)=>{
+    const t=b.statusHistory[st];
+    const cls=OUTCOMES.includes(b.status)&&i>railStates.indexOf("Confirmed")?"":
+      i<idx?"done":i===idx?"now":"";
+    return '<div class="s '+cls+'"><div class="n">'+esc(st)+'</div><div class="t">'+(t?uks(t).slice(11):"—")+'</div></div>';
+  }).join("")+(OUTCOMES.includes(b.status)?'<div class="s dead"><div class="n">'+esc(b.status)+'</div>'+
+    '<div class="t">'+(b.statusHistory[b.status]?uks(b.statusHistory[b.status]).slice(11):"—")+'</div></div>':"");
+
+  const tabs=[["journey","Journey"],["requirements","Requirements & risk"],
+    ...(can("price")?[["pricing","Pricing"]]:[]),["stops","Stops ("+b.stops.length+")"],
+    ["notes","Notes & attachments"],["audit","History ("+b.audit.length+")"]];
+
+  return '<div class="ph">'+
+    '<button class="btn g" data-go="bookings">← All bookings</button>'+
+    '<div><div class="micro">'+esc(b.ref)+' · '+esc(b.type)+'</div>'+
+      '<h1>'+(p?esc(p.forename+" "+p.surname):"Event medical cover")+'</h1></div>'+
+    statusBadge(b)+'<span class="bdg b-grey">'+esc(b.priority)+'</span>'+
+    '<div class="spacer"></div>'+
+    (can("edit")||can("status")?nextActions(b):'')+
+  '</div>'+
+
+  (p&&p.alerts.length?'<div class="alertbox"><b>Patient alerts</b><ul>'+
+    p.alerts.map(a=>'<li><strong>'+esc(a.k)+':</strong> '+esc(a.t)+'</li>').join("")+'</ul></div>':'')+
+
+  (isClosed(b)&&OUTCOMES.includes(b.status)?
+    '<div class="alertbox" style="border-color:var(--stop)"><b>'+esc(b.status)+'</b>'+
+    '<div style="font-size:12.5px">'+esc(b.cancelReason||"—")+(b.outcomeNotes?' — '+esc(b.outcomeNotes):"")+'</div></div>':'')+
+
+  (isClosed(b)?'':'<div class="ready '+r.level+'" style="margin-bottom:12px">'+
+    '<div style="flex:0 0 160px"><div class="micro">Dispatch readiness</div><div class="verdict">'+esc(r.verdict)+'</div></div>'+
+    '<div style="flex:1 1 300px">'+
+      (r.blocks.length?'<ul>'+r.blocks.map(x=>'<li><strong>'+esc(x)+'</strong></li>').join("")+'</ul>':'')+
+      (r.checks.length?'<ul>'+r.checks.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>':'')+
+      (!r.blocks.length&&!r.checks.length?'<div style="font-size:12px">Customer cleared, patient linked, vehicle and crew grade suitable, journey priced. Ready to hand to the control room.</div>':'')+
+    '</div></div>')+
+
+  '<div class="leg" style="margin-bottom:12px">'+
+    '<div class="pt"><div class="k">Collect</div><div class="t">'+esc(b.collectTime)+'</div>'+
+      '<div class="a">'+esc(b.fromAddr)+'</div>'+(b.fromNotes?'<div class="hint">'+esc(b.fromNotes)+'</div>':'')+'</div>'+
+    '<div class="arrow"><div class="d">'+(b.mileage||0)+' mi</div><div class="line"></div>'+
+      '<div class="d">'+esc(b.shape)+'</div></div>'+
+    '<div class="pt"><div class="k">Destination</div><div class="t">'+esc(b.appointmentTime||"—")+'</div>'+
+      '<div class="a">'+esc(b.toAddr)+'</div>'+
+      (b.returnTime?'<div class="hint">Return collection '+esc(b.returnTime)+'</div>':'')+'</div>'+
+  '</div>'+
+
+  (isClosed(b)&&b.status==="Completed"?'':'<div class="card" style="margin-bottom:12px"><div class="b" style="padding:10px 13px">'+
+    '<div class="micro">Journey status timestamps</div><div class="rail">'+rail+'</div></div></div>')+
+
+  '<div class="facts" style="margin-bottom:12px">'+
+    '<div><div class="k">Customer</div><div class="v">'+esc(c?c.name:"—")+'</div></div>'+
+    '<div><div class="k">Purchase order</div><div class="v mono">'+esc(b.poNumber||(c&&c.contract&&c.contract.standingPO)||"—")+'</div></div>'+
+    '<div><div class="k">Vehicle required</div><div class="v">'+esc(b.vehicleType||"—")+'</div></div>'+
+    '<div><div class="k">Crew</div><div class="v">'+esc(b.crewGrade||"—")+' ×'+b.staffCount+'</div></div>'+
+    (can("price")?'<div><div class="k">Quoted price</div><div class="v num">'+(q.priceable?gbp(shown):"—")+
+      (b.priceOverride!=null?' <span class="bdg b-warn">Override</span>':'')+'</div></div>':'')+
+  '</div>'+
+
+  '<div class="tabs" role="tablist">'+tabs.map(([id,l])=>
+    '<button class="tab" role="tab" data-tab="'+id+'" aria-selected="'+(S.tab===id)+'">'+esc(l)+'</button>').join("")+'</div>'+
+  '<div class="card" style="border-radius:0 0 var(--r2) var(--r2);border-top:0"><div class="b">'+bookingTab(b)+'</div></div>';
+}
+
+function nextActions(b){
+  const out=[];
+  if(b.status==="Draft") out.push('<button class="btn p" id="submit">Submit for approval</button>');
+  if(b.status==="Awaiting Approval"&&can("approve")) out.push('<button class="btn p" id="approve">Approve &amp; confirm</button>');
+  if(b.status==="Awaiting Approval"&&!can("approve")) out.push('<span class="muted">Approval needs a manager.</span>');
+  if(b.status==="Confirmed") out.push('<button class="btn p" id="todispatch">Send to dispatch</button>');
+  const i=FLOW.indexOf(b.status);
+  if(i>=FLOW.indexOf("Unallocated")&&i<FLOW.length-1&&can("status"))
+    out.push('<button class="btn" id="advance">Mark '+esc(FLOW[i+1])+'</button>');
+  if(!isClosed(b)&&can("cancel")){
+    out.push('<button class="btn danger" id="cancel">Cancel</button>');
+    if(i>=FLOW.indexOf("Dispatched")) out.push('<button class="btn danger" id="abort">Record outcome</button>');
+  }
+  return out.join(" ");
+}
+
+function bookingTab(b){
+  const p=pat(b.patientId),c=cust(b.customerRef);
+  if(S.tab==="journey"){
+    return '<div class="grid g2">'+
+      '<div><dl class="kv">'+
+        '<dt>Booking type</dt><dd>'+esc(b.type)+'</dd>'+
+        '<dt>Journey shape</dt><dd>'+esc(b.shape)+'</dd>'+
+        '<dt>Priority</dt><dd>'+esc(b.priority)+'</dd>'+
+        '<dt>Collection</dt><dd class="num">'+ukd(b.collectDate)+' '+esc(b.collectTime)+'</dd>'+
+        '<dt>Ready time</dt><dd class="num">'+esc(b.readyTime||"—")+'</dd>'+
+        '<dt>Appointment time</dt><dd class="num">'+esc(b.appointmentTime||"—")+'</dd>'+
+        '<dt>Return collection</dt><dd class="num">'+esc(b.returnTime||"—")+'</dd>'+
+        '<dt>Mileage</dt><dd class="num">'+(b.mileage||0)+' miles</dd>'+
+        '<dt>Waiting time</dt><dd class="num">'+(b.waitingMins||0)+' minutes</dd>'+
+      '</dl></div>'+
+      '<div><dl class="kv">'+
+        '<dt>Patient</dt><dd>'+(p?esc(p.forename+" "+p.surname)+'<div class="muted num">'+esc(p.nhs)+' · born '+ukd(p.dob)+'</div>':"—")+'</dd>'+
+        '<dt>Patient telephone</dt><dd class="num">'+(p?esc(p.phone):"—")+'</dd>'+
+        '<dt>Customer</dt><dd>'+esc(c?c.name:"—")+'</dd>'+
+        '<dt>Purchase order</dt><dd class="mono">'+esc(b.poNumber||"—")+'</dd>'+
+        '<dt>Created</dt><dd class="num">'+uks(b.createdAt)+'</dd>'+
+        '<dt>Last updated</dt><dd class="num">'+uks(b.updatedAt)+'</dd>'+
+      '</dl></div></div>'+
+      (can("edit")&&!isClosed(b)?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0"><span>Collection date</span><input type="date" id="e-date" value="'+esc(b.collectDate)+'"></label>'+
+        '<label class="f" style="margin:0"><span>Collection time</span><input type="time" id="e-time" value="'+esc(b.collectTime)+'"></label>'+
+        '<label class="f" style="margin:0"><span>Appointment time</span><input type="time" id="e-appt" value="'+esc(b.appointmentTime)+'"></label>'+
+        '<label class="f" style="margin:0"><span>Return collection</span><input type="time" id="e-return" value="'+esc(b.returnTime)+'"></label>'+
+        '<label class="f" style="margin:0"><span>Mileage</span><input type="number" id="e-mileage" min="0" value="'+(b.mileage||0)+'"></label>'+
+        '<label class="f" style="margin:0"><span>Waiting (mins)</span><input type="number" id="e-wait" min="0" step="5" value="'+(b.waitingMins||0)+'"></label>'+
+        '<label class="f" style="margin:0"><span>Purchase order</span><input type="text" id="e-po" value="'+esc(b.poNumber)+'"></label>'+
+        '</div><button class="btn p xs" id="save-journey" style="margin-top:9px">Save journey details</button>'+
+        '<p class="hint">Mileage is entered here. In production it is returned by the mapping service from the collection and destination addresses.</p></div>':'');
+  }
+
+  if(S.tab==="requirements"){
+    const flag=(on,label)=>'<span class="flag'+(on?" on":"")+'">'+esc(label)+'</span>';
+    return '<div class="flags" style="margin-bottom:14px">'+
+      flag(b.mobility==="Stretcher"||b.mobility==="Bariatric stretcher","Stretcher")+
+      flag((b.mobility||"").indexOf("wheelchair")>-1,"Wheelchair")+
+      flag(b.mobility==="Bariatric stretcher","Bariatric")+
+      flag(b.clinical==="Oxygen","Oxygen")+
+      flag(b.clinical&&b.clinical!=="None","Clinical need")+
+      flag(b.ipc&&b.ipc!=="None","Infection control")+
+      flag(!!b.escort,"Escort")+
+      flag(b.riskAssessed,"Risk assessed")+
+    '</div>'+
+    '<div class="grid g2"><div><dl class="kv">'+
+      '<dt>Mobility support</dt><dd>'+esc(b.mobility||"—")+'</dd>'+
+      '<dt>Vehicle type required</dt><dd>'+esc(b.vehicleType||"—")+'</dd>'+
+      '<dt>Crew grade required</dt><dd>'+esc(b.crewGrade||"—")+'</dd>'+
+      '<dt>Number of staff</dt><dd class="num">'+b.staffCount+'</dd>'+
+      '<dt>Clinical requirement</dt><dd>'+esc(b.clinical||"None")+'</dd>'+
+    '</dl></div><div><dl class="kv">'+
+      '<dt>Escort</dt><dd>'+esc(b.escort||"None")+'</dd>'+
+      '<dt>Infection control</dt><dd>'+esc(b.ipc||"None")+'</dd>'+
+      '<dt>Risk assessment</dt><dd>'+(b.riskAssessed?'<span class="bdg b-ok">Completed</span>':'<span class="bdg b-warn">Not recorded</span>')+'</dd>'+
+      '<dt>Patient mobility on file</dt><dd>'+(p?esc(p.mobility):"—")+'</dd>'+
+    '</dl></div></div>'+
+    '<div style="margin-top:12px"><div class="micro">Risk notes</div>'+
+      '<p style="margin:4px 0">'+esc(b.riskNotes||"No risk notes recorded.")+'</p>'+
+      '<div class="micro">Special instructions to crew</div>'+
+      '<p style="margin:4px 0;white-space:pre-wrap">'+esc(b.instructions||"None.")+'</p></div>'+
+    (can("edit")&&!isClosed(b)?'<div class="inline"><div class="row">'+
+      '<label class="f" style="margin:0"><span>Mobility support</span><select id="e-mob">'+
+        MOBILITY.map(m=>'<option'+(b.mobility===m?' selected':'')+'>'+esc(m)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Vehicle type</span><select id="e-veh">'+
+        VEHICLE_TYPES.map(v=>'<option'+(b.vehicleType===v?' selected':'')+'>'+esc(v)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Crew grade</span><select id="e-crew">'+
+        CREW_GRADES.map(g=>'<option'+(b.crewGrade===g?' selected':'')+'>'+esc(g)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Staff</span><input type="number" id="e-staff" min="1" max="6" value="'+b.staffCount+'"></label>'+
+      '<label class="f" style="margin:0"><span>Clinical requirement</span><select id="e-clin">'+
+        CLINICAL_NEEDS.map(x=>'<option'+(b.clinical===x?' selected':'')+'>'+esc(x)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Infection control</span><select id="e-ipc">'+
+        IPC.map(x=>'<option'+(b.ipc===x?' selected':'')+'>'+esc(x)+'</option>').join("")+'</select></label>'+
+      '<label class="f" style="margin:0"><span>Escort</span><input type="text" id="e-escort" value="'+esc(b.escort)+'" placeholder="Name and relationship"></label>'+
+      '</div>'+
+      '<label class="chk" style="margin-top:8px"><input type="checkbox" id="e-risk"'+(b.riskAssessed?" checked":"")+'> Risk assessment completed</label>'+
+      '<label class="f" style="margin-top:6px"><span>Risk notes</span><textarea id="e-risknotes">'+esc(b.riskNotes)+'</textarea></label>'+
+      '<label class="f"><span>Special instructions to crew</span><textarea id="e-instr">'+esc(b.instructions)+'</textarea></label>'+
+      '<button class="btn p xs" id="save-req">Save requirements</button></div>':'');
+  }
+
+  if(S.tab==="pricing"){
+    const q=price(b);
+    const shown=b.priceOverride!=null?b.priceOverride:q.total;
+    return '<p class="hint" style="margin-top:0">Priced from the agreed rate card held on <strong>'+esc(c?c.name:"—")+'</strong> in the CRM.</p>'+
+      (q.lines.length?'<div class="quote"><table><thead><tr><th>Charge</th><th>Basis</th><th class="r">Amount</th></tr></thead><tbody>'+
+        q.lines.map(l=>'<tr style="cursor:default"><td>'+esc(l.label)+'</td><td class="muted">'+esc(l.detail)+'</td>'+
+          '<td class="r num">'+gbp(l.amount)+'</td></tr>').join("")+
+        '</tbody><tfoot><tr style="cursor:default"><td colspan="2">Total'+(b.priceOverride!=null?" (before override)":"")+'</td>'+
+        '<td class="r num">'+gbp(q.total)+'</td></tr>'+
+        (b.priceOverride!=null?'<tr style="cursor:default"><td colspan="2">Agreed price after override</td><td class="r num">'+gbp(b.priceOverride)+'</td></tr>':'')+
+        '</tfoot></table></div>'
+        :'<div class="empty"><b>This journey cannot be priced</b>'+esc(q.notes[0]||"")+'</div>')+
+      (q.notes.length&&q.lines.length?'<ul class="hint" style="margin-top:9px">'+q.notes.map(n=>'<li>'+esc(n)+'</li>').join("")+'</ul>':'')+
+      '<div class="facts" style="margin-top:12px">'+
+        '<div><div class="k">Agreed rate basis</div><div class="v">'+esc(baseFareItem(b))+'</div></div>'+
+        '<div><div class="k">Out of hours</div><div class="v">'+(isOutOfHours(b)?"Yes":"No")+'</div></div>'+
+        '<div><div class="k">Payment terms</div><div class="v">'+esc(c&&c.contract?c.contract.terms:"—")+'</div></div>'+
+        '<div><div class="k">Price to invoice</div><div class="v num">'+gbp(shown)+'</div></div>'+
+      '</div>'+
+      (can("price")&&!isClosed(b)?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0"><span>Override price</span><input type="number" id="e-override" step="0.01" min="0" value="'+(b.priceOverride!=null?b.priceOverride:"")+'" placeholder="'+q.total.toFixed(2)+'"></label>'+
+        '<label class="f" style="margin:0"><span>Reason for override<span class="rq">*</span></span><input type="text" id="e-overreason" placeholder="Why the agreed rate does not apply"><div class="msg" id="m-overreason">A reason is required for any price override.</div></label>'+
+        '</div><div class="row" style="margin-top:8px">'+
+        '<label class="chk"><input type="checkbox" id="e-bh"'+(b.bankHoliday?" checked":"")+'> Bank holiday</label>'+
+        '</div><button class="btn p xs" id="save-price" style="margin-top:9px">Apply</button>'+
+        (b.priceOverride!=null?' <button class="btn xs" id="clear-override">Remove override</button>':'')+
+        '<p class="hint">Overrides are written to the audit history with the role, reason and original figure.</p></div>':'');
+  }
+
+  if(S.tab==="stops"){
+    return (b.stops.length?'<div class="tw" style="border:0"><table><thead><tr><th>#</th><th>Address</th><th>Purpose</th><th>Planned time</th>'+
+      (can("edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+      b.stops.map((s,i)=>'<tr style="cursor:default"><td class="num">'+(i+1)+'</td><td>'+esc(s.addr)+'</td>'+
+        '<td class="muted">'+esc(s.purpose)+'</td><td class="num">'+esc(s.time||"—")+'</td>'+
+        (can("edit")?'<td class="r"><button class="btn xs g" data-rmstop="'+s.id+'">Remove</button></td>':'')+'</tr>').join("")+
+      '</tbody></table></div>'
+      :'<div class="empty"><b>No intermediate stops</b>Multi-destination journeys collect additional stops here — pharmacy, second patient, or a drop-off on the way.</div>')+
+      (can("edit")&&!isClosed(b)?'<div class="inline"><div class="row">'+
+        '<label class="f" style="margin:0;flex:2 1 220px"><span>Address</span><input type="text" id="st-addr"><div class="msg" id="m-st-addr">Enter the address.</div></label>'+
+        '<label class="f" style="margin:0"><span>Purpose</span><select id="st-purpose">'+
+          ["Additional patient pick-up","Patient drop-off","Pharmacy collection","Equipment collection","Crew break","Other"].map(x=>'<option>'+x+'</option>').join("")+'</select></label>'+
+        '<label class="f" style="margin:0"><span>Planned time</span><input type="time" id="st-time"></label>'+
+        '</div><button class="btn p xs" id="add-stop" style="margin-top:9px">Add stop</button></div>':'');
+  }
+
+  if(S.tab==="notes"){
+    return '<div class="micro">Internal notes</div><p style="margin:4px 0 14px;white-space:pre-wrap">'+esc(b.internalNotes||"None recorded.")+'</p>'+
+      (b.attachments.length?'<div class="tw" style="border:0"><table><thead><tr><th>File</th><th>Size</th><th>Added</th>'+
+        (can("edit")?'<th></th>':'')+'</tr></thead><tbody>'+
+        b.attachments.map(a=>'<tr style="cursor:default"><td>'+esc(a.name)+'</td><td class="num muted">'+esc(a.size)+'</td>'+
+          '<td class="num muted nowrap">'+uks(a.at)+'<div class="muted">'+esc(a.by)+'</div></td>'+
+          (can("edit")?'<td class="r"><button class="btn xs g" data-rmfile="'+a.id+'">Remove</button></td>':'')+'</tr>').join("")+
+        '</tbody></table></div>'
+        :'<div class="empty"><b>No attachments</b>Referral letters, consent forms and risk assessments attach to the journey.</div>')+
+      (can("edit")?'<div class="inline">'+
+        '<label class="f"><span>Internal notes</span><textarea id="e-notes">'+esc(b.internalNotes)+'</textarea></label>'+
+        '<div class="row"><label class="f" style="margin:0"><span>Attach a file</span><input type="file" id="e-file" style="padding:4px"></label></div>'+
+        '<button class="btn p xs" id="save-notes" style="margin-top:9px">Save notes</button> '+
+        '<button class="btn xs" id="add-file">Attach file</button></div>':'');
+  }
+
+  return '<ul class="feed">'+b.audit.slice().sort((x,y)=>y.at.localeCompare(x.at)).map(a=>
+    '<li><div class="m">'+uks(a.at)+' · '+esc(a.by)+'</div><div class="s">'+esc(a.action)+'</div>'+
+    (a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</li>').join("")+'</ul>'+
+    '<p class="hint">History entries are immutable.</p>';
+}
+
+/* ---------- wizard ---------- */
+function viewWizard(){
+  if(!can("create")&&!can("request")) return viewDenied();
+  if(!S.draft) S.draft=blank();
+  const d=S.draft;
+  const names=["Customer & patient","Journey","Requirements","Pricing & approval","Review"];
+  const steps='<div class="steps">'+names.map((n,i)=>{
+    const k=i+1;
+    return '<div class="st '+(S.step===k?"now":S.step>k?"done":"")+'"><span class="n">'+k+'</span>'+esc(n)+'</div>';
+  }).join("")+'</div>';
+
+  let bodyHTML="";
+  if(S.step===1){
+    const c=cust(d.customerRef);
+    const blocked=c&&(c.creditHold||c.status==="Inactive"||c.status==="Archived"||(c.contract&&c.contract.end&&days(c.contract.end)<0));
+    bodyHTML='<div class="grid g2">'+
+      '<label class="f"><span>Customer account<span class="rq">*</span></span><select id="w-customer">'+
+        '<option value="">Select a customer…</option>'+
+        S.customers.map(x=>'<option value="'+esc(x.ref)+'"'+(d.customerRef===x.ref?' selected':'')+'>'+esc(x.name)+' — '+esc(x.ref)+'</option>').join("")+
+        '</select><div class="msg" id="m-w-customer">Select the customer who is paying for this journey.</div></label>'+
+      '<label class="f"><span>Patient</span><select id="w-patient">'+
+        '<option value="">No patient (event cover)</option>'+
+        S.patients.slice().sort((a,b)=>a.surname.localeCompare(b.surname)).map(p=>
+          '<option value="'+p.id+'"'+(d.patientId===p.id?' selected':'')+'>'+esc(p.surname+", "+p.forename)+' — '+esc(p.nhs)+'</option>').join("")+
+        '</select><div class="hint">Patient records come from the Patients module.</div></label>'+
+    '</div>'+
+    (c?'<div class="'+(blocked?"alertbox":"card")+'" style="margin-top:4px'+(blocked?'':';padding:0')+'">'+
+      (blocked?'<b>This customer is blocked in the CRM</b><ul>'+
+        (c.creditHold?'<li>On credit hold — release in the CRM before booking.</li>':'')+
+        (c.status!=="Active"?'<li>Account status is '+esc(c.status)+'.</li>':'')+
+        (c.contract&&c.contract.end&&days(c.contract.end)<0?'<li>Contract expired on '+ukd(c.contract.end)+'.</li>':'')+
+      '</ul>'
+      :'<div class="facts" style="border:0">'+
+        '<div><div class="k">Account status</div><div class="v">'+esc(c.status)+'</div></div>'+
+        '<div><div class="k">Contract ends</div><div class="v num">'+(c.contract&&c.contract.end?ukd(c.contract.end):"—")+'</div></div>'+
+        '<div><div class="k">Purchase order</div><div class="v">'+(c.contract&&c.contract.poRequired?(c.contract.standingPO?"Standing "+esc(c.contract.standingPO):"Required per booking"):"Not required")+'</div></div>'+
+        '<div><div class="k">Rate card</div><div class="v">'+(c.rates&&c.rates.length?c.rates.length+" agreed rates":"None agreed")+'</div></div>'+
+      '</div>')+'</div>':'')+
+    (d.patientId?(()=>{const p=pat(d.patientId);
+      return p&&p.alerts.length?'<div class="alertbox" style="margin-top:12px"><b>Patient alerts</b><ul>'+
+        p.alerts.map(a=>'<li><strong>'+esc(a.k)+':</strong> '+esc(a.t)+'</li>').join("")+'</ul></div>':'';})():'');
+  }
+
+  if(S.step===2){
+    bodyHTML='<div class="grid g3">'+
+      '<label class="f"><span>Booking type<span class="rq">*</span></span><select id="w-type">'+
+        BOOKING_TYPES.map(t=>'<option'+(d.type===t?' selected':'')+'>'+esc(t)+'</option>').join("")+'</select></label>'+
+      '<label class="f"><span>Journey shape</span><select id="w-shape">'+
+        JOURNEY_SHAPES.map(t=>'<option'+(d.shape===t?' selected':'')+'>'+esc(t)+'</option>').join("")+'</select></label>'+
+      '<label class="f"><span>Priority</span><select id="w-priority">'+
+        PRIORITIES.map(t=>'<option'+(d.priority===t?' selected':'')+'>'+esc(t)+'</option>').join("")+'</select></label>'+
+    '</div>'+
+    '<div class="grid g2">'+
+      '<label class="f"><span>Collection address<span class="rq">*</span></span><input type="text" id="w-from" value="'+esc(d.fromAddr)+'" placeholder="House, street, town, postcode">'+
+        '<div class="msg" id="m-w-from">Enter the collection address.</div></label>'+
+      '<label class="f"><span>Destination<span class="rq">*</span></span><input type="text" id="w-to" value="'+esc(d.toAddr)+'" placeholder="Ward, department, hospital or address">'+
+        '<div class="msg" id="m-w-to">Enter the destination.</div></label>'+
+    '</div>'+
+    '<div class="grid g2">'+
+      '<label class="f"><span>Access notes — collection</span><input type="text" id="w-fromnotes" value="'+esc(d.fromNotes)+'" placeholder="Key safe, parking, floor, buzzer"></label>'+
+      '<label class="f"><span>Access notes — destination</span><input type="text" id="w-tonotes" value="'+esc(d.toNotes)+'" placeholder="Entrance, ward, contact on arrival"></label>'+
+    '</div>'+
+    '<div class="grid g4">'+
+      '<label class="f"><span>Collection date<span class="rq">*</span></span><input type="date" id="w-date" value="'+esc(d.collectDate)+'"><div class="msg" id="m-w-date">Set a collection date.</div></label>'+
+      '<label class="f"><span>Collection time<span class="rq">*</span></span><input type="time" id="w-time" value="'+esc(d.collectTime)+'"><div class="msg" id="m-w-time">Set a collection time.</div></label>'+
+      '<label class="f"><span>Appointment time</span><input type="time" id="w-appt" value="'+esc(d.appointmentTime)+'"></label>'+
+      '<label class="f"><span>Return collection</span><input type="time" id="w-return" value="'+esc(d.returnTime)+'"><div class="hint">Return journeys only</div></label>'+
+    '</div>'+
+    '<div class="grid g3">'+
+      '<label class="f"><span>Estimated mileage</span><input type="number" id="w-mileage" min="0" value="'+(d.mileage||0)+'"><div class="hint">Supplied by the mapping service in production</div></label>'+
+      '<label class="f"><span>Expected waiting (mins)</span><input type="number" id="w-wait" min="0" step="5" value="'+(d.waitingMins||0)+'"></label>'+
+      '<label class="f" style="display:flex;align-items:flex-end"><span style="display:none">Bank holiday</span>'+
+        '<span class="chk"><input type="checkbox" id="w-bh"'+(d.bankHoliday?" checked":"")+'> Bank holiday rate applies</span></label>'+
+    '</div>';
+  }
+
+  if(S.step===3){
+    const p=pat(d.patientId);
+    bodyHTML=(p?'<div class="card" style="margin-bottom:12px"><div class="b" style="padding:9px 12px">'+
+      '<span class="micro">Patient record says</span> mobility: <strong>'+esc(p.mobility)+'</strong>'+
+      (p.alerts.length?' · alerts: '+p.alerts.map(a=>esc(a.k)).join(", "):'')+'</div></div>':'')+
+    '<div class="grid g3">'+
+      '<label class="f"><span>Mobility support<span class="rq">*</span></span><select id="w-mob"><option value="">Select…</option>'+
+        MOBILITY.map(m=>'<option'+(d.mobility===m?' selected':(p&&!d.mobility&&p.mobility===m?' selected':''))+'>'+esc(m)+'</option>').join("")+
+        '</select><div class="msg" id="m-w-mob">Select the mobility support needed.</div></label>'+
+      '<label class="f"><span>Vehicle type required<span class="rq">*</span></span><select id="w-veh"><option value="">Select…</option>'+
+        VEHICLE_TYPES.map(v=>'<option'+(d.vehicleType===v?' selected':'')+'>'+esc(v)+'</option>').join("")+
+        '</select><div class="msg" id="m-w-veh">Select a vehicle type.</div></label>'+
+      '<label class="f"><span>Crew grade required<span class="rq">*</span></span><select id="w-crew"><option value="">Select…</option>'+
+        CREW_GRADES.map(g=>'<option'+(d.crewGrade===g?' selected':'')+'>'+esc(g)+'</option>').join("")+
+        '</select><div class="msg" id="m-w-crew">Select the minimum crew grade.</div></label>'+
+    '</div>'+
+    '<div class="grid g3">'+
+      '<label class="f"><span>Number of staff</span><input type="number" id="w-staff" min="1" max="6" value="'+d.staffCount+'"></label>'+
+      '<label class="f"><span>Clinical requirement</span><select id="w-clin">'+
+        CLINICAL_NEEDS.map(x=>'<option'+(d.clinical===x?' selected':'')+'>'+esc(x)+'</option>').join("")+'</select></label>'+
+      '<label class="f"><span>Infection-control precautions</span><select id="w-ipc">'+
+        IPC.map(x=>'<option'+(d.ipc===x?' selected':'')+'>'+esc(x)+'</option>').join("")+'</select></label>'+
+    '</div>'+
+    '<div class="grid g2">'+
+      '<label class="f"><span>Escort travelling</span><input type="text" id="w-escort" value="'+esc(d.escort)+'" placeholder="Name and relationship, if any"></label>'+
+      '<label class="f"><span>Special instructions to crew</span><input type="text" id="w-instr" value="'+esc(d.instructions)+'"></label>'+
+    '</div>'+
+    '<label class="chk"><input type="checkbox" id="w-risk"'+(d.riskAssessed?" checked":"")+'> Risk assessment completed for this journey</label>'+
+    '<label class="f" style="margin-top:8px"><span>Risk notes</span><textarea id="w-risknotes">'+esc(d.riskNotes)+'</textarea></label>';
+  }
+
+  if(S.step===4){
+    const q=price(d), c=cust(d.customerRef);
+    bodyHTML=(q.lines.length?
+      '<div class="quote"><table><thead><tr><th>Charge</th><th>Basis</th><th class="r">Amount</th></tr></thead><tbody>'+
+      q.lines.map(l=>'<tr style="cursor:default"><td>'+esc(l.label)+'</td><td class="muted">'+esc(l.detail)+'</td>'+
+        '<td class="r num">'+gbp(l.amount)+'</td></tr>').join("")+
+      '</tbody><tfoot><tr style="cursor:default"><td colspan="2">Quoted total</td><td class="r num">'+gbp(q.total)+'</td></tr></tfoot></table></div>'
+      :'<div class="alertbox"><b>Cannot price this journey</b><ul>'+q.notes.map(n=>'<li>'+esc(n)+'</li>').join("")+'</ul></div>')+
+    '<div class="grid g2" style="margin-top:12px">'+
+      '<label class="f"><span>Purchase order number'+(c&&c.contract&&c.contract.poRequired&&!c.contract.standingPO?'<span class="rq">*</span>':'')+'</span>'+
+        '<input type="text" id="w-po" value="'+esc(d.poNumber||(c&&c.contract&&c.contract.standingPO)||"")+'">'+
+        '<div class="msg" id="m-w-po">This customer requires a purchase order on every booking.</div>'+
+        '<div class="hint">'+(c&&c.contract&&c.contract.poRequired?(c.contract.standingPO?"Standing PO held: "+esc(c.contract.standingPO):"Required on every booking"):"Not required by this customer")+'</div></label>'+
+      '<label class="f"><span>Internal notes</span><textarea id="w-notes">'+esc(d.internalNotes)+'</textarea></label>'+
+    '</div>';
+  }
+
+  if(S.step===5){
+    const p=pat(d.patientId),c=cust(d.customerRef),q=price(d);
+    const tmp=Object.assign({},d,{status:"Confirmed"});
+    const r=readiness(tmp);
+    bodyHTML='<div class="ready '+r.level+'" style="margin-bottom:12px">'+
+      '<div style="flex:0 0 160px"><div class="micro">On confirmation</div><div class="verdict">'+esc(r.verdict)+'</div></div>'+
+      '<div style="flex:1 1 300px">'+
+        (r.blocks.length?'<ul>'+r.blocks.map(x=>'<li><strong>'+esc(x)+'</strong></li>').join("")+'</ul>':'')+
+        (r.checks.length?'<ul>'+r.checks.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>':'')+
+        (!r.blocks.length&&!r.checks.length?'<div style="font-size:12px">Everything the control room needs is present.</div>':'')+
+      '</div></div>'+
+      '<div class="grid g2"><div><dl class="kv">'+
+        '<dt>Customer</dt><dd>'+esc(c?c.name:"—")+'</dd>'+
+        '<dt>Patient</dt><dd>'+(p?esc(p.forename+" "+p.surname):"Event cover")+'</dd>'+
+        '<dt>Type</dt><dd>'+esc(d.type)+' · '+esc(d.shape)+'</dd>'+
+        '<dt>Collection</dt><dd class="num">'+ukd(d.collectDate)+' '+esc(d.collectTime)+'</dd>'+
+        '<dt>From</dt><dd>'+esc(d.fromAddr)+'</dd>'+
+        '<dt>To</dt><dd>'+esc(d.toAddr)+'</dd>'+
+      '</dl></div><div><dl class="kv">'+
+        '<dt>Mobility</dt><dd>'+esc(d.mobility||"—")+'</dd>'+
+        '<dt>Vehicle</dt><dd>'+esc(d.vehicleType||"—")+'</dd>'+
+        '<dt>Crew</dt><dd>'+esc(d.crewGrade||"—")+' ×'+d.staffCount+'</dd>'+
+        '<dt>Clinical</dt><dd>'+esc(d.clinical)+'</dd>'+
+        '<dt>Purchase order</dt><dd class="mono">'+esc(d.poNumber||"—")+'</dd>'+
+        '<dt>Quoted price</dt><dd class="num">'+(q.lines.length?gbp(q.total):"Not priced")+'</dd>'+
+      '</dl></div></div>'+
+      '<div class="inline"><div class="micro">Save as</div>'+
+        '<div class="row" style="margin-top:6px">'+
+          '<label class="chk"><input type="radio" name="saveas" id="save-draft" checked> Draft — keep working on it</label>'+
+          (can("approve")?'<label class="chk"><input type="radio" name="saveas" id="save-confirm"> Confirmed — release to dispatch queue</label>'
+            :'<label class="chk"><input type="radio" name="saveas" id="save-approval"> Submit for approval</label>')+
+        '</div></div>';
+  }
+
+  return '<div class="ph"><h1>'+(can("request")?"Request transport":"New booking")+'</h1>'+
+      '<span class="muted">Step '+S.step+' of 5 — '+esc(names[S.step-1])+'</span>'+
+      '<div class="spacer"></div><button class="btn g" id="w-cancel">Discard</button></div>'+
+    steps+
+    '<div class="card"><div class="b">'+bodyHTML+'</div></div>'+
+    '<div style="display:flex;gap:8px;margin-top:12px">'+
+      (S.step>1?'<button class="btn" id="w-back">← Back</button>':'')+
+      '<div class="spacer"></div>'+
+      (S.step<5?'<button class="btn p" id="w-next">Continue →</button>'
+        :'<button class="btn p" id="w-save">Create booking</button>')+
+    '</div>';
+}
+
+/* ---------- recurring & bulk ---------- */
+function viewRecurring(){
+  if(!can("create")) return viewDenied();
+  const groups={};
+  S.bookings.filter(b=>b.recurringId).forEach(b=>{(groups[b.recurringId]=groups[b.recurringId]||[]).push(b);});
+  return demoNote+
+  '<div class="ph"><h1>Recurring &amp; bulk booking</h1><span class="muted">Generate a series of journeys from one pattern</span></div>'+
+  '<div class="card" style="margin-bottom:12px"><div class="h"><h2>Create a series</h2></div><div class="b">'+
+    '<div class="grid g3">'+
+      '<label class="f"><span>Customer<span class="rq">*</span></span><select id="r-customer"><option value="">Select…</option>'+
+        S.customers.map(c=>'<option value="'+esc(c.ref)+'">'+esc(c.name)+'</option>').join("")+'</select>'+
+        '<div class="msg" id="m-r-customer">Select a customer.</div></label>'+
+      '<label class="f"><span>Patient<span class="rq">*</span></span><select id="r-patient"><option value="">Select…</option>'+
+        S.patients.slice().sort((a,b)=>a.surname.localeCompare(b.surname)).map(p=>
+          '<option value="'+p.id+'">'+esc(p.surname+", "+p.forename)+'</option>').join("")+'</select>'+
+        '<div class="msg" id="m-r-patient">Select a patient.</div></label>'+
+      '<label class="f"><span>Booking type</span><select id="r-type">'+
+        BOOKING_TYPES.map(t=>'<option'+(t==="Non-emergency patient transport"?' selected':'')+'>'+esc(t)+'</option>').join("")+'</select></label>'+
+    '</div>'+
+    '<div class="grid g2">'+
+      '<label class="f"><span>Collection address<span class="rq">*</span></span><input type="text" id="r-from"><div class="msg" id="m-r-from">Enter the collection address.</div></label>'+
+      '<label class="f"><span>Destination<span class="rq">*</span></span><input type="text" id="r-to"><div class="msg" id="m-r-to">Enter the destination.</div></label>'+
+    '</div>'+
+    '<div class="grid g4">'+
+      '<label class="f"><span>First collection<span class="rq">*</span></span><input type="date" id="r-start" value="'+shift(7)+'"></label>'+
+      '<label class="f"><span>Series ends<span class="rq">*</span></span><input type="date" id="r-end" value="'+shift(56)+'"><div class="msg" id="m-r-end">The end date must be after the start.</div></label>'+
+      '<label class="f"><span>Collection time</span><input type="time" id="r-time" value="09:00"></label>'+
+      '<label class="f"><span>Return collection</span><input type="time" id="r-return" value="13:00"></label>'+
+    '</div>'+
+    '<div class="micro" style="margin-bottom:5px">Days of the week</div>'+
+    '<div class="row" style="margin-bottom:10px">'+
+      ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>
+        '<label class="chk" style="flex:0 0 auto"><input type="checkbox" class="rday" value="'+((i+1)%7)+'"'+([1,3,5].includes(i+1)?" checked":"")+'> '+d+'</label>').join("")+
+    '</div>'+
+    '<div class="grid g4">'+
+      '<label class="f"><span>Mobility</span><select id="r-mob">'+MOBILITY.map(m=>'<option'+(m==="Own wheelchair"?' selected':'')+'>'+esc(m)+'</option>').join("")+'</select></label>'+
+      '<label class="f"><span>Vehicle</span><select id="r-veh">'+VEHICLE_TYPES.map(v=>'<option'+(v==="Wheelchair-accessible vehicle"?' selected':'')+'>'+esc(v)+'</option>').join("")+'</select></label>'+
+      '<label class="f"><span>Crew grade</span><select id="r-crew">'+CREW_GRADES.map(g=>'<option'+(g==="Ambulance Care Assistant"?' selected':'')+'>'+esc(g)+'</option>').join("")+'</select></label>'+
+      '<label class="f"><span>Mileage each way</span><input type="number" id="r-mileage" min="0" value="8"></label>'+
+    '</div>'+
+    '<div class="row" style="align-items:center"><label class="chk" style="flex:0 0 auto"><input type="checkbox" id="r-confirm"> Create as Confirmed rather than Draft</label>'+
+      '<div class="spacer"></div><button class="btn" id="r-preview">Preview dates</button>'+
+      '<button class="btn p" id="r-create">Create series</button></div>'+
+    '<div id="r-out" style="margin-top:10px"></div>'+
+  '</div></div>'+
+
+  (Object.keys(groups).length?
+  '<div class="card"><div class="h"><h2>Existing series</h2></div><div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)">'+
+    '<table><thead><tr><th>Series</th><th>Patient</th><th>Journeys</th><th>First</th><th>Last</th><th></th></tr></thead><tbody>'+
+    Object.entries(groups).map(([gid,list])=>{
+      const p=pat(list[0].patientId);
+      const ds=list.map(x=>x.collectDate).sort();
+      return '<tr style="cursor:default"><td class="mono">'+esc(gid)+'</td><td>'+(p?esc(p.forename+" "+p.surname):"—")+'</td>'+
+        '<td class="num">'+list.length+'</td><td class="num">'+ukd(ds[0])+'</td><td class="num">'+ukd(ds[ds.length-1])+'</td>'+
+        '<td class="r"><button class="btn xs danger" data-cancelseries="'+esc(gid)+'">Cancel remaining</button></td></tr>';
+    }).join("")+'</tbody></table></div></div>':'');
+}
+
+/* ---------- patients (light index) ---------- */
+function viewPatients(){
+  return '<div class="demo">Demonstration build — a minimal patient index is included so Bookings can function. '+
+    'The full Patients module carries GP, next of kin, consent, funding and clinical history.</div>'+
+  '<div class="ph"><h1>Patients</h1><span class="muted">'+S.patients.length+' records</span></div>'+
+  '<div class="tw"><table><thead><tr><th>Patient</th><th>Date of birth</th><th>NHS number</th><th>Address</th>'+
+    '<th>Mobility</th><th>Alerts</th><th class="r">Journeys</th></tr></thead><tbody>'+
+    S.patients.slice().sort((a,b)=>a.surname.localeCompare(b.surname)).map(p=>{
+      const n=S.bookings.filter(b=>b.patientId===p.id).length;
+      return '<tr style="cursor:default"><td><strong>'+esc(p.surname+", "+p.forename)+'</strong></td>'+
+      '<td class="num nowrap">'+ukd(p.dob)+'</td><td class="mono nowrap">'+esc(p.nhs)+'</td>'+
+      '<td class="muted">'+esc(p.address)+'</td><td>'+esc(p.mobility)+'</td>'+
+      '<td>'+(p.alerts.length?'<div class="flags">'+p.alerts.map(a=>'<span class="flag alert" title="'+esc(a.t)+'">'+esc(a.k)+'</span>').join("")+'</div>':'<span class="muted">None</span>')+'</td>'+
+      '<td class="r num">'+n+'</td></tr>';}).join("")+
+  '</tbody></table></div>';
+}
+
+/* ---------- action centre ---------- */
+function viewActions(){
+  const notReady=S.bookings.filter(b=>!isClosed(b)&&readiness(b).level==="stop");
+  const unalloc=S.bookings.filter(b=>b.status==="Unallocated");
+  const approval=S.bookings.filter(b=>b.status==="Awaiting Approval");
+  const noPO=S.bookings.filter(b=>{const c=cust(b.customerRef);
+    return !isClosed(b)&&c&&c.contract&&c.contract.poRequired&&!b.poNumber&&!c.contract.standingPO;});
+  const drafts=S.bookings.filter(b=>b.status==="Draft"&&days(b.collectDate)<=2);
+  const groups=[
+    ["Not ready for dispatch",notReady,"stop"],
+    ["Awaiting approval",approval,"warn"],
+    ["Unallocated — waiting for the control room",unalloc,"warn"],
+    ["Missing purchase order",noPO,"stop"],
+    ["Drafts collecting within 48 hours",drafts,"warn"]
+  ];
+  return demoNote+'<div class="ph"><h1>Action Centre</h1><span class="muted">Bookings needing attention</span></div>'+
+    groups.map(([label,list,cls])=>
+      '<div class="card" style="margin-bottom:12px"><div class="h"><h2>'+esc(label)+'</h2>'+
+        '<span class="bdg b-'+cls+'" style="margin-left:auto">'+list.length+'</span></div>'+
+      (list.length?'<div class="tw" style="border:0;border-radius:0 0 var(--r2) var(--r2)"><table><tbody>'+
+        list.slice(0,8).map(b=>{const p=pat(b.patientId);
+          return '<tr tabindex="0" data-open="'+b.id+'"><td class="mono nowrap" style="color:var(--accent-2)">'+esc(b.ref)+'</td>'+
+          '<td class="num nowrap">'+ukd(b.collectDate)+' '+esc(b.collectTime)+'</td>'+
+          '<td>'+(p?esc(p.forename+" "+p.surname):"Event cover")+'</td>'+
+          '<td class="muted">'+esc((cust(b.customerRef)||{}).name||"—")+'</td>'+
+          '<td>'+statusBadge(b)+'</td>'+
+          '<td class="muted" style="font-size:11.5px">'+esc((readiness(b).blocks[0]||readiness(b).checks[0]||""))+'</td></tr>';}).join("")+
+        '</tbody></table></div>':'<div class="b empty" style="padding:18px"><b>Nothing outstanding</b></div>')+
+      '</div>').join("");
+}
+
+/* ---------- audit ---------- */
+function viewAudit(){
+  const all=[];
+  S.bookings.forEach(b=>b.audit.forEach(a=>all.push({...a,ref:b.ref,id2:b.id})));
+  all.sort((a,b)=>b.at.localeCompare(a.at));
+  const rows=all.slice(0,200);
+  return demoNote+'<div class="ph"><h1>Audit log</h1><span class="muted">'+all.length+' entries · showing '+rows.length+'</span></div>'+
+  '<div class="tw"><table><thead><tr><th>When</th><th>Job</th><th>Action</th><th>Detail</th><th>By</th></tr></thead><tbody>'+
+  rows.map(a=>'<tr tabindex="0" data-open="'+a.id2+'"><td class="mono muted nowrap">'+uks(a.at)+'</td>'+
+    '<td class="mono" style="color:var(--accent-2)">'+esc(a.ref)+'</td><td class="nowrap">'+esc(a.action)+'</td>'+
+    '<td>'+esc(a.detail||"—")+'</td><td class="nowrap muted">'+esc(a.by)+'</td></tr>').join("")+
+  '</tbody></table></div>';
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function modal(title,body,foot){
+  $("#modalhost").innerHTML='<div class="scrim" data-mclose="1"></div>'+
+    '<div class="modal" role="dialog" aria-modal="true" aria-label="'+esc(title)+'">'+
+    '<div class="mh"><h2 style="font-size:14px">'+esc(title)+'</h2><div class="spacer"></div>'+
+    '<button class="btn g xs" data-mclose="1" aria-label="Close">✕</button></div>'+
+    '<div class="mb">'+body+'</div><div class="mf">'+foot+'</div></div>';
+}
+const closeModal=()=>{$("#modalhost").innerHTML="";};
+
+function modalCancel(b){
+  const late=(new Date(when(b))-new Date())<864e5;
+  modal("Cancel "+b.ref,
+    '<label class="f"><span>Cancellation reason<span class="rq">*</span></span><select id="cx-reason">'+
+      '<option value="">Select a reason…</option>'+CANCEL_REASONS.map(r=>'<option>'+esc(r)+'</option>').join("")+
+      '</select><div class="msg" id="m-cx-reason">A cancellation reason is required.</div></label>'+
+    '<label class="f"><span>Notes</span><textarea id="cx-notes" placeholder="Who cancelled, when, and how it was communicated."></textarea></label>'+
+    (late?'<div class="alertbox" style="margin:0"><b>Inside 24 hours</b>'+
+      '<div style="font-size:12.5px">A late cancellation charge from the customer rate card will be applied. Untick below if the charge is waived.</div>'+
+      '<label class="chk" style="margin-top:6px;color:var(--stop)"><input type="checkbox" id="cx-charge" checked> Apply the late cancellation charge</label></div>':''),
+    '<button class="btn g" data-mclose="1">Keep booking</button><button class="btn danger" id="cx-do">Cancel booking</button>');
+}
+function modalAbort(b){
+  modal("Record journey outcome — "+b.ref,
+    '<label class="f"><span>Outcome<span class="rq">*</span></span><select id="ab-status">'+
+      OUTCOMES.filter(o=>o!=="Cancelled").map(o=>'<option>'+esc(o)+'</option>').join("")+'</select></label>'+
+    '<label class="f"><span>Reason<span class="rq">*</span></span><select id="ab-reason">'+
+      '<option value="">Select…</option>'+ABORT_REASONS.map(r=>'<option>'+esc(r)+'</option>').join("")+
+      '</select><div class="msg" id="m-ab-reason">Select a reason.</div></label>'+
+    '<label class="f" style="margin:0"><span>What happened<span class="rq">*</span></span><textarea id="ab-notes"></textarea>'+
+      '<div class="msg" id="m-ab-notes">Record what happened — at least 15 characters.</div></label>'+
+    '<p class="hint">Aborted journeys and clinical escalations should also be reported through the Incidents module.</p>',
+    '<button class="btn g" data-mclose="1">Cancel</button><button class="btn danger" id="ab-do">Record outcome</button>');
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function go(v){S.view=v;S.selected=null;render();window.scrollTo(0,0);$("#side").classList.remove("open");}
+function openB(id){
+  if(portalOnly()){const b=S.bookings.find(x=>x.id===id);
+    if(!b||b.customerRef!==role().ownCustomer){toast("Your portal account can only see its own journeys.","bad");return;}}
+  S.selected=id;S.view="booking";S.tab="journey";render();window.scrollTo(0,0);
+}
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():"";};
+const num=id=>{const e=document.getElementById(id);return e?parseFloat(e.value)||0:0;};
+const chk=id=>{const e=document.getElementById(id);return e?e.checked:false;};
+function mark(id,mid,ok){const e=document.getElementById(id),m=document.getElementById(mid);
+  if(e)e.classList.toggle("bad",!ok);if(m)m.classList.toggle("on",!ok);return ok;}
+
+/* capture wizard fields before changing step */
+function grabStep(){
+  const d=S.draft; if(!d) return;
+  if(S.step===1){ if($("#w-customer"))d.customerRef=$("#w-customer").value; if($("#w-patient"))d.patientId=$("#w-patient").value; }
+  if(S.step===2){
+    d.type=val("w-type")||d.type; d.shape=val("w-shape")||d.shape; d.priority=val("w-priority")||d.priority;
+    d.fromAddr=val("w-from"); d.toAddr=val("w-to"); d.fromNotes=val("w-fromnotes"); d.toNotes=val("w-tonotes");
+    d.collectDate=val("w-date"); d.collectTime=val("w-time"); d.appointmentTime=val("w-appt"); d.returnTime=val("w-return");
+    d.mileage=num("w-mileage"); d.waitingMins=num("w-wait"); d.bankHoliday=chk("w-bh");
+  }
+  if(S.step===3){
+    d.mobility=val("w-mob"); d.vehicleType=val("w-veh"); d.crewGrade=val("w-crew");
+    d.staffCount=num("w-staff")||1; d.clinical=val("w-clin"); d.ipc=val("w-ipc");
+    d.escort=val("w-escort"); d.instructions=val("w-instr"); d.riskAssessed=chk("w-risk"); d.riskNotes=val("w-risknotes");
+  }
+  if(S.step===4){ d.poNumber=val("w-po"); d.internalNotes=val("w-notes"); }
+}
+function validateStep(){
+  const d=S.draft;
+  if(S.step===1){
+    if(!mark("w-customer","m-w-customer",!!d.customerRef)) return false;
+    const c=cust(d.customerRef);
+    if(c&&(c.creditHold||c.status==="Inactive"||c.status==="Archived"||(c.contract&&c.contract.end&&days(c.contract.end)<0))){
+      toast("This customer is blocked in the CRM — the booking cannot proceed.","bad"); return false; }
+    return true;
+  }
+  if(S.step===2){
+    let ok=true;
+    ok=mark("w-from","m-w-from",!!d.fromAddr)&&ok;
+    ok=mark("w-to","m-w-to",!!d.toAddr)&&ok;
+    ok=mark("w-date","m-w-date",!!d.collectDate)&&ok;
+    ok=mark("w-time","m-w-time",!!d.collectTime)&&ok;
+    if(!ok) toast("Check the highlighted fields.","bad");
+    return ok;
+  }
+  if(S.step===3){
+    let ok=true;
+    ok=mark("w-mob","m-w-mob",!!d.mobility)&&ok;
+    ok=mark("w-veh","m-w-veh",!!d.vehicleType)&&ok;
+    ok=mark("w-crew","m-w-crew",!!d.crewGrade)&&ok;
+    if(!ok) toast("Check the highlighted fields.","bad");
+    return ok;
+  }
+  if(S.step===4){
+    const c=cust(d.customerRef);
+    if(c&&c.contract&&c.contract.poRequired&&!c.contract.standingPO)
+      return mark("w-po","m-w-po",!!d.poNumber);
+    return true;
+  }
+  return true;
+}
+
+document.addEventListener("click", async e=>{
+  const t=e.target.closest("[data-go],[data-open],[data-tab],[data-sort],[data-stat],[data-mclose],[data-rmstop],[data-rmfile],[data-cancelseries],button");
+  if(!t) return;
+  const b=S.bookings.find(x=>x.id===S.selected);
+
+  if(t.dataset.mclose){closeModal();return;}
+  if(t.dataset.go){const m=MENU.find(x=>x.id===t.dataset.go);
+    if(t.dataset.go==="newbooking"){S.draft=blank();S.step=1;}
+    if(m&&!m.live){S.view=t.dataset.go;S.selected=null;render();$("#side").classList.remove("open");return;}
+    go(t.dataset.go);return;}
+  if(t.dataset.open){openB(t.dataset.open);return;}
+  if(t.dataset.tab){S.tab=t.dataset.tab;render();return;}
+  if(t.dataset.sort){const k=t.dataset.sort;S.sort=S.sort.k===k?{k,d:S.sort.d==="asc"?"desc":"asc"}:{k,d:"asc"};render();return;}
+  if(t.dataset.stat!==undefined&&t.classList.contains("stat")){
+    const presets=[{from:todayISO(),to:todayISO(),status:""},{status:"unallocated"},{status:"progress"},
+      {status:"live",ready:"stop"},{status:"Awaiting Approval"},{status:"closed"}];
+    S.f=Object.assign({q:"",from:"",to:"",status:"",type:"",customer:"",priority:"",ready:""},presets[+t.dataset.stat]);
+    go("bookings");return;
+  }
+  if(t.dataset.cancelseries){
+    const gid=t.dataset.cancelseries;
+    const list=S.bookings.filter(x=>x.recurringId===gid&&!isClosed(x)&&days(x.collectDate)>=0);
+    list.forEach(x=>{x.cancelReason="Series cancelled";setStatus(x,"Cancelled","series cancellation");});
+    await save();toast("Cancelled "+list.length+" future journeys","ok");render();return;
+  }
+
+  const id=t.id;
+  if(id==="theme"){const n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",n);
+    try{if(window.storage)window.storage.set("pts:theme",n);}catch(_){}return;}
+  if(id==="sidetoggle"){$("#side").classList.toggle("open");return;}
+  if(id==="bell"){S.f=Object.assign({q:"",from:"",to:"",status:"live",type:"",customer:"",priority:"",ready:"stop"});go("bookings");return;}
+  if(id==="f-clear"){S.f={q:"",from:"",to:"",status:"live",type:"",customer:"",priority:"",ready:""};render();return;}
+  if(id==="printlist"){window.print();return;}
+  if(id==="export"){exportCSV();return;}
+
+  /* wizard */
+  if(id==="w-next"){grabStep();if(!validateStep())return;S.step++;render();window.scrollTo(0,0);return;}
+  if(id==="w-back"){grabStep();S.step--;render();window.scrollTo(0,0);return;}
+  if(id==="w-cancel"){S.draft=null;S.step=1;go("bookings");return;}
+  if(id==="w-save"){
+    grabStep();
+    const d=S.draft;
+    let status="Draft";
+    if($("#save-confirm")&&$("#save-confirm").checked) status="Confirmed";
+    if($("#save-approval")&&$("#save-approval").checked) status="Awaiting Approval";
+    if(can("request")) status="Awaiting Approval";
+    const rec=commit(Object.assign({},d,{status}));
+    if(status!=="Draft") rec.statusHistory={Draft:rec.createdAt}, rec.statusHistory[status]=rec.createdAt;
+    S.bookings.unshift(rec);
+    log(rec,"Saved as "+status, price(rec).priceable?("Quoted "+gbp(price(rec).total)):"Not priced");
+    await save();S.draft=null;S.step=1;
+    toast("Created "+rec.ref+" ("+status+")","ok");openB(rec.id);return;
+  }
+
+  /* recurring */
+  if(id==="r-preview"||id==="r-create"){
+    let ok=true;
+    ok=mark("r-customer","m-r-customer",!!val("r-customer"))&&ok;
+    ok=mark("r-patient","m-r-patient",!!val("r-patient"))&&ok;
+    ok=mark("r-from","m-r-from",!!val("r-from"))&&ok;
+    ok=mark("r-to","m-r-to",!!val("r-to"))&&ok;
+    ok=mark("r-end","m-r-end",val("r-end")>val("r-start"))&&ok;
+    if(!ok){toast("Check the highlighted fields.","bad");return;}
+    const wanted=Array.from(document.querySelectorAll(".rday:checked")).map(x=>+x.value);
+    if(!wanted.length){toast("Select at least one day of the week.","bad");return;}
+    const dates=[];
+    const d0=new Date(val("r-start")+"T00:00:00"), d1=new Date(val("r-end")+"T00:00:00");
+    for(let d=new Date(d0); d<=d1 && dates.length<200; d.setDate(d.getDate()+1))
+      if(wanted.includes(d.getDay())) dates.push(d.toISOString().slice(0,10));
+    if(id==="r-preview"){
+      $("#r-out").innerHTML='<div class="card"><div class="b"><strong>'+dates.length+' journeys</strong> would be created:'+
+        '<div class="hint" style="margin-top:6px">'+dates.map(x=>dayName(x).slice(0,3)+" "+ukd(x)).join(" · ")+'</div></div></div>';
+      return;
+    }
+    const gid="SER-"+Math.random().toString(36).slice(2,7).toUpperCase();
+    const status=chk("r-confirm")?"Confirmed":"Draft";
+    dates.forEach(dt=>{
+      const rec=commit({customerRef:val("r-customer"),patientId:val("r-patient"),type:val("r-type"),shape:"Return",
+        fromAddr:val("r-from"),toAddr:val("r-to"),collectDate:dt,collectTime:val("r-time"),returnTime:val("r-return"),
+        mobility:val("r-mob"),vehicleType:val("r-veh"),crewGrade:val("r-crew"),mileage:num("r-mileage"),
+        staffCount:1,status,recurringId:gid});
+      rec.statusHistory={};rec.statusHistory[status]=rec.createdAt;
+      log(rec,"Created from series",gid);
+      S.bookings.push(rec);
+    });
+    await save();
+    $("#r-out").innerHTML="";
+    toast("Created "+dates.length+" journeys in series "+gid,"ok");
+    S.f={q:"",from:dates[0],to:dates[dates.length-1],status:"",type:"",customer:val("r-customer"),priority:"",ready:""};
+    go("bookings");return;
+  }
+
+  if(!b) return;
+
+  /* status actions */
+  if(id==="submit"){setStatus(b,"Awaiting Approval");await save();toast("Submitted for approval","ok");render();return;}
+  if(id==="approve"){
+    if(!can("approve")){toast("Approval needs a manager.","bad");return;}
+    const r=readiness(b);
+    if(r.level==="stop"){toast("Cannot confirm — "+r.blocks[0],"bad");return;}
+    setStatus(b,"Confirmed","approved by "+role().name);await save();toast("Booking confirmed","ok");render();return;
+  }
+  if(id==="todispatch"){
+    const r=readiness(b);
+    if(r.level==="stop"){toast("Not ready for dispatch — "+r.blocks[0],"bad");return;}
+    setStatus(b,"Unallocated","released to the dispatch queue");await save();toast("Sent to the dispatch queue","ok");render();return;
+  }
+  if(id==="advance"){
+    const i=FLOW.indexOf(b.status);
+    if(i<0||i>=FLOW.length-1) return;
+    setStatus(b,FLOW[i+1],"recorded manually in Bookings");await save();render();return;
+  }
+  if(id==="cancel"){modalCancel(b);return;}
+  if(id==="abort"){modalAbort(b);return;}
+  if(id==="cx-do"){
+    if(!mark("cx-reason","m-cx-reason",!!val("cx-reason"))) return;
+    b.cancelReason=val("cx-reason");b.outcomeNotes=val("cx-notes");
+    b.lateCancel=$("#cx-charge")?$("#cx-charge").checked:false;
+    setStatus(b,"Cancelled",b.cancelReason+(b.lateCancel?" · late cancellation charge applied":""));
+    await save();closeModal();toast("Booking cancelled","ok");render();return;
+  }
+  if(id==="ab-do"){
+    let ok=true;
+    ok=mark("ab-reason","m-ab-reason",!!val("ab-reason"))&&ok;
+    ok=mark("ab-notes","m-ab-notes",val("ab-notes").length>=15)&&ok;
+    if(!ok) return;
+    b.cancelReason=val("ab-reason");b.outcomeNotes=val("ab-notes");
+    setStatus(b,val("ab-status"),b.cancelReason);
+    await save();closeModal();toast("Outcome recorded","ok");render();return;
+  }
+
+  /* edits */
+  if(id==="save-journey"){
+    const ch=[];
+    const nd=val("e-date"),nt=val("e-time");
+    if(nd!==b.collectDate||nt!==b.collectTime){ch.push("collection "+ukd(b.collectDate)+" "+b.collectTime+" → "+ukd(nd)+" "+nt);b.collectDate=nd;b.collectTime=nt;}
+    const map={appointmentTime:"e-appt",returnTime:"e-return",poNumber:"e-po"};
+    Object.entries(map).forEach(([k,el])=>{const v=val(el);if(v!==b[k]){ch.push(k+" updated");b[k]=v;}});
+    const mi=num("e-mileage"),wt=num("e-wait");
+    if(mi!==b.mileage){ch.push("mileage "+b.mileage+" → "+mi);b.mileage=mi;}
+    if(wt!==b.waitingMins){ch.push("waiting "+b.waitingMins+" → "+wt+" mins");b.waitingMins=wt;}
+    if(!ch.length){toast("Nothing to save.");return;}
+    log(b,"Journey updated",ch.join("; "));await save();toast("Saved","ok");render();return;
+  }
+  if(id==="save-req"){
+    const ch=[];
+    const set=(k,el,label)=>{const v=val(el);if(v!==b[k]){ch.push(label+": "+(b[k]||"—")+" → "+v);b[k]=v;}};
+    set("mobility","e-mob","mobility");set("vehicleType","e-veh","vehicle");set("crewGrade","e-crew","crew grade");
+    set("clinical","e-clin","clinical");set("ipc","e-ipc","infection control");set("escort","e-escort","escort");
+    const st=num("e-staff");if(st!==b.staffCount){ch.push("staff "+b.staffCount+" → "+st);b.staffCount=st;}
+    const rk=chk("e-risk");if(rk!==b.riskAssessed){ch.push(rk?"risk assessment recorded":"risk assessment removed");b.riskAssessed=rk;}
+    const rn=val("e-risknotes");if(rn!==b.riskNotes){ch.push("risk notes updated");b.riskNotes=rn;}
+    const ins=val("e-instr");if(ins!==b.instructions){ch.push("crew instructions updated");b.instructions=ins;}
+    if(!ch.length){toast("Nothing to save.");return;}
+    log(b,"Requirements updated",ch.join("; "));await save();toast("Saved","ok");render();return;
+  }
+  if(id==="save-price"){
+    const v=$("#e-override").value.trim();
+    b.bankHoliday=chk("e-bh");
+    if(v===""){log(b,"Pricing updated","bank holiday "+(b.bankHoliday?"applied":"removed"));await save();render();return;}
+    if(!mark("e-overreason","m-overreason",!!val("e-overreason"))) return;
+    const before=price(b).total;
+    b.priceOverride=Math.round(parseFloat(v)*100)/100;
+    log(b,"Price overridden",gbp(before)+" → "+gbp(b.priceOverride)+" · "+val("e-overreason"));
+    await save();toast("Price override applied","ok");render();return;
+  }
+  if(id==="clear-override"){
+    const was=b.priceOverride;b.priceOverride=null;
+    log(b,"Price override removed","was "+gbp(was));await save();render();return;
+  }
+  if(id==="add-stop"){
+    if(!mark("st-addr","m-st-addr",!!val("st-addr"))) return;
+    b.stops.push({id:uid(),addr:val("st-addr"),purpose:val("st-purpose"),time:val("st-time")});
+    if(b.shape!=="Multi-destination"){b.shape="Multi-destination";log(b,"Journey shape changed","→ Multi-destination");}
+    log(b,"Stop added",val("st-addr"));await save();toast("Stop added","ok");render();return;
+  }
+  if(t.dataset.rmstop){
+    const s=b.stops.find(x=>x.id===t.dataset.rmstop);
+    b.stops=b.stops.filter(x=>x.id!==t.dataset.rmstop);
+    log(b,"Stop removed",s?s.addr:"");await save();render();return;
+  }
+  if(id==="save-notes"){
+    const v=$("#e-notes").value;
+    if(v===b.internalNotes){toast("Nothing to save.");return;}
+    b.internalNotes=v;log(b,"Internal notes updated","");await save();toast("Saved","ok");render();return;
+  }
+  if(id==="add-file"){
+    const f=$("#e-file").files[0];
+    if(!f){toast("Choose a file first.","bad");return;}
+    b.attachments.push({id:uid(),name:f.name,size:(f.size/1024).toFixed(0)+" KB",by:role().name,at:new Date().toISOString()});
+    log(b,"Attachment added",f.name);await save();toast("Attached "+f.name,"ok");render();return;
+  }
+  if(t.dataset.rmfile){
+    const f=b.attachments.find(x=>x.id===t.dataset.rmfile);
+    b.attachments=b.attachments.filter(x=>x.id!==t.dataset.rmfile);
+    log(b,"Attachment removed",f?f.name:"");await save();render();return;
+  }
+});
+
+document.addEventListener("change", e=>{
+  const el=e.target;
+  if(el.id==="rolepick"){S.roleId=el.value;S.selected=null;S.draft=null;S.step=1;
+    if(!can("view")&&!can("view.today")&&!can("view.own"))S.view="bookings";
+    else S.view="bookings";
+    render();toast("Signed in as "+role().name);return;}
+  if(el.id==="w-customer"||el.id==="w-patient"){grabStep();render();return;}
+  const map={"f-status":"status","f-type":"type","f-customer":"customer","f-ready":"ready","f-from":"from","f-to":"to","f-priority":"priority"};
+  if(map[el.id]){S.f[map[el.id]]=el.value;render();return;}
+});
+
+let tm;
+document.addEventListener("input", e=>{
+  if(e.target.id!=="f-q"&&e.target.id!=="gsearch") return;
+  const g=e.target.id==="gsearch";
+  S.f.q=e.target.value;
+  clearTimeout(tm);
+  tm=setTimeout(()=>{
+    const pos=e.target.selectionStart;
+    if(g){ if(S.view!=="bookings"){S.f.status="";go("bookings");} else render();
+      const x=$("#gsearch");if(x){x.focus();try{x.setSelectionRange(pos,pos);}catch(_){}} }
+    else { render(); const x=$("#f-q");if(x){x.focus();try{x.setSelectionRange(pos,pos);}catch(_){}} }
+  },220);
+});
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"&&$("#modalhost").innerHTML){closeModal();return;}
+  if((e.key==="Enter"||e.key===" ")&&e.target.dataset&&e.target.dataset.open){e.preventDefault();openB(e.target.dataset.open);}
+});
+
+/* ---------- export ---------- */
+function exportCSV(){
+  const rows=visible();
+  if(!rows.length){toast("Nothing to export with these filters.","bad");return;}
+  const head=["Job","Status","Collection date","Collection time","Patient","NHS number","Customer","PO",
+    "Type","Shape","Priority","From","To","Vehicle","Crew grade","Staff","Mobility","Clinical","Infection control",
+    "Mileage","Waiting mins","Dispatch readiness","Cancellation reason"];
+  if(can("price")) head.push("Price");
+  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const body=rows.map(b=>{
+    const p=pat(b.patientId),c=cust(b.customerRef),pr=price(b);
+    const line=[b.ref,b.status,ukd(b.collectDate),b.collectTime,p?p.forename+" "+p.surname:"",p?p.nhs:"",
+      c?c.name:"",b.poNumber,b.type,b.shape,b.priority,b.fromAddr,b.toAddr,b.vehicleType,b.crewGrade,b.staffCount,
+      b.mobility,b.clinical,b.ipc,b.mileage,b.waitingMins,readiness(b).verdict,b.cancelReason];
+    if(can("price")) line.push((b.priceOverride!=null?b.priceOverride:pr.total).toFixed(2));
+    return line.map(q).join(",");
+  }).join("\r\n");
+  const csv="\ufeff"+head.map(q).join(",")+"\r\n"+body;
+  const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download="bookings-"+todayISO()+".csv";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),800);
+  toast("Exported "+rows.length+" journeys","ok");
+}
+
+/* ---------- boot ---------- */
+(async function(){
+  $("#rolepick").innerHTML=ROLES.map(r=>'<option value="'+r.id+'"'+(r.id===S.roleId?' selected':'')+'>'+esc(r.name)+'</option>').join("");
+  try{if(window.storage){const th=await window.storage.get("pts:theme");
+    if(th&&th.value)document.documentElement.setAttribute("data-theme",th.value);}}catch(_){}
+  const had=await load();
+  if(!had){
+    S.crmLinked=await loadCRM();
+    if(!S.crmLinked) seedCustomers();
+    seedPatients(); seedBookings(); await save();
+  }
+  render();
+  if(S.crmLinked) toast("Customer accounts loaded from the CRM module","ok");
+  if(!storageOK) toast("Changes are held for this session only.","bad");
+})();
+
+})();
+</script>
